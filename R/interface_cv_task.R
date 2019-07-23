@@ -36,6 +36,7 @@ split_n_folds <- function(
         verbose = TRUE,
         database = task[["database"]],
         collection = task[["collection"]],
+        mongodb_uri = task[["mongodb_uri"]],
         experiment_name = paste0(
           #TODO change in special field
           task[["tracker"]]$values[["experiment_name"]],
