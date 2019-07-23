@@ -20,7 +20,7 @@ défaut sont sélectionnés.}
 \item{seed}{\code{integer()}\cr Graîne pour que les calculs aléatoires soient
 reproductibles.}
 
-\item{tracker}{\code{[mllogr::MLLogger]} \cr Logger of ML experiment}
+\item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
 }
 \value{
 \code{[sf_task]} \cr L'objet \code{task} donné en entré, auquel a été ajouté

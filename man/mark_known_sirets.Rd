@@ -4,8 +4,7 @@
 \alias{mark_known_sirets}
 \title{Marks sirets from files as "known"}
 \usage{
-mark_known_sirets(df, names,
-  absolute_path = rprojroot::find_package_root_file("..", "data-raw"))
+mark_known_sirets(df, full_paths)
 }
 \arguments{
 \item{df}{\code{data.frame()} \cr Table avec au moins une colonne "siret"}

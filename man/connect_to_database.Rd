@@ -5,7 +5,7 @@
 \alias{factor_request}
 \title{Connexion à la base de donnée}
 \usage{
-connect_to_database(database, collection, batch, min_effectif,
+connect_to_database(database, collection, mongodb_uri, batch, min_effectif,
   siren = NULL, date_inf = NULL, date_sup = NULL, fields = NULL,
   code_ape = NULL, subsample = NULL, verbose = TRUE,
   replace_missing = NULL)
@@ -19,6 +19,8 @@ param exporter. Par défaut, celle stockée dans \code{task}.}
 
 \item{collection}{\code{character(1)} \cr Nom de la collection vers laquelle
 exporter. Par défaut, celle stockée dans \code{task}.}
+
+\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri format.}
 
 \item{batch}{\code{character(1)} \cr Batch auquel doit être importées les
 données. Les modifications opérées par les batchs ultérieurs sont

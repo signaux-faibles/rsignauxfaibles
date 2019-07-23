@@ -6,7 +6,7 @@
 \arguments{
 \item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
 
-\item{tracker}{\code{[mllogr::MLLogger]} \cr Logger of ML experiment}
+\item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
 }
 \description{
 Documentation tâche générique

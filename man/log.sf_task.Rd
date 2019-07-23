@@ -16,7 +16,7 @@ param exporter. Par défaut, celle stockée dans \code{task}.}
 \item{collection}{\code{character(1)}. La collection vers laquelle exporter. Par
 défaut, "ml_logs".}
 
-\item{tracker}{\code{[mllogr::MLLogger]} \cr Logger of ML experiment}
+\item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
 }
 \value{
 returns the \code{task} unchanged.

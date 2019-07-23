@@ -24,7 +24,7 @@ Toutes les fractions doivent être dans ]0,1] et leur somme doit être égale
 longueur que les fractions, ou de longueur 1. Si de longueur 1, alors un
 préfixe "_X", avec X la numérotation des échantillons, est automatiquement ajouté.}
 
-\item{tracker}{\code{[mllogr::MLLogger]} \cr Logger of ML experiment}
+\item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
 }
 \value{
 \code{[sf_task]} \cr

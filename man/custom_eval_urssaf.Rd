@@ -4,7 +4,7 @@
 \alias{custom_eval_urssaf}
 \title{Fonctions d'évaluation de la précision (spéciale URSSAF)}
 \usage{
-custom_eval_urssaf()
+custom_eval_urssaf(f1_score, f2_score)
 }
 \value{
 \code{MLsegmentr::eval_function}

@@ -4,8 +4,8 @@
 \alias{get_last_batch}
 \title{Récupère les dernières données disponibles pour un batch}
 \usage{
-get_last_batch(last_batch, periods, database, collection, fields,
-  min_effectif, rollback_months)
+get_last_batch(last_batch, periods, database, collection, mongodb_uri,
+  fields, min_effectif, rollback_months)
 }
 \arguments{
 \item{last_batch}{\code{character(1)} \cr Batch auquel doit être importées les
@@ -21,6 +21,8 @@ param exporter. Par défaut, celle stockée dans \code{task}.}
 
 \item{collection}{\code{character(1)} \cr Nom de la collection vers laquelle
 exporter. Par défaut, celle stockée dans \code{task}.}
+
+\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri format.}
 
 \item{fields}{\code{character()} \cr Noms des champs à requêter dans la base de
 données. Doit contenir "siret" et "periode". Si égal à \code{NULL}, alors

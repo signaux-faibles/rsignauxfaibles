@@ -15,7 +15,7 @@ split_n_folds(task, n_folds = 4, frac_test = 0.2,
 \item{frac_test}{\code{numeric(1)} \cr Fraction of data which should be kept
 aside}
 
-\item{tracker}{\code{[mllogr::MLLogger]} \cr Logger of ML experiment}
+\item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
 }
 \value{
 \code{c(cv_task, sf_task)} \cr

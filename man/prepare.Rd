@@ -19,7 +19,7 @@ prepare(task, ...)
 \item{data_names}{\code{character()} \cr Vecteur de noms des données à préparer.
 Doivent-être des noms de champs valides de \code{task}.}
 
-\item{tracker}{\code{[mllogr::MLLogger]} \cr Logger of ML experiment}
+\item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
 }
 \value{
 \code{[sf_task]} \cr

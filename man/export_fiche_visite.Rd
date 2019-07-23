@@ -5,9 +5,8 @@
 \title{Export d'une fiche visite}
 \usage{
 export_fiche_visite(sirets, database = "test_signauxfaibles",
-  collection = "Features", batch, with_urssaf = FALSE,
-  absolute_path = rprojroot::find_package_root_file("..", "output",
-  "Fiches", batch))
+  collection = "Features", mongodb_uri, batch, with_urssaf = FALSE,
+  absolute_path)
 }
 \arguments{
 \item{sirets}{Vecteur de sirets des établissements dont il faut exporter la
@@ -18,6 +17,8 @@ param exporter. Par défaut, celle stockée dans \code{task}.}
 
 \item{collection}{\code{character(1)} \cr Nom de la collection vers laquelle
 exporter. Par défaut, celle stockée dans \code{task}.}
+
+\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri format.}
 
 \item{batch}{\code{character(1)} Choix du batch pour lequel se fait l'export}
 

@@ -7,7 +7,7 @@
 train_light_gradient_boosting(h2o_train_data, h2o_validation_data = NULL,
   x_fields_model, outcome = "outcome", learn_rate = 0.1,
   max_depth = 4, ntrees = 60, min_child_weight = 1, seed = 123,
-  save_results = TRUE)
+  save_results = TRUE, absolute_path = NULL)
 }
 \arguments{
 \item{h2o_train_data}{\code{H2OFrame} \cr données d'entraînement, sous la forme d'un H2OFrame}

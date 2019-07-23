@@ -9,7 +9,8 @@ load_hist_data(task, ...)
 
 \method{load_hist_data}{sf_task}(task, batch,
   database = task[["database"]], collection = task[["collection"]],
-  subsample = 200000L, fields = get_fields(training = FALSE),
+  mongodb_uri = task[["mongodb_uri"]], subsample = 200000L,
+  fields = get_fields(training = FALSE),
   date_inf = as.Date("2015-01-01"), date_sup = as.Date("2017-01-01"),
   min_effectif = 10L, siren = NULL, code_ape = NULL)
 }
@@ -27,6 +28,8 @@ param exporter. Par défaut, celle stockée dans \code{task}.}
 
 \item{collection}{\code{character(1)} \cr Nom de la collection vers laquelle
 exporter. Par défaut, celle stockée dans \code{task}.}
+
+\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri format.}
 
 \item{subsample}{\code{integer(1)} \cr Nombre d'objets (c'est-à-dire de couples
 siret x periode) à échantillonner.}

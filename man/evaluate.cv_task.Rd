@@ -4,8 +4,7 @@
 \alias{evaluate.cv_task}
 \title{Evaluate a cross-validated task}
 \usage{
-\method{evaluate}{cv_task}(task,
-  eval_function = MLsegmentr::eval_precision_recall(),
+\method{evaluate}{cv_task}(task, eval_function = NULL,
   data_name = c("validation_data"), plot = TRUE,
   prediction_names = "score", target_names = "outcome",
   segment_names = NULL, remove_strong_signals = TRUE)

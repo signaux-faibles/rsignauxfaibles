@@ -5,8 +5,8 @@
 \title{Get a list of field names}
 \usage{
 get_fields(training, siren = 2, urssaf = 2, delai = 2,
-  effectif = 2, note_preface = 2, diane = 2, bdf = 2, apart = 2,
-  procol = 1, interim = 0, target_encode = 2, info = 0)
+  effectif = 2, diane = 2, bdf = 2, apart = 2, procol = 1,
+  interim = 0, target_encode = 2, info = 0)
 }
 \arguments{
 \item{training}{\code{logical()} \cr Si \code{TRUE}, uniquement des champs

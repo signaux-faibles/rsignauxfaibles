@@ -4,11 +4,11 @@
 \alias{name_file}
 \title{Nomme un fichier}
 \usage{
-name_file(relative_path, file_detail, file_extension = "",
+name_file(absolute_path, file_detail, file_extension = "",
   full_path = FALSE)
 }
 \arguments{
-\item{relative_path}{\code{character(1)}\cr Chemin d'accès depuis
+\item{absolute_path}{\code{character(1)}\cr Chemin d'accès depuis
 la racine
 du projet.}
 
@@ -24,7 +24,7 @@ fichier}
 \value{
 \code{character()} \cr
 Un nom de fichier qui n'écrase pas les fichiers déjà contenues dans le
-dossier spécifié par "relative_path", de la forme
+dossier spécifié par "absolute_path", de la forme
 "AAAA-MM-JJ_vX_{file_detail}.{file_extension}", où X est un chiffre
 }
 \description{

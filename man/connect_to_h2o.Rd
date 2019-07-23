@@ -5,7 +5,7 @@
 \alias{connect_to_spark}
 \title{Wrapper pour se connecter à H2O avec la bonne configuration}
 \usage{
-connect_to_h2o()
+connect_to_h2o(log_dir)
 
 connect_to_spark(database = NULL, collection = NULL)
 }

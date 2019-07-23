@@ -9,9 +9,9 @@ alert_levels(prediction, F1, F2)
 \arguments{
 \item{prediction}{Vector, list of predictions between 0 and 1.}
 
-\item{F1}{\code{Double(1)}. F1_score}
+\item{F1}{\code{Double(1)}. F1 threshold}
 
-\item{F2}{\code{Double(1)}. F2_score}
+\item{F2}{\code{Double(1)}. F2 threshold}
 }
 \value{
 A factor vector with alert levels.

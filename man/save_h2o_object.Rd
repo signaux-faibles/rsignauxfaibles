@@ -4,8 +4,7 @@
 \alias{save_h2o_object}
 \title{Enregistrer un objet H2O}
 \usage{
-save_h2o_object(object, object_name, relative_path = file.path("..",
-  "output", "model"))
+save_h2o_object(object, object_name, absolute_path)
 }
 \arguments{
 \item{object}{Objet à sauvegarder. Ou bien un "H2OBinomialModel", ou bien une liste de "H2OFrame"}
@@ -13,10 +12,11 @@ save_h2o_object(object, object_name, relative_path = file.path("..",
 \item{object_name}{\code{character(1)} \cr Nom générique à donner au fichier, auxquels seront
 automatiquement accolés une date et une version. Cf \code{[name_files]}.}
 
-\item{relative_path}{\code{character(1)} \cr Chemin relatif par rapport à la racine du projet R}
+\item{absolute_path}{\code{character(1)} \cr Chemin relatif par rapport à la racine du projet R}
 }
 \value{
-\code{TRUE}
+\code{character(1)}\cr
+Chemin complet du fichier créé.
 }
 \description{
 Enregistre un objet de type "H2OBinomialModel" ou "H2OFrame".

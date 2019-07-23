@@ -4,7 +4,7 @@
 \alias{export_scores_to_csv}
 \title{Export des scores dans un tableau csv}
 \usage{
-export_scores_to_csv(formatted_data, algo, batch, relative_path)
+export_scores_to_csv(formatted_data, algo, batch, absolute_path)
 }
 \arguments{
 \item{formatted_data}{\code{data.frame()} \cr Données à exporter. Typiquement,
@@ -16,7 +16,7 @@ exportés}
 \item{batch}{\code{character(1)} \cr Nom du batch qui figurera dans les objets
 exportés}
 
-\item{relative_path}{\code{character(1)} \cr Chemin relatif du dossier dans lequel effectuer
+\item{absolute_path}{\code{character(1)} \cr Chemin relatif du dossier dans lequel effectuer
 l'export, par rapport à la racine du paquet R.}
 }
 \value{

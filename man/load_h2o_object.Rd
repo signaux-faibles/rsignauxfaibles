@@ -4,9 +4,8 @@
 \alias{load_h2o_object}
 \title{Charge un fichier enregistré par save_h2o_object}
 \usage{
-load_h2o_object(object_name, extension = NULL,
-  relative_path = file.path("..", "output", "model"), last = TRUE,
-  file_name = "")
+load_h2o_object(object_name, extension = NULL, absolute_path,
+  last = TRUE, file_name = "")
 }
 \arguments{
 \item{object_name}{\code{character(1)}\cr Nom de l'objet, spécifié de manière
@@ -16,10 +15,10 @@ identique qu'au moment de l'enregistrement. Cf \code{[save_h2o_object]}}
 L'extension du fichier à charger, ou bien "model" (pour un
 \code{H2OBinomialModel}) ou bien "temap" (pour une \code{list(H2OFrame)}).}
 
-\item{relative_path}{Chemin d'accès relatif par rapport à la racine du projet.}
+\item{absolute_path}{Chemin d'accès relatif par rapport à la racine du projet.}
 
 \item{last}{\code{logical()} \cr Si TRUE, charge le dernier fichier sauvegardé
-correspondant à \code{object_name}, \code{extension} et \code{relative_path}. Sinon, il
+correspondant à \code{object_name}, \code{extension} et \code{absolute_path}. Sinon, il
 faut spécifier le nom complet: \code{file_name}.}
 
 \item{file_name}{\code{character(1)}\cr Nom complet et exact du fichier à charger. N'est pris en compte uniquement si last est FALSE.}

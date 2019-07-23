@@ -5,8 +5,8 @@
 \title{Initialiser une tâche d'apprentissage}
 \usage{
 sf_task(verbose, database = "test_signauxfaibles",
-  collection = "Features", experiment_name, experiment_description,
-  tracker = NULL)
+  collection = "Features", mongodb_uri, experiment_name,
+  experiment_description, tracker = NULL)
 }
 \arguments{
 \item{verbose}{\code{logical(1)} \cr
@@ -18,25 +18,28 @@ param exporter. Par défaut, celle stockée dans \code{task}.}
 \item{collection}{\code{character(1)} \cr Nom de la collection vers laquelle
 exporter. Par défaut, celle stockée dans \code{task}.}
 
+\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri format.}
+
 \item{experiment_name}{\code{character()} \cr
 Quel est l'objet de cette tâche ?}
 
 \item{experiment_description}{\code{character()} \cr
-Descriptions supplémentaires sur l'expérimentation en cours.
+Descriptions supplémentaires sur l'expérimentation en cours.}
 
-@return \code{[sf_task]} \cr
+\item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
+}
+\value{
+\code{[rsignauxfaibles::sf_task]} \cr
 Un objet sf_task avec un attribut de type \code{logical} "verbose", qui définit le niveau de log,
 ainsi qu'un attribut "to_log" de type \code{list} dans lequel seront stockés des
 informations spécifiques pour le log.
 
-@export}
-
-\item{tracker}{\code{[mllogr::MLLogger]} \cr Logger of ML experiment}
+@export
 }
 \description{
 Un objet s3 de type sf_task est défini, dans lequel seront défini et
 stockés les tâches intermédiaires et les résultats de l'apprentissage.
 }
 \details{
-Si \code{tracker} est \code{NULL}, alors un nouveau MLLogger est créé
+Si \code{tracker} est \code{NULL}, alors un nouveau Tracker est créé
 }

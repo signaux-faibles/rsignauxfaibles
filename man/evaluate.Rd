@@ -7,8 +7,7 @@
 \usage{
 evaluate(task, ...)
 
-\method{evaluate}{sf_task}(task,
-  eval_function = MLsegmentr::eval_precision_recall(),
+\method{evaluate}{sf_task}(task, eval_function = NULL,
   data_name = c("validation_data"), plot = TRUE,
   prediction_names = "score", target_names = "outcome",
   segment_names = NULL, remove_strong_signals = TRUE,
@@ -33,7 +32,7 @@ validation les entrerprises qui présentent des signaux forts, c'est-à-dire 3 m
 procédure collective en cours ? Nécessite que les données contenues dans
 \code{task[["hist_data"]]} possèdent le champs "time_til_outcome".}
 
-\item{tracker}{\code{[mllogr::MLLogger]} \cr Logger of ML experiment}
+\item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
 }
 \value{
 \code{task} donnée en entrée à laquelle s'est ajoutée (ou a été

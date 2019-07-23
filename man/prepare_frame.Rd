@@ -5,7 +5,7 @@
 \title{Préparation des données pour l'entraînement ou la prédiction}
 \usage{
 prepare_frame(data_to_prepare, test_or_train, te_map = NULL,
-  save_or_load_map, outcome)
+  save_or_load_map, absolute_path = NULL, outcome)
 }
 \arguments{
 \item{data_to_prepare}{\code{data.frame()} \cr Données à préparer}

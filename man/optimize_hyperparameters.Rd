@@ -8,7 +8,7 @@
 optimize_hyperparameters(task, ...)
 
 \method{optimize_hyperparameters}{sf_task}(task,
-  fields = get_fields(training = TRUE), n_init = 6, n_iter = 12,
+  fields = get_fields(training = TRUE), n_init = NULL, n_iter = 12,
   train_pipe = NULL, optim_bounds = NULL)
 }
 \arguments{

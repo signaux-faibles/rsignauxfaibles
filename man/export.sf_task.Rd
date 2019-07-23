@@ -4,13 +4,35 @@
 \alias{export.sf_task}
 \title{Export de données}
 \usage{
-\method{export}{sf_task}(task, export_type, ...)
+\method{export}{sf_task}(task, export_type, batch, f_scores = c(F1 =
+  0.15, F2 = 0.07), known_sirens_full_path, export_fields = NULL,
+  database = task[["database"]],
+  collection_features = task[["collection"]],
+  collection_scores = "scores", ...)
 }
 \arguments{
 \item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{export_type}{\code{"csv" | "mongodb"} \cr Export en csv, ou en
 mongodb ?}
+
+\item{f_scores}{\code{numeric(2)} \cr F_scores as obtained on test data. Names
+must be "F1" and "F2".}
+
+\item{known_sirens_full_path}{\code{character()} \cr  Un ou plusieurs chemins de
+fichiers absolus contenant des sirens (un siren par ligne). Les
+établissements de ces entreprises seront marqués comme connus.}
+
+\item{export_fields}{\code{character()} \cr Champs à exporter (only for csv
+export)}
+
+\item{database}{\code{character()} \cr Base de données mongodb.}
+
+\item{collection_features}{\code{character()} \cr Collections stockant les
+données. (Utilisée en lecture)}
+
+\item{collection_scores}{`character() \cr Collection mongodb stockant les
+scores calculés (utilisée en écriture).}
 
 \item{...}{additional parameters for export functions.}
 }

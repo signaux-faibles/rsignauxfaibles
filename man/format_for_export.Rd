@@ -5,11 +5,7 @@
 \title{Prepare_for_export}
 \usage{
 format_for_export(data_to_export, export_fields, database, collection,
-  last_batch,
-  known_sirens_full_paths = c(rprojroot::find_package_root_file("..",
-  "data-raw", "sirets_connus_pdl.csv"),
-  rprojroot::find_package_root_file("..", "data-raw",
-  "sirets_connus_bfc.csv")), verbose = TRUE)
+  last_batch, known_sirens_full_path, verbose)
 }
 \arguments{
 \item{data_to_export}{\code{data.frame(1)} \cr Données à exporter. Doit avoir
@@ -28,11 +24,11 @@ exporter. Par défaut, celle stockée dans \code{task}.}
 \item{last_batch}{\code{character(1)} \cr Nom du batch à prendre en compte pour
 les données.}
 
-\item{known_sirens_full_paths}{\code{character()} \cr Chemins absolus des
-fichiers contenant des listes de sirens connus.}
-
 \item{verbose}{\code{logical()} \cr Faut-il imprimer des informations sur le
 chargement des données supplémentaires ?}
+
+\item{known_sirens_full_paths}{\code{character()} \cr Chemins absolus des
+fichiers contenant des listes de sirens connus.}
 }
 \value{
 \code{data.frame()}\cr
