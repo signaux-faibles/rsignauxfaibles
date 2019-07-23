@@ -214,7 +214,7 @@ export_scores_to_mongodb <- function(
 #'   exportés
 #' @param batch `character(1)` \cr Nom du batch qui figurera dans les objets
 #'   exportés
-#' @param relative_path `character(1)` \cr Chemin relatif du dossier dans lequel effectuer
+#' @param absolute_path `character(1)` \cr Chemin relatif du dossier dans lequel effectuer
 #'   l'export, par rapport à la racine du paquet R.
 #'
 #'
@@ -228,7 +228,7 @@ export_scores_to_csv  <- function(
   formatted_data,
   algo,
   batch,
-  relative_path
+  absolute_path
   ){
 
   assertthat::assert_that(is.character(batch) && length(batch) == 1,
@@ -239,7 +239,7 @@ export_scores_to_csv  <- function(
 
   # create unique filename
   full_path <- name_file(
-    relative_path,
+    absolute_path,
     file_detail = paste("export", algo, batch, sep = "_"),
     file_extension = "csv",
     full_path = TRUE
@@ -464,7 +464,7 @@ export_fiche_visite <- function(
   collection = "Features",
   batch,
   with_urssaf = FALSE,
-  absolute_path = rprojroot::find_package_root_file("..", "output", "Fiches", batch)){
+  absolute_path){
 
   for (i in seq_along(sirets)) {
     elementary_info <- connect_to_database(

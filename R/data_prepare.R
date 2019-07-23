@@ -24,17 +24,22 @@
 #'   * "te_map": `list(H2OFrame)`; la carte de target encoding
 #' @export
 prepare_frame <- function(
-                          data_to_prepare,
-                          test_or_train,
-                          te_map = NULL,
-                          save_or_load_map,
-                          outcome) {
+  data_to_prepare,
+  test_or_train,
+  te_map = NULL,
+  save_or_load_map,
+  absolute_path = NULL,
+  outcome
+  ) {
 
   #if ( (!is.null(te_map) && test_or_train == "train") ||
   #  (!is.null(te_map) && save_or_load_map == TRUE)) {
   #  error('te_map should not be specified if it is computed (test_or_train =
   #    "train") or if map is loaded (save_or_load_map = TRUE)')
   #}
+  if (save_or_load_map){
+    assertthat::assert_that(!is.null(save_or_load_map))
+  }
 
   h2o_data <- convert_to_h2o(data_to_prepare)
 
@@ -54,10 +59,15 @@ prepare_frame <- function(
     )
 
     if (save_or_load_map) {
-      save_h2o_object(te_map, "te_map")
+      save_h2o_object(te_map, "te_map", absolute_path)
     }
   } else if (test_or_train == "test" && save_or_load_map) {
-    te_map <- load_h2o_object("te_map", "temap", last = TRUE)
+    te_map <- load_h2o_object(
+      "te_map",
+      "temap",
+      absolute_path = absolute_path,
+      last = TRUE
+    )
   }
 
   h2o_data <- h2o_target_encode(

@@ -76,7 +76,7 @@ alert_levels <- function(prediction, F1, F2) {
 #' Nomme un fichier selon une convension précise afin de sauvegarder plusieurs
 #' fichiers sans écraser les précédents.
 #'
-#' @param relative_path `character(1)`\cr Chemin d'accès depuis
+#' @param absolute_path `character(1)`\cr Chemin d'accès depuis
 #' la racine
 #'   du projet.
 #' @param file_detail `character(1)` \cr Description en un mot de la nature du
@@ -88,17 +88,17 @@ alert_levels <- function(prediction, F1, F2) {
 #'
 #' @return `character()` \cr
 #'   Un nom de fichier qui n'écrase pas les fichiers déjà contenues dans le
-#'   dossier spécifié par "relative_path", de la forme
+#'   dossier spécifié par "absolute_path", de la forme
 #'   "AAAA-MM-JJ_vX_{file_detail}.{file_extension}", où X est un chiffre
 #'
 #' @export
 name_file <- function(
-  relative_path,
+  absolute_path,
   file_detail,
   file_extension = "",
   full_path = FALSE) {
 
-  full_dir_path <- rprojroot::find_rstudio_root_file(relative_path)
+  full_dir_path <- absolute_path
 
   assertthat::assert_that(dir.exists(full_dir_path),
     msg = "Directory not found. Check relative path"

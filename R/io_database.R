@@ -384,7 +384,7 @@ return(requete)
 #'
 #' @return NULL
 #' @export
-connect_to_h2o <- function() {
+connect_to_h2o <- function(log_dir) {
   Sys.unsetenv("http_proxy")
 
   h2o::h2o.init(
@@ -395,7 +395,7 @@ connect_to_h2o <- function() {
     # https = TRUE,
     nthreads = -1,
     min_mem_size = "16G",
-    log_dir = rprojroot::find_rstudio_root_file("logs")
+    log_dir = log_dir
     )
 
   # Ugly but no other solution found yet.

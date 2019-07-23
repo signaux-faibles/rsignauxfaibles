@@ -33,11 +33,16 @@ train_light_gradient_boosting <- function(
   ntrees = 60,
   min_child_weight = 1,
   seed = 123,
-  save_results = TRUE) {
+  save_results = TRUE,
+  absolute_path = NULL) {
 
   #
   # Train the model
   #
+
+  if (save_results) {
+    assertthat::assert_that(!is.null(absolute_path))
+  }
 
   require(uuid)
   model <- h2o::h2o.xgboost(
@@ -56,7 +61,8 @@ train_light_gradient_boosting <- function(
   )
 
   if (save_results) {
-    save_h2o_object(model, "lgb") # lgb like Light Gradient Boosting
+    # lgb like Light Gradient Boosting
+    save_h2o_object(model, "lgb", absolute_path)
   }
   return(model)
 }

@@ -7,7 +7,7 @@
 #' @param object Objet à sauvegarder. Ou bien un "H2OBinomialModel", ou bien une liste de "H2OFrame"
 #' @param object_name `character(1)` \cr Nom générique à donner au fichier, auxquels seront
 #' automatiquement accolés une date et une version. Cf `[name_files]`.
-#' @param relative_path `character(1)` \cr Chemin relatif par rapport à la racine du projet R
+#' @param absolute_path `character(1)` \cr Chemin relatif par rapport à la racine du projet R
 #'
 #' @return `character(1)`\cr
 #'   Chemin complet du fichier créé.
@@ -15,7 +15,7 @@
 save_h2o_object <- function(
   object,
   object_name,
-  relative_path = file.path("..", "output", "model")
+  absolute_path
   ){
 
   if (object %>% inherits("H2OBinomialModel")) {
@@ -26,11 +26,8 @@ save_h2o_object <- function(
     extension <- "temap"
   }
 
-  require(rprojroot)
-  absolute_path <- rprojroot::find_rstudio_root_file(relative_path)
-
   filename <- name_file(
-    relative_path,
+    absolute_path,
     file_detail = object_name,
     file_extension = extension
   )

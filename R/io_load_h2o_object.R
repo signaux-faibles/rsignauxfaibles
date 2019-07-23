@@ -7,9 +7,9 @@
 #' @param extension `character(1)`\cr
 #'   L'extension du fichier à charger, ou bien "model" (pour un
 #'   `H2OBinomialModel`) ou bien "temap" (pour une `list(H2OFrame)`).
-#' @param relative_path Chemin d'accès relatif par rapport à la racine du projet.
+#' @param absolute_path Chemin d'accès relatif par rapport à la racine du projet.
 #' @param last `logical()` \cr Si TRUE, charge le dernier fichier sauvegardé
-#'  correspondant à `object_name`, `extension` et `relative_path`. Sinon, il
+#'  correspondant à `object_name`, `extension` et `absolute_path`. Sinon, il
 #'  faut spécifier le nom complet: `file_name`.
 #' @param file_name `character(1)`\cr Nom complet et exact du fichier à charger. N'est pris en compte uniquement si last est FALSE.
 #'
@@ -19,12 +19,13 @@
 load_h2o_object <- function(
                             object_name,
                             extension = NULL,
-                            relative_path = file.path("..", "output", "model"),
+                            absolute_path,
                             last = TRUE,
                             file_name = "") {
-  if (substr(relative_path, nchar(relative_path), nchar(relative_path))
+  # Remove trailing slash
+  if (substr(absolute_path, nchar(absolute_path), nchar(absolute_path))
   %in% c("/", "\\")) {
-    relative_path <- substr(relative_path, 1, nchar(relative_path) - 1)
+    absolute_path <- substr(absolute_path, 1, nchar(absolute_path) - 1)
   }
 
   if (file_name != "") {
@@ -42,9 +43,8 @@ load_h2o_object <- function(
     load_function <- load_H2OFrame_list
   }
 
-  full_dir_path <- rprojroot::find_rstudio_root_file(relative_path)
   assertthat::assert_that(dir.exists(full_dir_path),
-    msg = "Directory not found. Check relative path"
+    msg = "Directory not found. Check absolute path"
   )
 
   if (last) {

@@ -595,21 +595,38 @@ train.sf_task <- function(
   return(invisible(task))
 }
 
-load.sf_task <- function(task){
+load.sf_task <- function(task, absolute_path){
   set_verbose_level(task)
-  task[["model"]] <- load_h2o_object("lgb", "model", last = TRUE)
-  task[["preparation_map"]] <- load_h2o_object("te_map", "temap", last = TRUE)
+  task[["model"]] <- load_h2o_object(
+    "lgb",
+    "model",
+    absolute_path = absolute_path,
+    last = TRUE
+  )
+  task[["preparation_map"]] <- load_h2o_object(
+    "te_map",
+    "temap",
+    absolute_path = absolute_path,
+    last = TRUE
+  )
 
   return(task)
 }
 
-save.sf_task <- function(task, ...) {
+#' Saves model or map to disk
+#'
+#' @param task
+#' @param absolute_path
+#'
+#' @return
+#' @export
+save.sf_task <- function(task, absolute_path, ...) {
   set_verbose_level(task)
 
   assertthat::assert_that(all(c("model", "preparation_map") %in% names(task)),
     msg = "Task should have a model and a preparation_map to be saved")
-  save_h2o_object(task[["model"]], "lgb")
-  save_h2o_object(task[["preparation_map"]], "preparation_map")
+  save_h2o_object(task[["model"]], "lgb", absolute_path)
+  save_h2o_object(task[["preparation_map"]], "preparation_map", absolute_path)
 
   return(task)
 }
@@ -683,6 +700,19 @@ predict.sf_task <- function(
 #' @inheritParams generic_task
 #' @param export_type `"csv" | "mongodb"` \cr Export en csv, ou en
 #'   mongodb ?
+#' @param batch
+#' @param f_scores `numeric(2)` \cr F_scores as obtained on test data. Names
+#'   must be "F1" and "F2".
+#' @param known_sirens_full_path `character()` \cr  Un ou plusieurs chemins de
+#'   fichiers absolus contenant des sirens (un siren par ligne). Les
+#'   établissements de ces entreprises seront marqués comme connus.
+#' @param export_fields `character()` \cr Champs à exporter (only for csv
+#'   export)
+#' @param database `character()` \cr Base de données mongodb.
+#' @param collection_features `character()` \cr Collections stockant les
+#' données. (Utilisée en lecture)
+#' @param collection_scores `character() \cr Collection mongodb stockant les
+#'   scores calculés (utilisée en écriture).
 #' @param ... additional parameters for export functions.
 #' @return `sf_task` \cr L'objet `task` donné en entrée.
 #' @export
@@ -691,14 +721,7 @@ export.sf_task <- function(
   export_type,
   batch,
   f_scores = c(F1 = 0.15, F2 = 0.07),
-  known_sirens_full_path = c(
-    rprojroot::find_package_root_file(
-      "..", "data-raw", "sirets_connus_pdl.csv"
-      ),
-    rprojroot::find_package_root_file(
-      "..", "data-raw", "sirets_connus_bfc.csv"
-    )
-  ),
+  known_sirens_full_path,
   export_fields = NULL,
   database = task[["database"]],
   collection_features = task[["collection"]],
