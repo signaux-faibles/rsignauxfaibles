@@ -36,7 +36,7 @@ NULL
 #'   ainsi qu'un attribut "to_log" de type `list` dans lequel seront stockés des
 #'   informations spécifiques pour le log.
 #'
-#'  @export
+#' @export
 sf_task <- function(
   verbose,
   database = "test_signauxfaibles",
