@@ -462,6 +462,7 @@ export_fiche_visite <- function(
   sirets,
   database = "test_signauxfaibles",
   collection = "Features",
+  mongodb_uri,
   batch,
   with_urssaf = FALSE,
   absolute_path){
@@ -470,6 +471,7 @@ export_fiche_visite <- function(
     elementary_info <- connect_to_database(
       database = database,
       collection = collection,
+      mongodb_uri = mongodb_uri,
       batch = batch,
       siren = substr(sirets[i], 1, 9),
       fields = c("siret", "raison_sociale", "periode", "code_ape_niveau3"),

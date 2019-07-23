@@ -113,6 +113,7 @@ get_last_batch <- function(
   periods,
   database,
   collection,
+  mongodb_uri,
   fields,
   min_effectif,
   rollback_months) {
@@ -120,6 +121,7 @@ get_last_batch <- function(
   current_data <- connect_to_database(
     database,
     collection,
+    mongodb_uri,
     last_batch,
     date_inf = min(periods) %m-% months(rollback_months),
     date_sup = max(periods) %m+% months(1),

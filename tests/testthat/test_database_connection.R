@@ -53,8 +53,9 @@ test_that("Une requête vide renvoie un dataframe vide", {
   empty_query <- connect_to_database(
     test_db,
     test_col,
+    mongodb_uri = "mongodb://localhost:27017",
+    batch = "1901_interim",
     min_effectif = 10,
-    "1901_interim",
     date_sup = "2001-01-01",
     fields = c("siret", "periode"),
     verbose = FALSE
@@ -66,8 +67,9 @@ test_that(": Un champs vide présent et complété avec des NA", {
   missing_field <- connect_to_database(
     test_db,
     test_col,
+    mongodb_uri = "mongodb://localhost:27017",
+    batch = "1901_interim",
     min_effectif = 10,
-    "1901_interim",
     fields = c("siret", "periode", "missing_field"),
     verbose = FALSE
     )
@@ -80,6 +82,7 @@ test_that(": Un champs vide présent et complété avec des NA", {
 test_frame_1 <- connect_to_database(
   test_db,
   test_col,
+  mongodb_uri = "mongodb://localhost:27017",
   batch = "1901_interim",
   siren = c("012345678", "876543210"),
   date_inf = "2014-06-01",
@@ -93,6 +96,7 @@ test_frame_1 <- connect_to_database(
 test_frame_2 <- connect_to_database(
   test_db,
   test_col,
+  mongodb_uri = "mongodb://localhost:27017",
   batch = "1901_interim",
   siren = NULL,
   date_inf = NULL,

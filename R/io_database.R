@@ -61,6 +61,7 @@ NULL
 connect_to_database <- function(
   database,
   collection,
+  mongodb_uri,
   batch,
   min_effectif,
   siren = NULL,
@@ -121,7 +122,7 @@ connect_to_database <- function(
   dbconnection <- mongolite::mongo(
     collection = collection,
     db = database,
-    url = "mongodb://localhost:27017",
+    url = mongodb_uri,
     verbose = verbose
     )
   log_info(" Connexion effectuee avec succes.")

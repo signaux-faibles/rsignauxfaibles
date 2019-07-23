@@ -1,6 +1,6 @@
 #' Documentation des informations de connection à mongodb
 #'
-#' @param url `character(1)` \cr url to the database in mongodb uri format.
+#' @param mongodb_uri `character(1)` \cr url to the database in mongodb uri format.
 #' @param database `character(1)` \cr Nom de la base de données vers laquelle
 #'   param exporter. Par défaut, celle stockée dans \code{task}.
 #' @param collection `character(1)` \cr Nom de la collection vers laquelle
@@ -41,12 +41,17 @@ sf_task <- function(
   verbose,
   database = "test_signauxfaibles",
   collection = "Features",
+  mongodb_uri,
   experiment_name,
   experiment_description,
   tracker = NULL
   ){
 
-  res <- list(database = database, collection = collection)
+  res <- list(
+    database = database,
+    collection = collection,
+    mongodb_uri = mongodb_uri
+  )
   class(res) <- "sf_task"
   attr(res, "verbose") <- verbose
   if (is.null(tracker) && require(MLlogr)){
@@ -136,6 +141,7 @@ load_hist_data.sf_task <- function(
   batch,
   database = task[["database"]],
   collection = task[["collection"]],
+  mongodb_uri = task[["mongodb_uri"]],
   subsample = 200000L,
   fields = get_fields(training = FALSE),
   date_inf = as.Date("2015-01-01"),
@@ -151,6 +157,7 @@ load_hist_data.sf_task <- function(
   hist_data <- connect_to_database(
     database,
     collection,
+    mongodb_uri = mongodb_uri,
     batch,
     min_effectif = min_effectif,
     siren = NULL,
@@ -196,6 +203,7 @@ load_new_data.sf_task <- function(
   batch,
   database = task[["database"]],
   collection = task[["collection"]],
+  mongodb_uri = task[["mongodb_uri"]],
   fields = get_fields(training = FALSE),
   min_effectif = 10L,
   rollback_months = 1L
@@ -207,6 +215,7 @@ load_new_data.sf_task <- function(
   task[["new_data"]] <- connect_to_database(
     database = database,
     collection = collection,
+    mongodb_uri = mongodb_uri,
     batch = batch,
     date_inf = min(periods) %m-% months(rollback_months),
     date_sup = max(periods) %m+% months(1),

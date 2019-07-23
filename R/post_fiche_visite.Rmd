@@ -10,6 +10,7 @@ params:
   batch: "1810"
   database: "test_signauxfaibles"
   collection: "Features"
+  uri: "mongodb://localhost:27017"
   with_urssaf: "FALSE"
 ---
 
@@ -69,11 +70,13 @@ mon_siret <- params$siret
 batch <- params$batch
 database <- params$database
 collection  <- params$collection
+mongodb_uri <- params$uri
 with_urssaf <- params$with_urssaf
 
 elementary_info  <- connect_to_database(
   database = database,
   collection = collection,
+  mongodb_uri = mongodb_uri,
   batch = batch,
   siren = substr(mon_siret, 1, 9),
   fields = c("siret", "raison_sociale", "periode", "code_ape_niveau3"),
@@ -91,6 +94,7 @@ raison_sociale <- elementary_info %>%
 my_data <- connect_to_database(
   database = database,
   collection = collection,
+  mongodb_uri = mongodb_uri,
   batch = batch,
   date_inf = "2014-01-01",
   code_ape = code_ape_niveau3,
