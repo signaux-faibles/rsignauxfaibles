@@ -733,7 +733,7 @@ export.sf_task <- function(
   export_type,
   batch,
   f_scores = c(F1 = 0.15, F2 = 0.07),
-  known_sirens_full_path,
+  known_sirens_full_path = NULL,
   export_fields = NULL,
   csv_export_path = NULL,
   database = task[["database"]],
@@ -794,8 +794,6 @@ export.sf_task <- function(
 
     log_info("Adding additional fields for export")
 
-    log_info("JE SUIS ARRIVE LA")
-    log_info(mongodb_uri)
     res <- task[["new_data"]] %>%
       format_for_export(
         export_fields = export_fields,
