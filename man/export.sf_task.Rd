@@ -6,7 +6,8 @@
 \usage{
 \method{export}{sf_task}(task, export_type, batch, f_scores = c(F1 =
   0.15, F2 = 0.07), known_sirens_full_path, export_fields = NULL,
-  database = task[["database"]],
+  csv_export_path = NULL, database = task[["database"]],
+  mongodb_uri = task[["mongodb_uri"]],
   collection_features = task[["collection"]],
   collection_scores = "scores", ...)
 }
@@ -25,6 +26,9 @@ fichiers absolus contenant des sirens (un siren par ligne). Les
 
 \item{export_fields}{\code{character()} \cr Champs à exporter (only for csv
 export)}
+
+\item{csv_export_path}{\code{character()} \cr Chemin du répertoire pour
+l'export csv.}
 
 \item{database}{\code{character()} \cr Base de données mongodb.}
 

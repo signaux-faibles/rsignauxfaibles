@@ -5,7 +5,7 @@
 \title{Prepare_for_export}
 \usage{
 format_for_export(data_to_export, export_fields, database, collection,
-  last_batch, known_sirens_full_path, verbose)
+  mongodb_uri, last_batch, known_sirens_full_path, verbose)
 }
 \arguments{
 \item{data_to_export}{\code{data.frame(1)} \cr Données à exporter. Doit avoir
@@ -20,6 +20,8 @@ param exporter. Par défaut, celle stockée dans \code{task}.}
 
 \item{collection}{\code{character(1)} \cr Nom de la collection vers laquelle
 exporter. Par défaut, celle stockée dans \code{task}.}
+
+\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri format.}
 
 \item{last_batch}{\code{character(1)} \cr Nom du batch à prendre en compte pour
 les données.}

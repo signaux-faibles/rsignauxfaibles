@@ -5,7 +5,8 @@
 \title{Récupération des scores}
 \usage{
 get_scores(database = "test_signauxfaibles", collection = "Scores",
-  algo = "algo", method = "first", batchs = NULL, sirets = NULL)
+  mongodb_uri, algo = "algo", method = "first", batchs = NULL,
+  sirets = NULL)
 }
 \arguments{
 \item{database}{\code{character(1)} \cr Nom de la base de données vers laquelle
@@ -13,6 +14,8 @@ param exporter. Par défaut, celle stockée dans \code{task}.}
 
 \item{collection}{\code{character(1)} \cr Nom de la collection vers laquelle
 exporter. Par défaut, celle stockée dans \code{task}.}
+
+\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri format.}
 
 \item{method}{\code{character(1)}\cr Ou bien "first" ou bien "last". See details.}
 
@@ -36,6 +39,6 @@ dernier score disponible pour le \strong{dernier} batch disponible est récupér
 "first" représente plus fidèlement les scores qui ont été obtenues par le
 passé, là où "last" représente les scores qui auraient été obtenues avec
 le dernier algorithme en date (même si ce n'est pas toujours le cas, ça
-dépend des périodes qui ont été  exportées avec cet algorithme).
+dépend des périodes qui ont été exportées avec cet algorithme).
 }
 

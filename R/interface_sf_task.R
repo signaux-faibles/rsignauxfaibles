@@ -726,6 +726,7 @@ predict.sf_task <- function(
 #'   scores calculés (utilisée en écriture).
 #' @param ... additional parameters for export functions.
 #' @return `sf_task` \cr L'objet `task` donné en entrée.
+#'
 #' @export
 export.sf_task <- function(
   task,

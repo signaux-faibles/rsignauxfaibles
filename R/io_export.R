@@ -81,6 +81,7 @@ format_for_export <- function(
   donnees <- connect_to_database(
     database = database,
     collection = collection,
+    mongodb_uri = mongodb_uri,
     batch = last_batch,
     date_inf = first_period,
     date_sup = last_period %m+% months(1),

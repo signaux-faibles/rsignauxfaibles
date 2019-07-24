@@ -4,8 +4,8 @@
 \alias{get_sirets_of_detected}
 \title{Get sirets of companies detected by SF}
 \usage{
-get_sirets_of_detected(url = "mongodb://192.168.0.19:27017",
-  database = "test_signauxfaibles", collection = "Scores")
+get_sirets_of_detected(database = "test_signauxfaibles",
+  collection = "Scores", mongodb_uri)
 }
 \arguments{
 \item{database}{\code{character(1)} \cr Nom de la base de données vers laquelle
@@ -13,6 +13,8 @@ param exporter. Par défaut, celle stockée dans \code{task}.}
 
 \item{collection}{\code{character(1)} \cr Nom de la collection vers laquelle
 exporter. Par défaut, celle stockée dans \code{task}.}
+
+\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri format.}
 }
 \value{
 vector of unique sirets
