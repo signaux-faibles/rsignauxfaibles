@@ -794,6 +794,8 @@ export.sf_task <- function(
 
     log_info("Adding additional fields for export")
 
+    log_info("JE SUIS ARRIVE LA")
+    log_info(mongodb_uri)
     res <- task[["new_data"]] %>%
       format_for_export(
         export_fields = export_fields,
