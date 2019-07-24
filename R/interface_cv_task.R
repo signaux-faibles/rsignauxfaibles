@@ -167,11 +167,11 @@ predict.cv_task <- function(
 
 #' Evaluate a cross-validated task
 #'
-#'  @inheritParams evaluate.sf_task
+#' @inheritParams evaluate.sf_task
 #'
-#'  @return task with evaluation on first level. (no individual
-#'  cross-validated fold evaluation)
-#'  @export
+#' @return task with evaluation on first level. (no individual
+#' cross-validated fold evaluation)
+#' @export
 evaluate.cv_task <- function(
   task,
   eval_function = NULL,
@@ -193,10 +193,10 @@ evaluate.cv_task <- function(
   # 8ebe8e50-fb4c-4792-b19a-5074ba8c7807
 
   require(purrr)
-  combined_data <- purrr::map(task[["cross_validation"]], "validation_data")
+  combined_data <- purrr::map(task[["cross_validation"]], data_name)
   combined_data <- combined_data  %>%
     dplyr::bind_rows(.id = "model") %>%
-    mutate(model = paste0("cv_", model))
+    dplyr::mutate(model = paste0("cv_", model))
   model_names  <- unique(combined_data$model)
   combined_data  <- combined_data %>%
     tidyr::spread(key = model, value = "score")

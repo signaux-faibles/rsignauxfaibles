@@ -9,9 +9,7 @@ mark_known_sirets(df, full_paths)
 \arguments{
 \item{df}{\code{data.frame()} \cr Table avec au moins une colonne "siret"}
 
-\item{names}{\code{character()} \cr Nom des fichiers}
-
-\item{absolute_path}{\code{character()} \cr Chemin d'accès absolu}
+\item{full_paths}{\code{character()} \cr Chemin d'accès absolu}
 }
 \value{
 \code{data.frame()} \cr Table donnée en entrée à laquelle a été apposé

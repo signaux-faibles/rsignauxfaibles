@@ -9,11 +9,27 @@
   prediction_names = "score", target_names = "outcome",
   segment_names = NULL, remove_strong_signals = TRUE)
 }
-\description{
-@inheritParams evaluate.sf_task
+\arguments{
+\item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
+
+\item{eval_function}{\code{MLsegmentr::eval_function()} \cr Objet s3
+d'évaluation.}
+
+\item{data_name}{\code{character(1)} \cr Sur quelles données évaluer ?}
+
+\item{plot}{\code{logical(1)} \cr Faut-il tracer la figure avec la fonction de
+l'\code{eval_function} (si disponible)}
+
+\item{remove_strong_signals}{\code{logical(1)}\cr
+Faut-il retirer des échantillons de test ou de
+validation les entrerprises qui présentent des signaux forts, c'est-à-dire 3 mois de défaut, ou une
+procédure collective en cours ? Nécessite que les données contenues dans
+\code{task[["hist_data"]]} possèdent le champs "time_til_outcome".}
 }
-\details{
-@return task with evaluation on first level. (no individual
+\value{
+task with evaluation on first level. (no individual
 cross-validated fold evaluation)
-@export
+}
+\description{
+Evaluate a cross-validated task
 }

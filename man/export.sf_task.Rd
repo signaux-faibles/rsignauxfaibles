@@ -5,11 +5,11 @@
 \title{Export de données}
 \usage{
 \method{export}{sf_task}(task, export_type, batch, f_scores = c(F1 =
-  0.15, F2 = 0.07), known_sirens_full_path, export_fields = NULL,
-  csv_export_path = NULL, database = task[["database"]],
-  mongodb_uri = task[["mongodb_uri"]],
+  0.15, F2 = 0.07), known_sirens_full_path = NULL,
+  export_fields = NULL, csv_export_path = NULL,
+  database = task[["database"]], mongodb_uri = task[["mongodb_uri"]],
   collection_features = task[["collection"]],
-  collection_scores = "scores", ...)
+  collection_scores = "Scores", ...)
 }
 \arguments{
 \item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
