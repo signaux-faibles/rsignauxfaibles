@@ -104,7 +104,7 @@ format_for_export <- function(
 
   # TODO couper nom / chemin du dossier
   donnees <- donnees %>%
-    mark_known_sirets(full_path = unique(dirname(known_sirens_full_path))) %>%
+    mark_known_sirets(full_paths = unique(dirname(known_sirens_full_path))) %>%
     select(export_fields)
 
   all_names <- names(donnees)
