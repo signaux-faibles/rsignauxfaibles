@@ -739,7 +739,7 @@ export.sf_task <- function(
   database = task[["database"]],
   mongodb_uri = task[["mongodb_uri"]],
   collection_features = task[["collection"]],
-  collection_scores = "scores",
+  collection_scores = "Scores",
   ...
 ){
 
