@@ -798,6 +798,7 @@ export.sf_task <- function(
         export_fields = export_fields,
         database = database,
         collection = collection_features,
+        mongodb_uri = mongodb_uri,
         last_batch = batch,
         known_sirens_full_path = known_sirens_full_path,
         verbose = attr(task, "verbose")

@@ -26,6 +26,7 @@ format_for_export <- function(
   export_fields,
   database,
   collection,
+  mongodb_uri,
   last_batch,
   known_sirens_full_path,
   verbose) {
@@ -159,7 +160,6 @@ export_scores_to_mongodb <- function(
   mongodb_uri
   ){
 
-  browser()
   exported_columns <- c("siret", "periode", "score", "score_diff")
   assertthat::assert_that(
     all(exported_columns %in% names(formatted_data)),
