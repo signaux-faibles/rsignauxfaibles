@@ -284,7 +284,7 @@ mark_known_sirets <- function(
 ) {
 
   sirens <- c()
-  for (full_path in full_path) {
+  for (full_path in full_paths) {
     sirets <- readLines(full_path)
     sirens <- c(sirens, substr(sirets, 1, 9))
   }
