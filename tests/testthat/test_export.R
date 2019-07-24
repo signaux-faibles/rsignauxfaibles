@@ -11,12 +11,13 @@ context("Test that exports and import of scores work as expected")
 
 test_database <- "unittest_signauxfaibles"
 test_collection <- "Scores_for_tests"
+test_mongodb_uri  <-  "mongodb://localhost:27017"
 
 dbconnection <- mongolite::mongo(
   collection = test_collection,
   db = test_database,
   verbose = TRUE,
-  url = "mongodb://localhost:27017"
+  url = test_mongodb_uri
 )
 
 f_scores <- c(F2 = 0.2, F1 = 0.4)
@@ -141,12 +142,14 @@ test_that("Input checking for get_scores", {
   expect_error(get_scores(
     database = 123,
     collection = test_collection,
+    mongodb_uri = test_mongodb_uri,
     method = "historic"
   ))
 
   expect_error(get_scores(
     database = test_database,
     collection = c(test_database, test_database),
+    mongodb_uri = test_mongodb_uri,
     method = "historic"
   ))
 
@@ -154,6 +157,7 @@ test_that("Input checking for get_scores", {
   expect_error(get_scores(
     database = test_database,
     collection = test_collection,
+    mongodb_uri = test_mongodb_uri,
     method = "historci"
   ))
 
@@ -161,12 +165,14 @@ test_that("Input checking for get_scores", {
   expect_error(get_scores(
     database = "wrong_name",
     collection = test_collection,
+    mongodb_uri = test_mongodb_uri,
     method = "historic"
   ))
 
   expect_error(get_scores(
     database = test_database,
     collection = "wrong_name",
+    mongodb_uri = test_mongodb_uri,
     method = "historic"
   ))
 })
@@ -179,6 +185,7 @@ test_that("Get_scores works with 'historical' method", {
     batch = "1901",
     database = test_database,
     collection = test_collection,
+    mongodb_uri = test_mongodb_uri,
     f_scores = c(F2 = 0.2, F1 = 0.4),
     algo = "test_algo"
   )
@@ -187,6 +194,7 @@ test_that("Get_scores works with 'historical' method", {
     batch = "1903",
     database = test_database,
     collection = test_collection,
+    mongodb_uri = test_mongodb_uri,
     f_scores = c(F2 = 0.2, F1 = 0.4),
     algo = "test_algo"
   )
@@ -194,6 +202,7 @@ test_that("Get_scores works with 'historical' method", {
   res_last <- get_scores(
     database = test_database,
     collection = test_collection,
+    mongodb_uri = test_mongodb_uri,
     algo = "test_algo",
     method = "last",
     sirets = c("1", "2", "3")
@@ -202,6 +211,7 @@ test_that("Get_scores works with 'historical' method", {
   res_first <- get_scores(
     database = test_database,
     collection = test_collection,
+    mongodb_uri = test_mongodb_uri,
     algo = "test_algo",
     method = "first",
     sirets = c("1", "2", "3")

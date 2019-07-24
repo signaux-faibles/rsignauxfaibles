@@ -155,7 +155,8 @@ export_scores_to_mongodb <- function(
   batch,
   f_scores,
   database,
-  collection
+  collection,
+  mongodb_uri
   ){
 
   browser()
@@ -183,9 +184,8 @@ export_scores_to_mongodb <- function(
   dbconnection <- mongolite::mongo(
     collection = collection,
     db = database,
-    verbose = FALSE,
-    # TODO: a lire du fichier de config
-    url = "mongodb://localhost:27017"
+    url = mongodb_uri,
+    verbose = FALSE
     )
 
   data_to_export <- formatted_data %>%
@@ -308,7 +308,7 @@ mark_known_sirets <- function(
 #' "first" représente plus fidèlement les scores qui ont été obtenues par le
 #' passé, là où "last" représente les scores qui auraient été obtenues avec
 #' le dernier algorithme en date (même si ce n'est pas toujours le cas, ça
-#' dépend des périodes qui ont été  exportées avec cet algorithme).
+#' dépend des périodes qui ont été exportées avec cet algorithme).
 #'
 #' @return Returns a dataframe with columns "siret", "periode", "score"
 #' (failure probability), "batch" (batch of the model used), "algo" (name of
@@ -319,6 +319,7 @@ mark_known_sirets <- function(
 get_scores <- function(
   database = "test_signauxfaibles",
   collection = "Scores",
+  mongodb_uri,
   algo = "algo",
   method = "first",
   batchs = NULL,
@@ -357,7 +358,11 @@ get_scores <- function(
     msg = "Database not found"
   )
 
-  db <- mongolite::mongo(db = database, collection = collection)
+  db <- mongolite::mongo(
+    db = database,
+    collection = collection,
+    url = mongodb_uri
+  )
   col_names <- db$run('{"listCollections":1}')$cursor$firstBatch$name #nolint
   assertthat::assert_that(collection %in% col_names,
     msg = "Collection not found"

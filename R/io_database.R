@@ -199,14 +199,14 @@ connect_to_database <- function(
 #' @return vector of unique sirets
 #' @export
 get_sirets_of_detected <- function(
-  url = "mongodb://192.168.0.19:27017",
   database = "test_signauxfaibles",
-  collection = "Scores"
+  collection = "Scores",
+  mongodb_uri
   ) {
   dbconnection <- mongolite::mongo(
     collection = collection,
     db = database,
-    url = "mongodb://localhost:27017",
+    url = mongodb_uri,
     verbose = FALSE
     )
 

@@ -717,6 +717,8 @@ predict.sf_task <- function(
 #'   établissements de ces entreprises seront marqués comme connus.
 #' @param export_fields `character()` \cr Champs à exporter (only for csv
 #'   export)
+#' @param csv_export_path `character()` \cr Chemin du répertoire pour
+#'   l'export csv.
 #' @param database `character()` \cr Base de données mongodb.
 #' @param collection_features `character()` \cr Collections stockant les
 #' données. (Utilisée en lecture)
@@ -732,7 +734,9 @@ export.sf_task <- function(
   f_scores = c(F1 = 0.15, F2 = 0.07),
   known_sirens_full_path,
   export_fields = NULL,
+  csv_export_path = NULL,
   database = task[["database"]],
+  mongodb_uri = task[["mongodb_uri"]],
   collection_features = task[["collection"]],
   collection_scores = "scores",
   ...
@@ -806,14 +810,15 @@ export.sf_task <- function(
         if (x == "csv") {
           export_scores_to_csv(
             ...,
-            relative_path = "../output/"
+            absolute_path = csv_export_path
             )
         } else if (x == "mongodb") {
           export_scores_to_mongodb(
             ...,
             f_scores = f_scores,
             database = database,
-            collection = collection_scores
+            collection = collection_scores,
+            mongodb_uri = mongodb_uri
             )
       }},
       formatted_data = res,
