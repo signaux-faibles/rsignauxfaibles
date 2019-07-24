@@ -104,8 +104,7 @@ format_for_export <- function(
 
   # TODO couper nom / chemin du dossier
   donnees <- donnees %>%
-    mark_known_sirets(names = basename(known_sirens_full_paths),
-      absolute_path = unique(dirname(known_sirens_full_paths))) %>%
+    mark_known_sirets(full_path = unique(dirname(known_sirens_full_path))) %>%
     select(export_fields)
 
   all_names <- names(donnees)
@@ -271,8 +270,7 @@ export_company_card  <- function(formatted_data){
 #' fichiers.
 #'
 #' @param df `data.frame()` \cr Table avec au moins une colonne "siret"
-#' @param names `character()` \cr Nom des fichiers
-#' @param absolute_path `character()` \cr Chemin d'accès absolu
+#' @param full_paths `character()` \cr Chemin d'accès absolu
 #'
 #' @return `data.frame()` \cr Table donnée en entrée à laquelle a été apposé
 #' une colonne "connu", qui vaut 1 si le siren correspondant a été trouvé dans
@@ -284,6 +282,7 @@ mark_known_sirets <- function(
   df,
   full_paths
 ) {
+
   sirens <- c()
   for (full_path in full_path) {
     sirets <- readLines(full_path)
