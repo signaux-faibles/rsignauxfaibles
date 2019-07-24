@@ -103,9 +103,17 @@ format_for_export <- function(
   # Report des dernieres infos financieres connues
 
   # TODO couper nom / chemin du dossier
-  donnees <- donnees %>%
-    mark_known_sirets(full_paths = unique(dirname(known_sirens_full_path))) %>%
-    select(export_fields)
+  if (!is.null(known_sirens_full_path)){
+    donnees <- donnees %>%
+      mark_known_sirets(
+        full_paths = unique(dirname(known_sirens_full_path))
+      ) %>%
+      select(export_fields)
+  } else {
+    donnees <- donnees %>%
+      mutate(connu = FALSE) %>%
+      select(export_fields)
+  }
 
   all_names <- names(donnees)
   log_info("Les variables suivantes sont absentes du dataframe:
