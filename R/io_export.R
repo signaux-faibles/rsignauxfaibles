@@ -305,7 +305,7 @@ mark_known_sirets <- function(
 #' Récupération des scores
 #'
 #' @inheritParams mongodb_connection
-#' @param algo`character(1)`\cr Algorithm from which to take the score. Defaults to "algo".
+#' @param algo `character(1)`\cr Algorithm from which to take the score. Defaults to "algo".
 #' @param method `character(1)`\cr Ou bien "first" ou bien "last". See details.
 #' @param siret `character()` \cr Vecteur de sirets à requêter
 #'
@@ -352,7 +352,6 @@ get_scores <- function(
   msg = "Sirets should only be numeric characters"
   )
 
-
   result <- data.frame(
     siret = character(),
     periode = as.Date(character()),
@@ -360,7 +359,7 @@ get_scores <- function(
     batch = character()
   )
 
-  admin <- mongolite::mongo(db = "admin")
+  admin <- mongolite::mongo(db = "admin", url = mongodb_uri)
   db_names <- admin$run('{"listDatabases":1}')$databases$name
   assertthat::assert_that(database %in% db_names,
     msg = "Database not found"
