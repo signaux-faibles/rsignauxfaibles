@@ -5,7 +5,7 @@
 \title{Récupération des scores}
 \usage{
 get_scores(database = "test_signauxfaibles", collection = "Scores",
-  mongodb_uri, algo = "algo", method = "first", batchs = NULL,
+  mongodb_uri, algo = "algo", method = "last", batchs = NULL,
   sirets = NULL)
 }
 \arguments{
@@ -17,16 +17,19 @@ exporter. Par défaut, celle stockée dans \code{task}.}
 
 \item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri format.}
 
-\item{method}{\code{character(1)}\cr Ou bien "first" ou bien "last". See details.}
+\item{algo}{\code{character(1)}\cr Algorithm from which to take the score. Defaults to "algo".}
 
-\item{algo`character(1)`\cr}{Algorithm from which to take the score. Defaults to "algo".}
+\item{method}{\code{character(1)}\cr Ou bien "first" ou bien "last". Se référer
+à la section Details.}
 
 \item{siret}{\code{character()} \cr Vecteur de sirets à requêter}
 }
 \value{
-Returns a dataframe with columns "siret", "periode", "score"
-(failure probability), "batch" (batch of the model used), "algo" (name of
-the algorithm)
+Retourne un \code{data.frame} avec des colonnes "siret", "periode", "score"
+(probabilité de défaillance selon la définition signaux-faibles), "batch"
+(Nom du batch d'intégration pour lequel le score a été calculé), "algo"
+(nom de l'algorithme utilisé) et "timestamp" (date et heure d'intégration des scores
+à la base de données)
 }
 \description{
 Récupération des scores

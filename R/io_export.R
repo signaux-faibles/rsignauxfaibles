@@ -306,7 +306,8 @@ mark_known_sirets <- function(
 #'
 #' @inheritParams mongodb_connection
 #' @param algo `character(1)`\cr Algorithm from which to take the score. Defaults to "algo".
-#' @param method `character(1)`\cr Ou bien "first" ou bien "last". See details.
+#' @param method `character(1)`\cr Ou bien "first" ou bien "last". Se référer
+#'   à la section Details.
 #' @param siret `character()` \cr Vecteur de sirets à requêter
 #'
 #' @section Details:
@@ -318,9 +319,11 @@ mark_known_sirets <- function(
 #' le dernier algorithme en date (même si ce n'est pas toujours le cas, ça
 #' dépend des périodes qui ont été exportées avec cet algorithme).
 #'
-#' @return Returns a dataframe with columns "siret", "periode", "score"
-#' (failure probability), "batch" (batch of the model used), "algo" (name of
-#' the algorithm)
+#' @return Retourne un `data.frame` avec des colonnes "siret", "periode", "score"
+#' (probabilité de défaillance selon la définition signaux-faibles), "batch"
+#' (Nom du batch d'intégration pour lequel le score a été calculé), "algo"
+#' (nom de l'algorithme utilisé) et "timestamp" (date et heure d'intégration des scores
+#' à la base de données)
 #'
 #' @export
 #'
@@ -329,7 +332,7 @@ get_scores <- function(
   collection = "Scores",
   mongodb_uri,
   algo = "algo",
-  method = "first",
+  method = "last",
   batchs = NULL,
   sirets = NULL
   ){
