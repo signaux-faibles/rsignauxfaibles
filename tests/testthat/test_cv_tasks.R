@@ -1,14 +1,17 @@
 context("Test cross validation tasks")
 
 test_database <- "unittest_signauxfaibles"
+test_mongodb_uri <- "mongodb://localhost:27017"
+test_log_directory  <- "./logs"
 
-connect_to_h2o()
+connect_to_h2o(test_log_directory)
 
 test_that("quick test that everything works", {
   my_test_task <- sf_task(
     verbose = TRUE,
     database = test_database,
     collection  = "Features_for_tests",
+    mongodb_uri = test_mongodb_uri,
     experiment_name = "test",
     experiment_description = "test description")
 
@@ -47,7 +50,11 @@ test_that("quick test that everything works", {
   )
   my_test_task  <- train(my_test_task)
   my_test_task <- predict(my_test_task, data_names = "validation_data")
-  my_test_task <- evaluate(my_test_task, data_name = "validation_data")
+  my_test_task <- evaluate(
+    my_test_task,
+    data_name = "validation_data",
+    plot = FALSE
+  )
 
   expect_equal(
     my_test_task[["model_performance"]]$evaluation[1][[1]],
@@ -57,13 +64,25 @@ test_that("quick test that everything works", {
 
   my_test_task  <- optimize_hyperparameters(
     my_test_task,
-    n_init = 5,
-    n_iter = 5,
+    n_init = 2,
+    n_iter = 2,
     fields = c("montant_part_patronale", "ca")
     )
   my_test_task <- log(
     my_test_task,
     database = "unittest_signauxfaibles",
     collection = "ml_logs_for_tests"
+  )
+})
+
+
+test_that("Join_for_evaluation works as expected on cross validation", {
+  foo  <- join_for_evaluation(
+    task = my_test_task,
+    task2 = my_test_task,
+    data_name = "validation_data"
+  )
+  expect_error(
+    evaluate(foo, data_name = "validation_data", plot = FALSE)
   )
 })

@@ -9,9 +9,9 @@ evaluate(task, ...)
 
 \method{evaluate}{sf_task}(task, eval_function = NULL,
   data_name = c("validation_data"), plot = TRUE,
-  prediction_names = "score", target_names = "outcome",
-  segment_names = NULL, remove_strong_signals = TRUE,
-  tracker = task[["tracker"]])
+  prediction_names = grep("^score", names(task[[data_name]]), value = T),
+  target_names = "outcome", segment_names = NULL,
+  remove_strong_signals = TRUE, tracker = task[["tracker"]])
 }
 \arguments{
 \item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}

@@ -1,12 +1,15 @@
 context("Test s3 sf_tasks")
 
 test_database <- "unittest_signauxfaibles"
+test_mongodb_uri <- "mongodb://localhost:27017"
+test_log_directory  <- "./logs"
 test_that("sf_task initialization works as expected", {
   expect_error(
     my_test_task <<- sf_task(
       verbose = TRUE,
       database = test_database,
       collection  = "Features_for_tests",
+      mongodb_uri = test_mongodb_uri,
       experiment_name = "test",
       experiment_description = "test description"),
     NA
@@ -14,7 +17,12 @@ test_that("sf_task initialization works as expected", {
 
   expect_true(
     all(
-      names(my_test_task) %in% c("database", "collection", "tracker")
+      names(my_test_task) %in% c(
+        "database",
+        "collection",
+        "mongodb_uri",
+        "tracker"
+      )
       )
     )
   expect_true( attr(my_test_task, "verbose"))
@@ -39,11 +47,14 @@ test_that("load_new_data works as expected", {
   expect_error(
     my_test_task <<- load_new_data.sf_task(
       my_test_task,
-      batch = "1901_interim"
+      batch = "1901_interim",
+      periods = as.Date("2019-01-01")
     ),
     NA
     )
+  expect_equal(nrow(my_test_task[["new_data"]]), 31)
 })
+
 test_that("split_data works as expected", {
   expect_error(split_data(my_test_task, fracs <- c (0.6, 0.1, 0.1)))
   expect_error(
@@ -65,7 +76,7 @@ test_that("split_data works as expected", {
 
 
 test_that("Data preparation works as expected", {
-  connect_to_h2o()
+  connect_to_h2o(test_log_directory)
   expect_error(
     my_test_task <<- prepare(my_test_task, c(
       "train_data",
@@ -103,7 +114,9 @@ test_that("Predicting works", {
     my_test_task <<- predict(my_test_task, data_names = "validation_data"),
     NA
     )
+
   expect_true("score" %in% names(my_test_task[["validation_data"]]))
+
   ## Predicting twice still works
   my_test_task <- predict(my_test_task, data_names = "validation_data")
   expect_true("score" %in% names(my_test_task[["validation_data"]]))
@@ -120,16 +133,19 @@ test_that("evaluation works", {
      my_test_task <<- evaluate(
        my_test_task,
        plot = FALSE,
-       remove_strong_signals = FALSE
+       remove_strong_signals = FALSE,
+      eval_function = MLsegmentr::eval_precision_recall()
      ),
       NA
       )
    expect_error(
-     my_test_task <<- evaluate(my_test_task, plot = FALSE),
+     my_test_task <<- evaluate(
+       my_test_task,
+       plot = FALSE,
+       eval_function = MLsegmentr::eval_precision_recall()
+     ),
       NA
       )
-  #TODO better test remove_strong_signals
-  # 35191df2-7b94-4cc7-8646-5a9f97921d1d
 })
 
 
@@ -146,18 +162,27 @@ test_that("log works", {
   # ef922acc-3f0c-4ff8-8c51-cbd9a53eec02
 })
 
-test_that("load_new_data works", {
+
+test_that("Export works", {
+})
+
+test_that("join_for_evaluation works", {
+  foo <- join_for_evaluation(
+    task = my_test_task,
+    model_2 = my_test_task,
+    data_name = "validation_data"
+  )
+  expect_true("validation_data" %in% names(foo))
+  expect_equal(
+    nrow(foo[["validation_data"]]),
+    nrow(my_test_task[["validation_data"]])
+  )
   expect_error(
-    my_test_task <<- load_new_data(
-      my_test_task,
-      as.Date("2019-01-01"),
-      "1901_interim"
+    evaluate(
+      foo,
+      plot = FALSE,
+      eval_function = MLsegmentr::eval_precision_recall()
     ),
     NA
     )
-  expect_equal(nrow(my_test_task[["new_data"]]), 31)
-})
-
-test_that("Export works", {
-
 })

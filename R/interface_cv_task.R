@@ -246,3 +246,41 @@ evaluate.cv_task <- function(
   }
   return (modified_task)
 }
+
+
+#' Join for evaluation
+#'
+#' @param task `cv_task`
+#' @param ... `cv_task` \cr other `cv_task` to be joined
+#'
+#' @return cv_task
+#' @export
+join_for_evaluation.cv_task <- function(task, ..., data_name){
+
+  require(purrr)
+  tasks <- list(...)
+  all_tasks <- c(list(task), tasks)
+  cv_tasks <- purrr::map(all_tasks, "cross_validation")
+  aux_fun  <- function(...){
+    cv_samples <- list(...)
+    res  <- purrr::pmap(
+      cv_samples,
+      join_for_evaluation.sf_task,
+      data_name = data_name
+    )
+  }
+  names(cv_tasks) <- c("task", names(tasks))
+  cv_res <- do.call(what = aux_fun, args = cv_tasks)
+  res  <- sf_task(
+    verbose = task[["verbose"]],
+    database = task[["database"]],
+    collection = task[["collection"]],
+    mongodb_uri = task[["mongodb_uri"]],
+    experiment_name = task[["experiment_name"]],
+    experiment_description = task[["experiment_description"]],
+    tracker = task[["tracker"]]
+  )
+  class(res) <- c("cv_task", "sf_task")
+  res[["cross_validation"]]  <- cv_res
+  return(res)
+}

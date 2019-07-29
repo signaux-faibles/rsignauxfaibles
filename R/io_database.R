@@ -395,7 +395,7 @@ connect_to_h2o <- function(log_dir) {
     # insecure = TRUE,
     # https = TRUE,
     nthreads = -1,
-    min_mem_size = "16G",
+    min_mem_size = "6G",
     log_dir = log_dir
     )
 

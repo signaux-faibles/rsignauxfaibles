@@ -93,3 +93,9 @@ log <- function(task, ...){
 explain <- function(task, ...){
   UseMethod("explain", task)
 }
+
+#' Joins models for evaluation
+#' @export
+join_for_evaluation <- function(task, ...){
+  UseMethod("join_for_evaluation", task)
+}

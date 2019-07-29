@@ -685,9 +685,9 @@ predict.sf_task <- function(
         new_data = task[[prepared_data_name]]
         )
 
-      dup_names  <-  intersect(names(prediction %>% select(-siret, -periode)),
+      dup_names  <-  intersect(names(prediction %>% dplyr::select(-siret, -periode)),
         names(task[[data_name]]))
-      task[[data_name]]  <- task[[data_name]] %>% select(-one_of(dup_names))
+      task[[data_name]]  <- task[[data_name]] %>% dplyr::select(-one_of(dup_names))
       task[[data_name]] <- task[[data_name]] %>%
         left_join(prediction, by = c("siret", "periode"))
 
@@ -860,12 +860,17 @@ evaluate.sf_task <- function(
   eval_function =  NULL,
   data_name = c("validation_data"),
   plot = TRUE,
-  prediction_names = "score",
+  prediction_names = grep(
+    "^score",
+    names(task[[data_name]]),
+    value = T
+  ),
   target_names = "outcome",
   segment_names = NULL,
   remove_strong_signals = TRUE,
   tracker = task[["tracker"]]
   ){
+
   if (is.null(eval_function)){
     default_eval_fun <- TRUE
     eval_fun <- MLsegmentr::eval_precision_recall()
@@ -965,6 +970,12 @@ explain.sf_task <- function(task, ...){
   # Later
 }
 
+#' Print sf_task
+#'
+#' @param x `sf_task` \cr
+#'
+#' @return invisible(x)
+#' @export
 print.sf_task <- function(x, ...){
   require(purrr)
   cat("-- FIELDS --\n")
@@ -983,5 +994,53 @@ print.sf_task <- function(x, ...){
     x[["tracker"]]$values,
     aux_fun
     )
-  return()
+  return(invisible(x))
+}
+
+
+#' Joins tasks for a comparative evaluation
+#'
+#' @param ... `sf_task()` \cr One or several `sf_task`.
+#' @param data_name `character(1)` \cr Name of data on which to evaluate.
+#'
+#' @return Data frame ready to use with evaluate
+#' @export
+join_for_evaluation.sf_task <- function(task, ..., data_name){
+
+  require(purrr)
+  tasks <- list(...)
+  all_tasks <- c(list(task), tasks)
+
+  assertthat::assert_that(all(
+      purrr::map_lgl(tasks, inherits, what = "sf_task")
+      ),
+    msg = "join_for_evaluation operates only on objects of class sf_task")
+
+  aux_extract_siret_periode  <- function(x, data_name){
+    return(x[[data_name]] %>% dplyr::select(siret, periode))
+  }
+  assertthat::assert_that(all(
+      purrr::map_lgl(tasks, ~ isTRUE(all.equal(
+            aux_extract_siret_periode(., data_name),
+            aux_extract_siret_periode(task, data_name)
+            )))
+      ))
+
+  scores <- purrr::map_dfc(all_tasks, ~ .[[data_name]]$score)
+  aux_names <- paste0("score_", names(all_tasks))
+  aux_names[aux_names == ""]  <- "score"
+  names(scores) <- make.unique(aux_names)
+  res  <- sf_task(
+    verbose = task[["verbose"]],
+    database = task[["database"]],
+    collection = task[["collection"]],
+    mongodb_uri = task[["mongodb_uri"]],
+    experiment_name = task[["experiment_name"]],
+    experiment_description = task[["experiment_description"]],
+    tracker = task[["tracker"]]
+  )
+  res[[data_name]]  <- task[[data_name]] %>%
+    dplyr::select(-score) %>%
+    dplyr::bind_cols(scores)
+  return(res)
 }
