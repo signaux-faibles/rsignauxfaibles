@@ -871,6 +871,7 @@ evaluate.sf_task <- function(
   tracker = task[["tracker"]]
   ){
 
+  browser()
   if (is.null(eval_function)){
     default_eval_fun <- TRUE
     eval_fun <- MLsegmentr::eval_precision_recall()
@@ -891,7 +892,7 @@ evaluate.sf_task <- function(
     # task a7368366-ad3c-4dcb-b8d9-2e23de616bf0
     assertthat::assert_that("time_til_outcome" %in% names(evaluation_data))
     evaluation_data  <- evaluation_data %>%
-      filter(is.na(time_til_outcome) | time_til_outcome > 0)
+      dplyr::filter(is.na(time_til_outcome) | time_til_outcome > 0)
   }
 
   require(MLsegmentr)
@@ -908,7 +909,9 @@ evaluate.sf_task <- function(
 
   assesser$evaluation_funs <- eval_function
 
-  perf <- assesser$assess_model(plot = plot)
+  aux <- assesser$assess_model(plot = plot)
+  perf  <- aux[["performance_frame"]]
+  task[["plot"]] <- aux[["plot"]]
 
   if (default_eval_fun){
     task[["model_performance"]] <- perf %>%
