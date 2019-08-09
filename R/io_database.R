@@ -830,7 +830,8 @@ get_fields <- function(
       "outcome",
       "time_til_outcome"
       )
-  } else if (procol >= 2 && !training) {
+  }
+  if (procol >= 2 && !training) {
     fields <- c(
       fields,
       "tag_failure",
