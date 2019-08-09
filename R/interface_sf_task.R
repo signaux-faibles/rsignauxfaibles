@@ -871,7 +871,6 @@ evaluate.sf_task <- function(
   tracker = task[["tracker"]]
   ){
 
-  browser()
   if (is.null(eval_function)){
     default_eval_fun <- TRUE
     eval_fun <- MLsegmentr::eval_precision_recall()

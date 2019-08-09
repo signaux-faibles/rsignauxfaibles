@@ -469,7 +469,7 @@ get_fields <- function(
   diane = 2,
   bdf = 2,
   apart = 2,
-  procol = 1,
+  procol = 2,
   interim = 0,
   target_encode = 2,
   info = 0) {
@@ -833,8 +833,11 @@ get_fields <- function(
   } else if (procol >= 2 && !training) {
     fields <- c(
       fields,
-      "tag_outcome",
-      "tag_failure"
+      "tag_failure",
+      "tag_default",
+      "tag_debit",
+      "time_til_failure",
+      "time_til_default"
       )
   }
 
