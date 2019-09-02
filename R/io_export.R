@@ -1,3 +1,136 @@
+#' Export de données
+#'
+#' Exporte les données.
+#'
+#' @inheritParams generic_task
+#' @param export_type `"csv" | "mongodb"` \cr Export en csv, ou en
+#'   mongodb ?
+#' @param batch description
+#' @param f_scores `numeric(2)` \cr F_scores as obtained on test data. Names
+#'   must be "F1" and "F2".
+#' @param known_sirens_full_path `character()` \cr  Un ou plusieurs chemins de
+#'   fichiers absolus contenant des sirens (un siren par ligne). Les
+#'   établissements de ces entreprises seront marqués comme connus.
+#' @param export_fields `character()` \cr Champs à exporter (only for csv
+#'   export)
+#' @param csv_export_path `character()` \cr Chemin du répertoire pour
+#'   l'export csv.
+#' @inheritParams mongodb_connection
+#' @param collection_features `character()` \ cr Collection mongodb où
+#' récupérer des données supplémentaires
+#' @param collection_scores `character()` \cr Collection mongodb stockant les
+#'   scores calculés (utilisée en écriture).
+#' @param ... additional parameters for export functions.
+#' @return `sf_task` \cr L'objet `task` donné en entrée.
+#'
+#' @export
+export.sf_task <- function(
+  task,
+  export_type,
+  batch,
+  f_scores = c(F1 = 0.15, F2 = 0.07),
+  known_sirens_full_path = NULL,
+  export_fields = NULL,
+  csv_export_path = NULL,
+  database = task[["database"]],
+  mongodb_uri = task[["mongodb_uri"]],
+  collection_features = task[["collection"]],
+  collection_scores = "Scores",
+  ...
+){
+
+  requireNamespace("purrr")
+  if (is.null(export_fields)){
+    export_fields <- c(
+      "siret",
+      "periode",
+      "raison_sociale",
+      "departement",
+      "region",
+      "score",
+      "score_diff",
+      "connu",
+      "date_ccsf",
+      "etat_proc_collective",
+      "date_proc_collective",
+      "interessante_urssaf",
+      # "default_urssaf",
+      "effectif",
+      "libelle_naf",
+      "libelle_ape5",
+      "code_ape",
+      "montant_part_ouvriere",
+      "montant_part_patronale",
+      "ca",
+      "ca_past_1",
+      "benefice_ou_perte",
+      "benefice_ou_perte_past_1",
+      "resultat_expl",
+      "resultat_expl_past_1",
+      "poids_frng",
+      "taux_marge",
+      "frais_financier",
+      "financier_court_terme",
+      "delai_fournisseur",
+      "dette_fiscale",
+      "apart_heures_consommees",
+      "apart_heures_autorisees",
+      # "cotisation_moy12m",
+      "compte_urssaf",
+      "montant_majorations",
+      "exercice_bdf",
+      "exercice_diane",
+      "delai"
+      )
+  }
+
+
+  if (!is.null(export_type)) {
+    assertthat::assert_that(all(export_type %in% c("csv", "mongodb")))
+
+    logger::log_info("Adding additional fields for export")
+
+    res <- task[["new_data"]] %>%
+      format_for_export(
+        export_fields = export_fields,
+        database = database,
+        collection = collection_features,
+        mongodb_uri = mongodb_uri,
+        last_batch = batch,
+        known_sirens_full_path = known_sirens_full_path,
+        verbose = attr(task, "verbose")
+        )
+
+    logger::log_info(
+      "Data is exported to {paste(export_type, collapse = ' and ')}"
+    )
+    purrr::walk(
+      .x = export_type,
+      .f = function(x, ...){
+        if (x == "csv") {
+          export_scores_to_csv(
+            ...,
+            absolute_path = csv_export_path
+            )
+        } else if (x == "mongodb") {
+          export_scores_to_mongodb(
+            ...,
+            f_scores = f_scores,
+            database = database,
+            collection = collection_scores,
+            mongodb_uri = mongodb_uri
+            )
+      }},
+      formatted_data = res,
+      batch = batch,
+      algo = "algo"
+      )
+  }
+  logger::log_info("Data exported with success to
+    {paste(export_type, collapse = ' and ')}")
+    return(task)
+}
+
 #' Prepare_for_export
 #'
 #' Si le nombre de périodes disponible dans les données est supérieur à deux,
@@ -11,7 +144,7 @@
 #' @inheritParams mongodb_connection
 #' @param last_batch `character(1)` \cr Nom du batch à prendre en compte pour
 #'   les données.
-#' @param known_sirens_full_paths `character()` \cr Chemins absolus des
+#' @param known_sirens_full_path `character()` \cr Chemins absolus des
 #'   fichiers contenant des listes de sirens connus.
 #' @param verbose `logical()` \cr Faut-il imprimer des informations sur le
 #'   chargement des données supplémentaires ?
@@ -31,11 +164,11 @@ format_for_export <- function(
   known_sirens_full_path,
   verbose) {
 
-  require(logger)
+  requireNamespace("logger")
   if (verbose) {
-    log_threshold(TRACE)
+    logger::log_threshold(logger::TRACE)
   } else {
-    log_threshold(WARN)
+    logger::log_threshold(logger::WARN)
   }
 
   prediction <- data_to_export %>%
@@ -47,7 +180,7 @@ format_for_export <- function(
     unique()
 
   if (length(all_periods) < 2) {
-    log_warning(
+    logger::log_warn(
       "Less than two periods do not allow to compute score variations,
       or to monitor company appearing since last period. You can add more
       periods with the rollback_months parameter from load_new_data function"
@@ -56,27 +189,27 @@ format_for_export <- function(
 
   # Compute additional indicators about progression
   pred_data <- prediction %>%
-    group_by(siret) %>%
-    arrange(siret, periode) %>%
-    mutate(
+    dplyr::group_by(siret) %>%
+    dplyr::arrange(siret, periode) %>%
+    dplyr::mutate(
       last_score = dplyr::lag(score)#,
       # last_periode = dplyr::lag(periode),
       # next_periode = dplyr::lead(periode),
       ) %>%
-    ungroup() %>%
+    dplyr::ungroup() %>%
     # select(-c(last_periode, next_periode)) %>%
-    mutate(score_diff = score - last_score) %>%
-    select(-c(last_score))
+    dplyr::mutate(score_diff = score - last_score) %>%
+    dplyr::select(-c(last_score))
 
   if (length(all_periods) >= 2){
     pred_data <- pred_data %>%
-      filter(periode > min(all_periods), periode <= max(all_periods))
+      dplyr::filter(periode > min(all_periods), periode <= max(all_periods))
   }
 
   first_period <- min(all_periods)
   last_period <- max(all_periods)
-  log_info("Preparation a l'export ... ")
-  log_info("Derniere periode connue: {last_period}")
+  logger::log_info("Preparation a l'export ... ")
+  logger::log_info("Derniere periode connue: {last_period}")
 
   donnees <- connect_to_database(
     database = database,
@@ -111,12 +244,12 @@ format_for_export <- function(
       select(export_fields)
   } else {
     donnees <- donnees %>%
-      mutate(connu = FALSE) %>%
-      select(export_fields)
+      dplyr::mutate(connu = FALSE) %>%
+      dplyr::select(export_fields)
   }
 
   all_names <- names(donnees)
-  log_info("Les variables suivantes sont absentes du dataframe:
+  logger::log_info("Les variables suivantes sont absentes du dataframe:
     {export_fields[!(export_fields %in% all_names)]}")
     export_fields <- export_fields[export_fields %in% all_names]
 
@@ -147,6 +280,7 @@ format_for_export <- function(
 #'   param exporter.
 #' @param collection `character(1)' \cr Nom de la collection vers laquelle
 #'   exporter.
+#' @inheritParams mongodb_connection
 #'
 #' @return Retourne TRUE. \cr Les objets insérés dans la base de données ont les
 #'   champs:
@@ -155,8 +289,6 @@ format_for_export <- function(
 #'   * "algo" et "batch" tel qu'entrés en paramètres,
 #'   * "siret", "periode", "score" et "score_diff" tel qu'extraits de la table \code{formatted_data},
 #'   * "timestamp" qui donne la date et l'heure.
-#'
-#' @export
 #'
 export_scores_to_mongodb <- function(
   formatted_data,
@@ -229,9 +361,6 @@ export_scores_to_mongodb <- function(
 #' @return `TRUE`. \cr Exporte un fichier csv, dans le dossier spécifié
 #'   en entrée, nommé automatiquement "aaaa_mm_jj_export_{algo}_{batch}" avec
 #'   éventuellement un suffixe "_vX" pour ne pas écraser de fichier existant.
-#'
-#' @export
-#'
 export_scores_to_csv  <- function(
   formatted_data,
   algo,
@@ -253,7 +382,7 @@ export_scores_to_csv  <- function(
     full_path = TRUE
     )
 
-  write.table(data_to_export,
+  utils::write.table(data_to_export,
     row.names = F,
     dec = ",",
     sep = ";",
@@ -308,7 +437,8 @@ mark_known_sirets <- function(
 #' @param algo `character(1)`\cr Algorithm from which to take the score. Defaults to "algo".
 #' @param method `character(1)`\cr Ou bien "first" ou bien "last". Se référer
 #'   à la section Details.
-#' @param siret `character()` \cr Vecteur de sirets à requêter
+#' @param batchs `character()` \cr Vecteur de batchs à requêter
+#' @param sirets `character()` \cr Vecteur de sirets à requêter
 #'
 #' @section Details:
 #' Si la méthode est "first", alors le dernier score disponible pour le
@@ -493,13 +623,12 @@ export_fiche_visite <- function(
       min_effectif = 0
     ) %>%
       filter(siret == sirets[i]) %>%
-      head(n = 1)
+      utils::head(n = 1)
 
     raison_sociale <- elementary_info %>%
       .$raison_sociale
 
-    require(rprojroot)
-    rmarkdown::render(rprojroot::find_package_root_file("R", "post_fiche_visite.Rmd"),
+    rmarkdown::render(here::here("R", "post_fiche_visite.Rmd"),
       params = list(
         siret = sirets[i],
         batch = batch,

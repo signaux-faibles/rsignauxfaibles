@@ -1,14 +1,5 @@
 context("Test that exports and import of scores work as expected")
 
-
-# test_dataframe <- data.frame(
-#   siret = c("1", "1", "2"),
-#   periode = c("2018", "2019", "2019"),
-#   score = c(0.4, 0.6, 0.2),
-#   score_diff = c(0, 0.2, -0.2)
-# )
-
-
 test_database <- "unittest_signauxfaibles"
 test_collection <- "Scores_for_tests"
 test_mongodb_uri  <-  "mongodb://localhost:27017"
@@ -21,21 +12,6 @@ dbconnection <- mongolite::mongo(
 )
 
 f_scores <- c(F2 = 0.2, F1 = 0.4)
-# test_that("export_scores_to_mongodb works as expected", {
-
-#     expect_error(
-#       export_scores_to_mongodb(
-#         formatted_data = test_dataframe,
-#         algo = "test_algo",
-#         batch = "test_batch",
-#         f_scores = c(F2 = 0.2, F1 = 0.4),
-#         database = test_database,
-#         collection = test_collection
-#         ),
-#       NA
-#       )
-
-# })
 
 # Sample object for the tests
 siret_df <- data.frame(
@@ -98,6 +74,7 @@ test_that("Scores are well exported with export_scores_to_mongodb function", {
       batch = "1901",
       database = test_database,
       collection = test_collection,
+      mongodb_uri = test_mongodb_uri,
       algo = "test_algo",
       f_scores = c(F2 = 0.2, F1 = 0.4)
     ),
@@ -110,9 +87,15 @@ test_that("Scores are well exported with export_scores_to_mongodb function", {
   expect_equal(
     dbconnection$find('{"siret":"1", "periode":"2019-01-01"}') %>%
       dplyr::select(-timestamp),
-    structure(list(
-      siret = "1", periode = "2019-01-01", score = 0.265508663, score_diff = 1,
-      algo = "test_algo", batch = "1901", alert = "Alerte seuil F2"), class = "data.frame", row.names = 1L)
+    structure(
+      list(
+        siret = "1", periode = "2019-01-01", score = 0.265508663,
+        score_diff = 1, algo = "test_algo", batch = "1901",
+        alert = "Alerte seuil F2"
+        ),
+      class = "data.frame",
+      row.names = 1L
+    )
   )
 
   export_scores_to_mongodb(
@@ -120,6 +103,7 @@ test_that("Scores are well exported with export_scores_to_mongodb function", {
     batch = "1902",
     database = test_database,
     collection = test_collection,
+    mongodb_uri = test_mongodb_uri,
     algo = "test_algo",
     f_scores = c(F2 = 0.2, F1 = 0.4)
   )
@@ -128,6 +112,7 @@ test_that("Scores are well exported with export_scores_to_mongodb function", {
     batch = "1903",
     database = test_database,
     collection = test_collection,
+    mongodb_uri = test_mongodb_uri,
     algo = "test_algo",
     f_scores = c(F2 = 0.2, F1 = 0.4)
   )

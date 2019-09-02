@@ -26,11 +26,11 @@ exporter. Par défaut, celle stockée dans \code{task}.}
 \item{last_batch}{\code{character(1)} \cr Nom du batch à prendre en compte pour
 les données.}
 
+\item{known_sirens_full_path}{\code{character()} \cr Chemins absolus des
+fichiers contenant des listes de sirens connus.}
+
 \item{verbose}{\code{logical()} \cr Faut-il imprimer des informations sur le
 chargement des données supplémentaires ?}
-
-\item{known_sirens_full_paths}{\code{character()} \cr Chemins absolus des
-fichiers contenant des listes de sirens connus.}
 }
 \value{
 \code{data.frame()}\cr

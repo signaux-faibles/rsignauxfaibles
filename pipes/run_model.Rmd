@@ -9,7 +9,6 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 h2o::h2o.no_progress()
-library(mlr)
 # Script parameters
 devtools::load_all()
 database <- "test_signauxfaibles"

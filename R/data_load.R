@@ -1,8 +1,148 @@
 #' @import dplyr
 #' @importFrom lubridate %m+% %m-%
+#' @importFrom rlang :=
+#' @importFrom stats predict
+NULL
+
+#' Documentation des informations de connection à mongodb
+#'
+#' @param mongodb_uri `character(1)` \cr url to the database in mongodb uri format.
+#' @param database `character(1)` \cr Nom de la base de données vers laquelle
+#'   param exporter. Par défaut, celle stockée dans \code{task}.
+#' @param collection `character(1)` \cr Nom de la collection vers laquelle
+#'   exporter. Par défaut, celle stockée dans \code{task}.
+#' @name mongodb_connection
 NULL
 
 
+
+#' Chargement de données historiques
+#'
+#' Charge les données historiques de signaux faibles et les stocke dans un
+#' champ "hist_data" de l'objet \code{task}
+#'
+#' @param batch `character(1)` \cr Batch auquel doit être importées les
+#'   données. Les modifications opérées par les batchs ultérieurs sont
+#'   ignorées.
+#' @inheritParams mongodb_connection
+#' @param subsample `integer(1)` \cr Nombre d'objets (c'est-à-dire de couples
+#'   siret x periode) à échantillonner.
+#' @param fields `character()` \cr Noms des champs à requêter dans la base de
+#'   données. Doit contenir "siret" et "periode". Si égal à \code{NULL}, alors
+#'   charge tous les champs disponibles.
+#' @param date_inf `Date` \cr Date inférieure du chargement des données.
+#' @param date_sup `Date` \cr Date supérieure (exclue) du chargement des
+#'   données.
+#' @param min_effectif `integer(1)` \cr Limite basse du filtrage de l'effectif
+#'   (la limite est incluse)
+#' @param siren `character()` \cr Liste de sirens à exporter. Si égale à
+#'   \code{NULL}, charge tous les sirens disponibles.
+#' @param code_ape `character()` \cr Liste de codes APE à exporter. Si égale à
+#'   \code{NULL}, charge tous les codes disponibles.
+#'
+#' @return `[sf_task]` \cr
+#'   L'objet \code{task} donné en entrée auquel le champs "hist_data" a été
+#'   ajouté (ou écrasé), contenant un  data.frame() avec les colonnes incluses dans le paramètre d'entrée
+#'  \code{fields}, et pour chaque ligne un couple unique siret x periode.
+#'
+#' @describeIn load_hist_data
+#'
+#' @export
+load_hist_data.sf_task <- function(
+  task,
+  batch,
+  database = task[["database"]],
+  collection = task[["collection"]],
+  mongodb_uri = task[["mongodb_uri"]],
+  subsample = 200000L,
+  fields = get_fields(training = FALSE),
+  date_inf = as.Date("2015-01-01"),
+  date_sup = as.Date("2017-01-01"),
+  min_effectif = 10L,
+  siren = NULL,
+  code_ape = NULL,
+  ...
+  ){
+  set_verbose_level(task)
+
+  logger::log_info("Chargement des donnees historiques.")
+
+  hist_data <- connect_to_database(
+    database,
+    collection,
+    mongodb_uri = mongodb_uri,
+    batch,
+    min_effectif = min_effectif,
+    siren = NULL,
+    date_inf = date_inf,
+    date_sup = date_sup,
+    fields = fields,
+    code_ape = NULL,
+    subsample = subsample,
+    verbose = attr(task, "verbose")
+  )
+
+  if (nrow(hist_data) > 1) {
+    logger::log_info("Les donnees ont ete chargees avec succes.")
+  } else {
+    log_warn("Aucune donnee n'a ete chargee. Veuillez verifier la requete.")
+  }
+  check_overwrites(task, "hist_data")
+  task[["hist_data"]] <- hist_data
+  return(task)
+}
+
+#' Chargement de nouvelles données
+#'
+#' @param task `[sf_task]` \cr Objet s3 de type sf_task
+#' @param periods `[Date()]` \cr Périodes d'intérêt, auquels charger les
+#'   données. Des périodes supplémentairs peuvent être chargées selon la
+#'   valeur de rollback_months.
+#' @inheritParams connect_to_database
+#' @param rollback_months `integer(1)`\cr Nombre de mois précédant le premier mois de
+#'   `periods` à charger. Permet d'effectuer des calculs de différences ou de
+#'   moyennes glissantes pour les périodes d'intérêt.
+#'
+#' @describeIn load_new_data
+#'
+#' @return `[sf_task]` \cr
+#'   L'objet \code{task} donné en entrée auquel le champs "new_data" a été
+#'   ajouté (ou écrasé), contenant un  data.frame() avec les colonnes incluses dans le paramètre d'entrée
+#'  \code{fields}, et pour chaque ligne un couple unique siret x periode.
+#' @export
+load_new_data.sf_task <- function(
+  task,
+  periods,
+  batch,
+  database = task[["database"]],
+  collection = task[["collection"]],
+  mongodb_uri = task[["mongodb_uri"]],
+  fields = get_fields(training = FALSE),
+  min_effectif = 10L,
+  rollback_months = 1L,
+  ...
+  ){
+
+  set_verbose_level(task)
+
+  logger::log_info("Loading data from last batch")
+  task[["new_data"]] <- connect_to_database(
+    database = database,
+    collection = collection,
+    mongodb_uri = mongodb_uri,
+    batch = batch,
+    date_inf = min(periods) %m-% months(rollback_months),
+    date_sup = max(periods) %m+% months(1),
+    min_effectif = min_effectif,
+    fields = fields
+  )
+
+  if ("periode" %in% fields &&
+    max(task[["new_data"]]$periode) != max(periods)) {
+    logger::log_warn("Data is missing at actual period !")
+  }
+  return(task)
+}
 #' Connexion à la base de donnée
 #'
 #' `connect_to_database` permet de requêter des données mongoDB pour en
@@ -93,14 +233,14 @@ connect_to_database <- function(
       montant_part_ouvriere_past_12  = 0,
       apart_heures_consommees        = 0,
       apart_heures_autorisees        = 0
-      )
+    )
   }
 
-  require(logger)
+  requireNamespace("logger")
   if (verbose) {
-    log_threshold(TRACE)
+    logger::log_threshold(logger::TRACE)
   } else {
-    log_threshold(WARN)
+    logger::log_threshold(logger::WARN)
   }
   requete <- factor_request(
     batch,
@@ -111,40 +251,40 @@ connect_to_database <- function(
     fields,
     code_ape,
     subsample
-    )
+  )
 
   assertthat::assert_that(
     is.null(fields) || all(c("periode", "siret") %in% fields)
-    )
+  )
 
-  log_info("Connexion a la collection mongodb {collection} ...")
+  logger::log_info("Connexion a la collection mongodb {collection} ...")
 
   dbconnection <- mongolite::mongo(
     collection = collection,
     db = database,
     url = mongodb_uri,
     verbose = verbose
-    )
-  log_info(" Connexion effectuee avec succes.")
+  )
+  logger::log_info(" Connexion effectuee avec succes.")
 
   # Import dataframe
-  log_info("Import en cours...")
+  logger::log_info("Import en cours...")
 
   donnees <- dbconnection$aggregate(requete)
 
-  log_info(" Import fini.")
+  logger::log_info(" Import fini.")
 
   if (dim(donnees)[1] == 0) {
     return(tibble::tibble(siret = character(0), periode = character(0)))
   }
   assertthat::assert_that(
     all(c("periode", "siret") %in% names(donnees))
-    )
+  )
 
   assertthat::assert_that(
     anyDuplicated(donnees %>% select(siret, periode)) == 0,
     msg = "La base importee contient des lignes identiques"
-    )
+  )
 
   table_wholesample <- donnees %>%
     arrange(periode) %>%
@@ -155,14 +295,14 @@ connect_to_database <- function(
   n_ent <- table_wholesample$siret %>%
     stringr::str_sub(1, 9) %>%
     n_distinct()
-  log_info("Import de {n_eta} etablissements issus de {n_ent} entreprises")
+  logger::log_info("Import de {n_eta} etablissements issus de {n_ent} entreprises")
 
-  log_info(" Fini.")
+  logger::log_info(" Fini.")
 
   # Champs par defaut lorsque absent.
 
   if (any(names(replace_missing) %in% colnames(table_wholesample))){
-    log_info("Filling missing values with default values")
+    logger::log_info("Filling missing values with default values")
   }
   table_wholesample <- table_wholesample %>%
     replace_na(
@@ -173,14 +313,14 @@ connect_to_database <- function(
   # Champs manquants
   champs_manquants <- fields[!fields %in% tbl_vars(table_wholesample)]
   if (length(champs_manquants) >= 1) {
-    log_info("Champ manquant: {champs_manquants}")
-    log_info("Remplacements par NA")
+    logger::log_info("Champ manquant: {champs_manquants}")
+    logger::log_info("Remplacements par NA")
     NA_variable <- NA_character_
     remplacement <- paste0(
-      NA_variable,
+     NA_variable,
       character(length(champs_manquants))
       ) %>%
-    setNames(champs_manquants)
+    stats::setNames(champs_manquants)
   table_wholesample <- table_wholesample %>%
     mutate_(.dots = remplacement)
   }
@@ -208,7 +348,7 @@ get_sirets_of_detected <- function(
     db = database,
     url = mongodb_uri,
     verbose = FALSE
-    )
+  )
 
   res <- dbconnection$find(
     '{ "$or": [ { "alert": "Alerte seuil F1" },
@@ -258,7 +398,7 @@ factor_request <- function(
       match_siren <- c(
         match_siren,
         paste0('{"info.siren":"', siren[i], '"}')
-        )
+      )
     }
 
     match_siren <- paste0('"$or":[', paste(match_siren, collapse = ","), "]")
@@ -273,7 +413,7 @@ factor_request <- function(
   } else {
     sample_req <- paste0(
       '{"$sort": {"value.random_order": -1}}, {"$limit" :', subsample, "}"
-      )
+    )
   }
 
   # Filtrage code APE
@@ -294,7 +434,7 @@ factor_request <- function(
         paste0('{"value.', ape_or_naf, '":
           {"$regex":"^', code_ape[i], '", "$options":"i"}
     }')
-    )
+        )
   }
   match_APE <- paste0('"$or":[', paste(match_APE, collapse = ","), "]")
   # FIX ME: Requete nettement sous-optimale
@@ -307,7 +447,7 @@ if (is.null(min_effectif)) {
   match_eff <- paste0(
     '"value.effectif":{"$gte":',
     min_effectif, "}"
-    )
+  )
 }
 
 # Filtrage date
@@ -326,7 +466,7 @@ if (is.null(date_sup)) {
     '"info.periode":{"$lt": {"$date":"',
     date_sup,
     'T00:00:00Z"}}'
-    )
+  )
 }
 
 match_req <- make_query(
@@ -338,8 +478,8 @@ match_req <- make_query(
     match_date_2,
     match_APE,
     match_eff
-    )
   )
+)
 
 # Construction de la projection
 
@@ -349,7 +489,7 @@ if (is.null(fields)) {
   assertthat::validate_that( # does not return an error if not verified
     all(c("periode", "siret") %in% fields),
     msg = "Beware: siret and periode are not included in the request"
-    )
+  )
   projection_req <- paste0('"', fields, '":1')
   projection_req <- paste(projection_req, collapse = ",")
   projection_req <- paste0('{"$project":{', projection_req, "}}")
@@ -364,69 +504,19 @@ reqs <- c(
   sample_req,
   new_root,
   projection_req
-  )
+)
 
 requete <- paste(
   reqs[reqs != ""],
   collapse = ", "
-  )
+)
 requete <- paste0(
   "[",
   requete,
   "]"
-  )
+)
 
 return(requete)
-}
-
-#' Wrapper pour se connecter à H2O avec la bonne configuration
-#'
-#' Créé une instance ou rejoint l'instance existante le cas échéant.
-#'
-#' @return NULL
-#' @export
-connect_to_h2o <- function(log_dir) {
-  Sys.unsetenv("http_proxy")
-
-  h2o::h2o.init(
-    ip = "localhost",
-    port = 4444,
-    # proxy = "http://localhost:8888/",
-    # insecure = TRUE,
-    # https = TRUE,
-    nthreads = -1,
-    min_mem_size = "16G",
-    log_dir = log_dir
-    )
-
-  # Ugly but no other solution found yet.
-  # Sys.setenv(http_proxy = "http://localhost:8888")
-}
-
-
-#' @rdname connect_to_h2o
-connect_to_spark <- function(database = NULL, collection = NULL) {
-  config <- sparklyr::spark_config()
-  config$sparklyr.defaultPackages <- #nolint
-    c("org.mongodb.spark:mongo-spark-connector_2.11:2.4.0")
-  if (!is.null(database) && !is.null(collection)) {
-    config$spark.mongodb.input.uri <- #nolint
-      paste0("mongodb://127.0.0.1:27017/", database, ".", collection)
-    config$spark.mongodb.output.uri <- #nolint
-      paste0("mongodb://127.0.0.1:27017/", database, ".", collection)
-  }
-
-  sc <- sparklyr::spark_connect(master = "local[*]", config = config)
-
-  if ("spark.mongodb.input.uri" %in% sc$config &&
-    config$spark.mongodb.input.uri != sc$config$spark.mongodb.input.uri) { #nolint
-    sparklyr::spark_disconnect_all()
-    sc <- sparklyr::spark_connect(master = "local[*]", config = config)
-  }
-  # FIX ME: add config if spark has been initiated without this config file.
-  # Spark_connect does not correct this automatically.
-
-  return(sc)
 }
 
 
@@ -817,18 +907,13 @@ get_fields <- function(
       )
   }
 
-  if (procol >= 1) {
-    fields <- c(
-      fields,
-      "etat_proc_collective"
-      )
-  }
   if (procol >= 1 && !training) {
     fields <- c(
       fields,
       # ALTARES
       "outcome",
-      "time_til_outcome"
+      "time_til_outcome",
+      "etat_proc_collective"
       )
   }
   if (procol >= 2 && !training) {
@@ -856,8 +941,8 @@ get_fields <- function(
   if (target_encode >= 1 && training) {
     fields <- c(
       fields,
-      "TargetEncode_code_ape_niveau2",
-      "TargetEncode_code_ape_niveau3"
+      "target_encode_code_ape_niveau2",
+      "target_encode_code_ape_niveau3"
       )
   }
   if (info >= 1 && !training) {
@@ -932,4 +1017,56 @@ get_fields_training_light <- function(){
   "TargetEncode_code_ape_niveau2",
   "TargetEncode_code_ape_niveau3")
   )
+}
+
+#' Récupère les dernières données disponibles pour un batch
+#'
+#' Cette fonction permet d'accéder rapidement aux dernières données
+#' disponibles.
+#'
+#' @param last_batch `character(1)` \cr Batch auquel doit être importées les
+#'   données. Les modifications opérées par les batchs ultérieurs sont
+#'   ignorées.
+#' @param periods `[Date()]` \cr Périodes d'intérêt, auquels charger les
+#'   données. Des périodes supplémentairs peuvent être chargées selon la
+#'   valeur de rollback_months.
+#' @inheritParams mongodb_connection
+#' @param fields `character()` \cr Noms des champs à requêter dans la base de
+#'   données. Doit contenir "siret" et "periode". Si égal à \code{NULL}, alors
+#'   charge tous les champs disponibles.
+#' @param min_effectif `integer(1)` \cr Limite basse du filtrage de l'effectif
+#'   (la limite est incluse)
+#' @param rollback_months `integer(1)`\cr Nombre de mois précédant le premier mois de
+#'   `periods` à charger. Permet d'effectuer des calculs de différences ou de
+#'   moyennes glissantes pour les périodes d'intérêt.
+#'
+#' @return `data.frame()` \cr
+#' Données avec les colonnes décrites dans `fields`, pour les périodes
+#' définies par `periods` et `rollback_months`
+#' @export
+get_last_batch <- function(
+  last_batch,
+  periods,
+  database,
+  collection,
+  mongodb_uri,
+  fields,
+  min_effectif,
+  rollback_months) {
+
+  current_data <- connect_to_database(
+    database,
+    collection,
+    mongodb_uri,
+    last_batch,
+    date_inf = min(periods) %m-% months(rollback_months),
+    date_sup = max(periods) %m+% months(1),
+    min_effectif = min_effectif,
+    fields = fields
+  )
+
+  if ("periode" %in% fields && max(current_data$periode) != max(periods)) {
+    logger::log_warn("Data is missing at actual period !")
+  }
+  return(current_data)
 }

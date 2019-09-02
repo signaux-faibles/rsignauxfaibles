@@ -6,6 +6,13 @@
 \usage{
 custom_eval_urssaf(f1_score, f2_score)
 }
+\arguments{
+\item{f1_score}{:: \code{double(1)} \cr
+Score F1}
+
+\item{f2_score}{:: \code{double(1)} \cr
+Score F2}
+}
 \value{
 \code{MLsegmentr::eval_function}
 }

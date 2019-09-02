@@ -4,8 +4,8 @@ Title: Charge et Analyse les Données de Signaux Faibles
 Version: 0.1.1
 Authors@R: person("Pierre", "Camilleri", email = "pierre.camilleri@direccte.gouv.fr",
   role = c("aut", "cre"))
-Description: Ce package permet de récupérer les données depuis MongoDB, de les traiter et de développer des modèles dans le cadre du projet de la startup d'État Signaux Faibles
-License: What license is it under?
+Description: Ce package permet de récupérer les données depuis MongoDB, de les traiter et de développer des modèles dans le cadre du projet de la startup d'État Signaux Faibles.
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
@@ -16,17 +16,29 @@ Imports:
     logger,
     mongolite,
     MLmetrics,
+    MLlogr,
+    MLsegmentr,
+    fte,
     PRROC,
     purrr,
-    rprojroot,
+    here,
     tibble,
     tidyr,
-    uuid
+    uuid,
+    stringr,
+    xgboost,
+    rlang
 Suggests:
+    jsonlite,
     ggplot2,
+    Hmisc,
+    lhs,
+    mlr,
     mlrMBO,
     ParamHelpers,
     rgenoud,
+    smoof,
+    rmarkdown,
     DiceKriging,
     testthat (>= 2.1.0)
 RoxygenNote: 6.1.1

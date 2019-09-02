@@ -2,7 +2,7 @@
 % Please edit documentation in R/interface_generics.R
 \name{export}
 \alias{export}
-\title{exports data}
+\title{Exports data}
 \usage{
 export(task, ...)
 }
@@ -12,5 +12,5 @@ export(task, ...)
 \item{...}{Additional parameters depending on class of task}
 }
 \description{
-exports data
+Exports data
 }

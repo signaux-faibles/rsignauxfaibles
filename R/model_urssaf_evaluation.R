@@ -112,7 +112,7 @@ aux_custom_eval_urssaf <- function(eval_frame, F1_thres, F2_thres) {
 #' @return NULL
 #' @export
 aux_custom_plot_urssaf  <- function(eval_frame){
-  if (require(ggplot2)) {
+  if (requireNamespace("ggplot2")) {
     p <- ggplot2::ggplot(
       eval_frame,
       ggplot2::aes(
@@ -129,12 +129,12 @@ aux_custom_plot_urssaf  <- function(eval_frame){
     ggplot2::facet_wrap(ggplot2::vars(segment, model)) +
     ggplot2::geom_text(y = -0.015)
 
-  plot(p)
+  graphics::plot(p)
   } else {
     warning(
       "Cette fonction necessite le package ggplot2; veuillez l'installer pour
       l'utiliser"
-      )
+    )
   }
 }
 
@@ -150,12 +150,15 @@ aux_custom_plot_urssaf  <- function(eval_frame){
 #' 3 -définir  comme segment la colonne interessant urssaf (6 segments)
 #' 4- Définir comme target l'anticipation d'un débit à 18 mois
 #'
+#' @param f1_score :: `double(1)` \cr
+#'   Score F1
+#' @param f2_score :: `double(1)` \cr
+#'   Score F2
 #'
 #' @return `MLsegmentr::eval_function`
 #' @export
-#'
 custom_eval_urssaf  <- function(f1_score, f2_score){
-  require(MLsegmentr)
+  requireNamespace("MLsegmentr")
   evo <- MLsegmentr::eval_function(
     eval_fun = function(x) aux_custom_eval_urssaf(x, f1_score, f2_score),
     wrap_eval_fun = TRUE,

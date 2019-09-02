@@ -5,11 +5,38 @@ compare_fields <- function(actual_fields, expected_fields) {
   expect_equal(
     sort(actual_fields), sort(expected_fields),
     info = paste(
-      "Only in expected: ", expected_fields[!expected_fields %in% actual_fields],
-      "\nOnly in actual: ", actual_fields[!actual_fields %in% expected_fields]
+      "Only in actual: ",
+      expected_fields[!expected_fields %in% actual_fields],
+      "\nOnly in expected: ",
+      actual_fields[!actual_fields %in% expected_fields]
     )
   )
 }
+
+test_that("No problem in get_fields", {
+  expect_false(all(c(
+        "outcome",
+        "siret",
+        "periode",
+        "siren",
+        "code_ape"
+        ) %in% get_fields(training = TRUE)))
+  expect_true(all(c(
+        "target_encode_code_ape_niveau2",
+        "target_encode_code_ape_niveau3"
+        ) %in% get_fields(training = TRUE, target_encode = 2)))
+  expect_false(all(c(
+        "target_encode_code_ape_niveau2",
+        "target_encode_code_ape_niveau3"
+        ) %in% get_fields(training = FALSE, target_encode = 2)))
+  expect_true(all(c(
+        "outcome",
+        "siret",
+        "periode",
+        "siren",
+        "code_ape"
+        ) %in% get_fields(training = FALSE)))
+  })
 
 test_that("get fields does not change the fields queried
   (default behavior)", {
@@ -27,6 +54,8 @@ test_that("get fields does not change the fields queried
     "montant_echeancier",
     "delai",
     "duree_delai",
+    "ratio_dette_delai",
+    "debit_entreprise",
     # URSSAF 12m,
     "ratio_dette",
     "ratio_dette_moy12m",
@@ -291,6 +320,7 @@ test_that("get fields does not change the fields queried
     # APART
     "apart_heures_consommees",
     "apart_heures_autorisees",
+    "apart_entreprise",
     # SIRENE
     "code_ape",
     "code_ape_niveau2",
@@ -298,7 +328,12 @@ test_that("get fields does not change the fields queried
     "code_naf",
     # PROCOL
     "outcome",
-    "time_til_outcome"
+    "time_til_outcome",
+    "time_til_failure",
+    "time_til_default",
+    "tag_failure",
+    "tag_default",
+    "tag_debit"
   )
   compare_fields(actual_fields, expected_fields)
 })
@@ -316,6 +351,8 @@ test_that("get fields does not change the fields queried
     "montant_echeancier",
     "delai",
     "duree_delai",
+    "ratio_dette_delai",
+    "debit_entreprise",
     # URSSAF 12m,
     "ratio_dette",
     "ratio_dette_moy12m",
@@ -335,8 +372,6 @@ test_that("get fields does not change the fields queried
     "effectif_past_12",
     "effectif_past_18",
     "effectif_past_24",
-    # ALTARES
-    "etat_proc_collective",
     # DIANE
     "dette_fiscale_et_sociale",
     "effectif_consolide",
@@ -580,9 +615,10 @@ test_that("get fields does not change the fields queried
     # APART
     "apart_heures_consommees",
     "apart_heures_autorisees",
+    "apart_entreprise",
     # SIRENE
-    "TargetEncode_code_ape_niveau2",
-    "TargetEncode_code_ape_niveau3"
+    "target_encode_code_ape_niveau2",
+    "target_encode_code_ape_niveau3"
   )
   compare_fields(actual_fields, expected_fields)
 })

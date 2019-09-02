@@ -21,10 +21,10 @@ replace_na <- function(
   fail_if_column_missing = TRUE
 ) {
 
-  require(purrr)
+  requireNamespace("purrr")
   if (any(!names(replacements_by_column) %in% colnames(frame)) &&
     fail_if_column_missing &&
-    require(logger)){
+    requireNamespace("logger")){
     stop(
       "{names(replacements_by_column)[!names(replacements_by_column) %in%
       colnames(frame)]} is missing from the dataframe"
@@ -134,46 +134,4 @@ name_file <- function(
   } else {
     return(file_name)
   }
-}
-
-
-#' Conversion d'un data.frame en H2OFrame
-#'
-#' Convertit un data.frame en H2OFrame en s'assurant de conserver les bons
-#' types de données.
-#'
-#' @param table_to_convert `data.frame()` \cr Table à convertir.
-#'
-#' @return `h2o::H2OFrame` \cr
-#'   La table convertie.
-#'
-#' @export
-#'
-convert_to_h2o <- function(table_to_convert) {
-  h2o_table <- h2o::as.h2o(table_to_convert)
-  h2o_table <- set_h2o_types(h2o_table)
-  return(h2o_table)
-}
-
-
-#' Conversion des colonnes "string" en "enum" dans un H2OFrame
-#'
-#' @param h2o_table Table h2o
-#'
-#' @return Table h2o avec les colonnes de type "string" remplacées par des colonnes de type "enum"
-#' @export
-#'
-set_h2o_types <- function(h2o_table) {
-  fields <- names(h2o_table)[h2o::h2o.getTypes(h2o_table) == "string"]
-
-  if ("outcome" %in% names(h2o_table)) fields <- c(fields, "outcome")
-
-  aux_type_factor <- function(colname) {
-    h2o_table[colname] <<- h2o::h2o.asfactor(h2o_table[colname])
-  }
-
-  plyr::l_ply(fields, aux_type_factor)
-  # BUG H2O: cf JIRA H2O BUG PUBDEV-6221
-  utils::capture.output(h2o_table, file = "/dev/null") #nolint
-  return(h2o_table)
 }

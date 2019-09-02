@@ -22,7 +22,9 @@ exporter. Par défaut, celle stockée dans \code{task}.}
 \item{method}{\code{character(1)}\cr Ou bien "first" ou bien "last". Se référer
 à la section Details.}
 
-\item{siret}{\code{character()} \cr Vecteur de sirets à requêter}
+\item{batchs}{\code{character()} \cr Vecteur de batchs à requêter}
+
+\item{sirets}{\code{character()} \cr Vecteur de sirets à requêter}
 }
 \value{
 Retourne un \code{data.frame} avec des colonnes "siret", "periode", "score"
