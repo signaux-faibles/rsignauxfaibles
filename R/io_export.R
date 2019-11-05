@@ -521,7 +521,7 @@ get_scores <- function(
         ']}'
     )
   } else {
-    siret_match <- ""
+    siret_match <- NULL
   }
   if (!is.null(batchs)){
     batch_match <- paste0(
@@ -529,17 +529,17 @@ get_scores <- function(
         paste0(paste0('"', batchs, '"'), collapse = ", "),
         ']}')
   } else {
-      batch_match <- ""
+      batch_match <- NULL
   }
   if (!is.null(algo)){
     algo_match <- paste0('"algo" : "', algo, '"')
   } else {
-    algo_match <- ""
+    algo_match <- NULL
   }
 
   aggregation <- paste0(
     '[{ "$match" : {',
-    paste(siret_match, batch_match, algo_match, sep = ",")
+    paste(c(siret_match, batch_match, algo_match), collapse = ",")
       ,
       '}
     }, {
