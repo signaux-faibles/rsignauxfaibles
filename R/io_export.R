@@ -532,7 +532,7 @@ get_scores <- function(
       batch_match <- ""
   }
   if (!is.null(algo)){
-    algo_match <- '"algo" : "', algo, '"'
+    algo_match <- paste0('"algo" : "', algo, '"')
   } else {
     algo_match <- ""
   }
