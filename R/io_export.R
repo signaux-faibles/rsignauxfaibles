@@ -554,16 +554,14 @@ get_scores <- function(
        "$group" : {
          "_id" : {
            "siret" : "$siret",
-           "periode" : "$periode"
+           "periode" : "$periode",
+           "algo" : "$algo"
          },
          "score" : {
            "$first" : "$score"
          },
          "batch" : {
            "$first" : "$batch"
-         },
-         "algo" : {
-           "$first" : "$algo"
          },
          "timestamp" : {
            "$first" : "$timestamp"
@@ -576,7 +574,8 @@ get_scores <- function(
      {
        "$addFields" : {
          "siret" : "$_id.siret",
-         "periode" : "$_id.periode"
+         "periode" : "$_id.periode",
+         "algo" : "$_id.algo"
        }
      },
      {
