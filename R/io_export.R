@@ -461,8 +461,8 @@ get_scores <- function(
   database = "test_signauxfaibles",
   collection = "Scores",
   mongodb_uri,
-  algo = "algo",
   method = "last",
+  algo = NULL,
   batchs = NULL,
   sirets = NULL
   ){
@@ -514,68 +514,78 @@ get_scores <- function(
     batch_sort <- -1
   }
 
-
+  if (!is.null(sirets)){
+    siret_match <- paste0(
+      '"siret" : {"$in" : [',
+        paste0(paste0('"', sirets, '"'), collapse = ", "),
+        ']}'
+    )
+  } else {
+    siret_match <- ""
+  }
+  if (!is.null(batchs)){
+    batch_match <- paste0(
+      '"batch" : {"$in" : [',
+        paste0(paste0('"', batchs, '"'), collapse = ", "),
+        ']}')
+  } else {
+      batch_match <- ""
+  }
+  if (!is.null(algo)){
+    algo_match <- '"algo" : "', algo, '"'
+  } else {
+    algo_match <- ""
+  }
 
   aggregation <- paste0(
-    '[
-    {
-      "$match" : {',
-      if (!is.null(sirets)){
-        paste0('"siret" : {
-          "$in" : [',
-    paste0(paste0('"', sirets, '"'), collapse = ", "), '
-            ]
-        },')} else {''},
-      if (!is.null(batchs)){
-        paste0('"batch" : {
-          "$in" : [',
-    paste0(paste0('"', batchs, '"'), collapse = ", "), '
-            ]
-        },')} else {''},
-        '"algo" : "', algo, '"
-      }
-    },
-    {
+    '[{ "$match" : {',
+    paste(siret_match, batch_match, algo_match, sep = ",")
+      ,
+      '}
+    }, {
       "$sort" : {
-        "siret" : 1.0,
-        "batch" : ', batch_sort, ',
-        "periode" : 1.0,
-        "timestamp" : -1.0
-      }
-    },
-    {
-      "$group" : {
-        "_id" : {
-          "siret" : "$siret",
-          "periode" : "$periode"
-        },
-        "score" : {
-          "$first" : "$score"
-        },
-        "batch" : {
-          "$first" : "$batch"
-        },
-        "algo" : {
-          "$first" : "$algo"
-        },
-        "timestamp" : {
-          "$first" : "$timestamp"
+      "siret" : 1.0,
+      "batch" : ', batch_sort, ',
+      "periode" : 1.0,
+      "timestamp" : -1.0
         }
-      }
-    },
-    {
-      "$addFields" : {
-        "siret" : "$_id.siret",
-        "periode" : "$_id.periode"
-      }
-    },
-    {
-      "$project" : {
-        "_id" : 0.0
-      }
-    }
-    ]'
-  )
+     },
+     {
+       "$group" : {
+         "_id" : {
+           "siret" : "$siret",
+           "periode" : "$periode"
+         },
+         "score" : {
+           "$first" : "$score"
+         },
+         "batch" : {
+           "$first" : "$batch"
+         },
+         "algo" : {
+           "$first" : "$algo"
+         },
+         "timestamp" : {
+           "$first" : "$timestamp"
+         },
+         "alert" : {
+           "$first" : "$alert"
+         }
+       }
+     },
+     {
+       "$addFields" : {
+         "siret" : "$_id.siret",
+         "periode" : "$_id.periode"
+       }
+     },
+     {
+       "$project" : {
+         "_id" : 0.0
+       }
+     }
+]'
+        )
 
   query <- db$aggregate(
     aggregation
