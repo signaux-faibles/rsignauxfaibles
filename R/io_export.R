@@ -475,7 +475,7 @@ get_scores <- function(
   )
   assertthat::assert_that(tolower(method) %in% c("first", "last"))
 
-  assertthat::assert_that(grepl("^[[:alnum:]_]+$", algo),
+  assertthat::assert_that(is.null(algo) || grepl("^[[:alnum:]_]+$", algo),
     msg = "Please use alphanumeric and underscore characters for algorithm name"
   )
 
