@@ -576,7 +576,7 @@ get_fields <- function(
       "code_ape_niveau3",
       "code_naf",
       "libelle_naf",
-      "libelle_ape",
+      "libelle_ape5",
       "departement"
       )
   }
