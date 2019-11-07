@@ -54,7 +54,7 @@ load_hist_data.sf_task <- function(
   database = task[["database"]],
   collection = task[["collection"]],
   mongodb_uri = task[["mongodb_uri"]],
-  subsample = 200000L,
+  subsample = NULL,
   fields = get_fields(training = FALSE),
   date_inf = as.Date("2015-01-01"),
   date_sup = as.Date("2017-01-01"),
@@ -574,7 +574,10 @@ get_fields <- function(
       "code_ape",
       "code_ape_niveau2",
       "code_ape_niveau3",
-      "code_naf"
+      "code_naf",
+      "libelle_naf",
+      "libelle_ape",
+      "departement"
       )
   }
   if (siren >= 1) {
