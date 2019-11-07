@@ -374,11 +374,12 @@ factor_request <- function(
   ) {
   # Util functions
 
-  make_query <- function(keyword, x) {
+  make_query <- function(x) {
     if (any(x != "")) {
       return(paste0(
-          '{"$', keyword, '":{',
-          paste0(x[x != ""], collapse = ", "), "}}"
+          '{"$match":{
+             "$and":[{',
+          paste0(x[x != ""], collapse = "}, {"), "}]}}"
           ))
     } else {
       return("")
@@ -409,7 +410,7 @@ factor_request <- function(
 
   # Sample
   if (is.null(subsample)) {
-    sample_req <- ""
+    sample_req <- '{"$sort": {"value.random_order": -1}}'
   } else {
     sample_req <- paste0(
       '{"$sort": {"value.random_order": -1}}, {"$limit" :', subsample, "}"
@@ -470,7 +471,6 @@ if (is.null(date_sup)) {
 }
 
 match_req <- make_query(
-  "match",
   c(
     match_id,
     match_siren,
