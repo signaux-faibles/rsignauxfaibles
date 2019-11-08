@@ -568,6 +568,9 @@ get_scores <- function(
          },
          "alert" : {
            "$first" : "$alert"
+         },
+         "score_diff" : {
+           "$first" : "$score_diff"
          }
        }
      },
