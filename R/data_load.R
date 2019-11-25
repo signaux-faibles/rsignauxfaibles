@@ -583,7 +583,8 @@ get_fields <- function(
   if (siren >= 1) {
     fields <- c(
       fields,
-      "age"
+      "age_entreprise",
+      "region"
       )
   }
 
