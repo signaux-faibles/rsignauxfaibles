@@ -85,7 +85,7 @@ load_hist_data.sf_task <- function(
   if (nrow(hist_data) > 1) {
     logger::log_info("Les donnees ont ete chargees avec succes.")
   } else {
-    log_warn("Aucune donnee n'a ete chargee. Veuillez verifier la requete.")
+    logger::log_warn("Aucune donnee n'a ete chargee. Veuillez verifier la requete.")
   }
   check_overwrites(task, "hist_data")
   task[["hist_data"]] <- hist_data
@@ -323,6 +323,12 @@ connect_to_database <- function(
     stats::setNames(champs_manquants)
   table_wholesample <- table_wholesample %>%
     mutate_(.dots = remplacement)
+  }
+
+  # Régions comme facteurs
+  if ("region" %in% fields){
+    table_wholesample <- table_wholesample %>%
+      mutate(region = factor(region))
   }
 
 
