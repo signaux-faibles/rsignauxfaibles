@@ -479,11 +479,11 @@ if (is.null(date_sup)) {
 match_req <- make_query(
   c(
     match_id,
-    match_siren,
     match_date_1,
     match_date_2,
-    match_APE,
-    match_eff
+    match_eff,
+    match_siren,
+    match_APE
   )
 )
 
