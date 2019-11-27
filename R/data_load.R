@@ -232,7 +232,10 @@ connect_to_database <- function(
       montant_part_patronale_past_12 = 0,
       montant_part_ouvriere_past_12  = 0,
       apart_heures_consommees        = 0,
-      apart_heures_autorisees        = 0
+      apart_heures_autorisees        = 0,
+      tag_default                    = FALSE,
+      tag_failure                    = FALSE,
+      tag_outcome                    = FALSE
     )
   }
 
