@@ -72,7 +72,8 @@ train.sf_task <- function(
     learn_rate = parameters[["learn_rate"]],
     max_depth = parameters[["max_depth"]],
     ntrees = parameters[["ntrees"]],
-    min_child_weight = parameters[["min_child_weight"]]
+    min_child_weight = parameters[["min_child_weight"]],
+    seed = seed
     )
 
   logger::log_info("Model trained_successfully")
