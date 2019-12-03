@@ -104,7 +104,7 @@ train.cv_task  <- function(
   task,
   outcome = "outcome",
   parameters = NULL,
-  seed = 123,
+  seed = 0,
   tracker = task[["tracker"]],
   train_fun = train_xgboost,
   ...
@@ -162,11 +162,11 @@ train_xgboost <- function(
   #
   # Train the model
   #
+  set.seed(seed)
   model <- xgboost::xgboost(
     data = train_data,
     label = outcome,
     params = list(
-      seed = seed,
       eta = learn_rate,
       max_depth = 4,
       min_child_weight = min_child_weight,
