@@ -20,7 +20,6 @@ replace_na <- function(
   replacements_by_column,
   fail_if_column_missing = TRUE
 ) {
-
   requireNamespace("purrr")
   if (any(!names(replacements_by_column) %in% colnames(frame)) &&
     fail_if_column_missing &&

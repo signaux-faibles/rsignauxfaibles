@@ -646,7 +646,7 @@ get_fields <- function(
     fields <- c(
       fields,
       "effectif",
-      "effectif_entreprise"
+      "effectif_ent"
       )
   }
   if (effectif >= 2) {

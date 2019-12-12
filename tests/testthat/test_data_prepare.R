@@ -25,7 +25,8 @@ test_that("Prepare task works as expected", {
   prepared_task <- prepare(
     test_task,
     prepare_train_function = fake_prepare_train_frame,
-    prepare_test_function = fake_prepare_test_frame
+    prepare_test_function = fake_prepare_test_frame,
+    outcome_field = "target"
   )
 
   expect_true(all(
@@ -66,4 +67,15 @@ test_that("Training_fields works as expected", {
   )
   expect_equal(ncol(prepared_task[["prepared_validation_data"]]), 1)
   expect_equal(ncol(prepared_task[["prepared_train_data"]]), 1)
+})
+
+
+test_that("transformation_map_create and apply work as expected", {
+   test_task <- get_test_task()
+   test_data  <- test_task[["validation_data"]] %>%
+     select(score, target)
+   transformation_map <- transformation_map_create(test_data)
+   res_data <- transformation_map_apply(transformation_map, test_data)
+   expect_equal(res_data[[1]], transformation_map[[1]][["x.t"]])
+   expect_equal(res_data[[2]], transformation_map[[2]][["x.t"]])
 })

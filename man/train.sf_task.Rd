@@ -5,7 +5,7 @@
 \title{Entraînement de l'algorithme}
 \usage{
 \method{train}{sf_task}(task, outcome = "outcome", parameters = NULL,
-  seed = 123, tracker = task[["tracker"]], train_fun = train_xgboost,
+  seed = 123, tracker = task[["tracker"]], train_fun = "xgboost",
   ...)
 }
 \arguments{
@@ -23,7 +23,8 @@ reproductibles.}
 
 \item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
 
-\item{train_fun}{\code{training_data} \cr Training_function}
+\item{train_fun}{\code{training_data} \cr Training_function, or "xgboost" or
+"linear"}
 
 \item{...}{Not used}
 }

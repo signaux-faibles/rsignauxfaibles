@@ -10,7 +10,8 @@
 #' défaut sont sélectionnés.
 #' @param seed `integer()`\cr Graîne pour que les calculs aléatoires soient
 #' reproductibles.
-#' @param train_fun `training_data` \cr Training_function
+#' @param train_fun `training_data` \cr Training_function, or "xgboost" or
+#' "linear"
 #' @param outcome `character()` \cr Nom de la colonne dans laquelle on trouve
 #' l'objectif d'apprentissage.
 #'
@@ -26,26 +27,40 @@ train.sf_task <- function(
   parameters = NULL,
   seed = 0,
   tracker = task[["tracker"]],
-  train_fun = train_xgboost,
+  train_fun = "xgboost",
   ...
   ){
+
+  admissible_train_types <- c("xgboost", "linear")
+  if (is.character(train_fun)){
+    assertthat::assert_that(
+      length(train_fun) == 1 &&
+      train_fun %in% admissible_train_types
+    )
+    train_fun <- switch(
+      train_fun,
+      xgboost = train_xgboost,
+      linear = train_linear
+      )
+  }
 
   assertthat::assert_that(
     "prepared_train_data" %in% names(task),
     msg = "task does not contain prepared train data."
     )
 
-  if (is.null(parameters) &&
-    (!"model_parameters" %in% names(task))){
-    parameters  <- list(
-      learn_rate = 0.1,
-      max_depth = 4,
-      ntrees = 60,
-      min_child_weight = 1
-      )
+  # if (is.null(parameters) &&
+  #   (!"model_parameters" %in% names(task))){
+  #   parameters  <- list(
+  #     learn_rate = 0.1,
+  #     max_depth = 4,
+  #     ntrees = 60,
+  #     min_child_weight = 1
+  #     )
 
-    task[["model_parameters"]] <- parameters
-  } else if (is.null(parameters)){
+  #   task[["model_parameters"]] <- parameters
+  # } else
+  if (is.null(parameters)){
     parameters <- task[["model_parameters"]]
   }
 
@@ -53,14 +68,6 @@ train.sf_task <- function(
     is.list(parameters)
     )
 
-  assertthat::assert_that(
-    all(c("learn_rate", "max_depth", "ntrees", "min_child_weight") %in%
-      names(parameters)),
-    msg = paste("Following parameters are missing: ",
-      dplyr::setdiff(c("learn_rate", "max_depth", "ntrees", "min_child_weight"),
-      names(parameters)),
-      sep = ", ")
-    )
 
   set_verbose_level(task)
 
@@ -106,7 +113,7 @@ train.cv_task  <- function(
   parameters = NULL,
   seed = 0,
   tracker = task[["tracker"]],
-  train_fun = train_xgboost,
+  train_fun = "xgboost",
   ...
   ){
 
@@ -136,13 +143,8 @@ train.cv_task  <- function(
 #' @param validation_data `H2OFrame` \cr Données d'évaluation, sous la forme d'un H2OFrame
 #' @param outcome `character(1)` \cr Nom de la variable qui sert de cible
 #'   d'apprentissage
-#' @param learn_rate `numeric(1)` \cr
-#' @param max_depth `integer(1)` \cr  Specify the maximum tree depth. Higher
-#'   values will make the model more complex and can lead to overfitting.
-#'   Setting this value to 0 specifies no limit.
-#' @param ntrees `integer(1)` \cr Specify the number of trees to build.
-#' @param min_child_weight `integer(1)` \cr Specify the minimum number of
-#' observations for a leaf.
+#' @param parameters `list()` \cr list of parameters with fields "learn_rate",
+#' "max_depth", "ntrees", "min_child_weight".
 #' @param seed `integer(1)` \cr Graine aléatoire pour que les opérations
 #'   aléatoires soient reproductibles.
 #'
@@ -159,6 +161,20 @@ train_xgboost <- function(
   seed
   ) {
 
+  assertthat::assert_that(
+    all(c("learn_rate", "max_depth", "ntrees", "min_child_weight") %in%
+      names(parameters)),
+    msg = paste("Following parameters are missing: ",
+      dplyr::setdiff(c("learn_rate", "max_depth", "ntrees", "min_child_weight"),
+      names(parameters)),
+      sep = ", ")
+    )
+
+  learn_rate <- parameters[["learn_rate"]]
+  max_depth <- parameters[["max_depth"]]
+  ntrees <- parameters[["ntrees"]]
+  min_child_weight <- parameters[["min_child_weight"]]
+
   #
   # Train the model
   #
@@ -168,11 +184,43 @@ train_xgboost <- function(
     label = outcome,
     params = list(
       eta = learn_rate,
-      max_depth = 4,
+      max_depth = max_depth,
       min_child_weight = min_child_weight,
       objective = "binary:logistic"
       ),
     nrounds = ntrees
+  )
+  return(model)
+}
+
+#' Train a linear model
+#'
+#' Trains a linear regularized model.
+#'
+#' @param train_data `data.frame` \cr données d'entraînement, sous la forme d'un H2OFrame
+#' @param validation_data `H2OFrame` \cr Données d'évaluation, sous la forme d'un H2OFrame
+#' @param outcome `character(1)` \cr Nom de la variable qui sert de cible
+#'   d'apprentissage
+#' @param parameters `list()` \cr Paramètres de la régression logistique.
+#' @param seed `integer(1)` \cr Graine aléatoire pour que les opérations
+#'   aléatoires soient reproductibles.
+#'
+#' @export
+train_linear <- function(
+  train_data,
+  outcome,
+  validation_data = NULL,
+  parameters,
+  seed = 123
+  ) {
+
+  #
+  # Train the model
+  #
+  model <- glmnet::glmnet(
+    x = train_data,
+    y = outcome,
+    family = "binomial"
   )
   return(model)
 }

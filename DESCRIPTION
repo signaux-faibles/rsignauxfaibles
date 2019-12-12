@@ -29,17 +29,20 @@ Imports:
     xgboost,
     rlang
 Suggests:
+    corrplot,
     jsonlite,
     ggplot2,
     Hmisc,
     lhs,
     mlr,
     mlrMBO,
+    moments,
     ParamHelpers,
     rgenoud,
     smoof,
     rmarkdown,
     DiceKriging,
-    testthat (>= 2.1.0)
+    testthat (>= 2.1.0),
+    xgboostExplainer
 RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE)

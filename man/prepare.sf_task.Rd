@@ -6,7 +6,8 @@
 \usage{
 \method{prepare}{sf_task}(task, data_names = c("train_data",
   "validation_data", "test_data", "new_data"),
-  prepare_train_function = NULL, prepare_test_function = NULL,
+  prepare_train_function = "xgboost",
+  prepare_test_function = "xgboost", outcome_field = "outcome",
   tracker = NULL, preprocessing_strategy = NULL,
   training_fields = get_fields(training = TRUE), ...)
 }
@@ -19,12 +20,16 @@ Doivent-être des noms de champs valides de \code{task}.}
 \item{prepare_train_function}{:: (data_to_prepare :: data.frame) -> list(data :: data.frame,
 preparation_map :: any) \cr
 A function that prepares the training data and gives a preparation_map to be applied for
-further data preparation}
+further data preparation.
+Can be equal to "xgboost" or "linear" for quick reference to the right
+preparation function.}
 
 \item{prepare_test_function}{:: (data_to_prepare :: data.frame,
 preparation_map :: any) -> data.frame \cr
 A function that uses the preparation map to prepare further data (test,
-validation data etc.)}
+validation data etc.)
+Can be equal to "xgboost" or "linear" for quick reference to the right
+preparation function.}
 
 \item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
 
@@ -36,7 +41,7 @@ pour le logging de l'expérience.}
 conservées pour l'entraînement, après toutes les phases de préparation,
 notamment le target encoding.}
 
-\item{...}{Not used}
+\item{...}{Unused.}
 }
 \value{
 \code{[sf_task]} \cr
