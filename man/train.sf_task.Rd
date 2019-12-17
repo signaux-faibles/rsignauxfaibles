@@ -5,8 +5,7 @@
 \title{Entraînement de l'algorithme}
 \usage{
 \method{train}{sf_task}(task, outcome = "outcome", parameters = NULL,
-  seed = 123, tracker = task[["tracker"]], train_fun = "xgboost",
-  ...)
+  seed = 0, tracker = task[["tracker"]], train_fun = "xgboost", ...)
 }
 \arguments{
 \item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}

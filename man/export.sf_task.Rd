@@ -9,7 +9,7 @@
   export_fields = NULL, csv_export_path = NULL,
   database = task[["database"]], mongodb_uri = task[["mongodb_uri"]],
   collection_features = task[["collection"]],
-  collection_scores = "Scores", ...)
+  collection_scores = "Scores", algo_name = "algo", ...)
 }
 \arguments{
 \item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}

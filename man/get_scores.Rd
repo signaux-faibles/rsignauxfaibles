@@ -5,7 +5,7 @@
 \title{Récupération des scores}
 \usage{
 get_scores(database = "test_signauxfaibles", collection = "Scores",
-  mongodb_uri, algo = "algo", method = "last", batchs = NULL,
+  mongodb_uri, method = "last", algo = NULL, batchs = NULL,
   sirets = NULL)
 }
 \arguments{
@@ -17,10 +17,10 @@ exporter. Par défaut, celle stockée dans \code{task}.}
 
 \item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri format.}
 
-\item{algo}{\code{character(1)}\cr Algorithm from which to take the score. Defaults to "algo".}
-
 \item{method}{\code{character(1)}\cr Ou bien "first" ou bien "last". Se référer
 à la section Details.}
+
+\item{algo}{\code{character(1)}\cr Algorithm from which to take the score. Defaults to "algo".}
 
 \item{batchs}{\code{character()} \cr Vecteur de batchs à requêter}
 

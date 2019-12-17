@@ -7,7 +7,7 @@
 \usage{
 \method{load_hist_data}{sf_task}(task, batch,
   database = task[["database"]], collection = task[["collection"]],
-  mongodb_uri = task[["mongodb_uri"]], subsample = 200000L,
+  mongodb_uri = task[["mongodb_uri"]], subsample = NULL,
   fields = get_fields(training = FALSE),
   date_inf = as.Date("2015-01-01"), date_sup = as.Date("2017-01-01"),
   min_effectif = 10L, siren = NULL, code_ape = NULL, ...)

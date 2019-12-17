@@ -2,9 +2,10 @@
 % Please edit documentation in R/data_prepare.R
 \name{prepare_train_frame_linear}
 \alias{prepare_train_frame_linear}
-\title{Préparation des données pour l'entraînement}
+\title{Préparation des données pour l'entraînement d'un modèle linéaire}
 \usage{
-prepare_train_frame_linear(data_to_prepare, training_fields, outcome_field)
+prepare_train_frame_linear(data_to_prepare, training_fields, outcome_field,
+  target_encode_fields)
 }
 \arguments{
 \item{data_to_prepare}{\code{data.frame()} \cr Données à préparer}
@@ -13,8 +14,8 @@ prepare_train_frame_linear(data_to_prepare, training_fields, outcome_field)
 conservées pour l'entraînement, après toutes les phases de préparation,
 notamment le target encoding.}
 
-\item{shape_function}{\code{function(data.frame => ?)} \cr
-Fonction qui met en forme les données pour l'apprentissage.}
+\item{target_encode_fields}{\code{character()} \cr Nom des champs sur lesquels
+effectuer du target encoding.}
 }
 \value{
 \code{list(2)} \cr

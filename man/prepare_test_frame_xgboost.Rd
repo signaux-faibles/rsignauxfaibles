@@ -2,7 +2,7 @@
 % Please edit documentation in R/data_prepare.R
 \name{prepare_test_frame_xgboost}
 \alias{prepare_test_frame_xgboost}
-\title{Préparation des données pour la prédiction}
+\title{Préparation des données pour la prédiction d'un modèle xgboost}
 \usage{
 prepare_test_frame_xgboost(data_to_prepare, preparation_map,
   training_fields, outcome_field)
@@ -23,7 +23,7 @@ Une liste avec deux champs:
 }
 }
 \description{
-Inclut la conversion en H2O, et le target encoding.
+Inclut le target encoding.
 La map pour le target encoding peut être sauvegardé, afin de permettre de
 l'appliquer à de nouvelles données.
 Le target encoding se fait avec du bruit pour éviter le surapprentissage.

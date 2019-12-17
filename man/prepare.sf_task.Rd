@@ -9,7 +9,8 @@
   prepare_train_function = "xgboost",
   prepare_test_function = "xgboost", outcome_field = "outcome",
   tracker = NULL, preprocessing_strategy = NULL,
-  training_fields = get_fields(training = TRUE), ...)
+  training_fields = get_fields(training = TRUE),
+  target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3"), ...)
 }
 \arguments{
 \item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
@@ -17,10 +18,10 @@
 \item{data_names}{\code{character()} \cr Vecteur de noms des données à préparer.
 Doivent-être des noms de champs valides de \code{task}.}
 
-\item{prepare_train_function}{:: (data_to_prepare :: data.frame) -> list(data :: data.frame,
-preparation_map :: any) \cr
-A function that prepares the training data and gives a preparation_map to be applied for
-further data preparation.
+\item{prepare_train_function}{:: (data_to_prepare :: data.frame) ->
+list(data :: data.frame, preparation_map :: any) \cr
+A function that prepares the training data and gives a preparation_map to
+be applied for further data preparation.
 Can be equal to "xgboost" or "linear" for quick reference to the right
 preparation function.}
 

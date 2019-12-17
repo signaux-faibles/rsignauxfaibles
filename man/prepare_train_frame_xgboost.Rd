@@ -5,7 +5,7 @@
 \title{Préparation des données pour l'entraînement}
 \usage{
 prepare_train_frame_xgboost(data_to_prepare, training_fields,
-  outcome_field)
+  outcome_field, target_encode_fields)
 }
 \arguments{
 \item{data_to_prepare}{\code{data.frame()} \cr Données à préparer}

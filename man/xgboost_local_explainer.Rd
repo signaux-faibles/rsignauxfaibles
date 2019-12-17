@@ -4,25 +4,23 @@
 \alias{xgboost_local_explainer}
 \title{Explication locale d'une prédiction}
 \usage{
-xgboost_local_explainer(task, data_name = "validation_data",
-  siret = NULL, aggregation_matrix = NULL, group_name = NULL)
+xgboost_local_explainer(task, aggregation_matrix, group_name,
+  data_to_explain)
 }
 \arguments{
 \item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
 
-\item{data_name}{\code{character()} \cr
-Nom des données à valider.}
-
-\item{siret}{\code{character()} \cr
-Vecteur de sirets pour lesquels une explication est requise.}
-
 \item{aggregation_matrix}{\code{dataframe()} \cr
 Table de correspondance qui possède une colonne "variable" et une colonne
 correspondant au paramètre \code{group_name}. Si égal à NULL (défaut), alors les variables ne
-sont pas aggrégées.}
+sont pas aggrégées. Utiliser \code{read_aggregation_matrix()} pour lire la
+table de corrsepondance.}
 
 \item{group_name}{\code{character()} \cr Nom de la colonne de
-\code{aggregation_matrix} qui sert pour l'aggregation.}
+\code{aggregation_matrix} qui sert pour l'agrégation.}
+
+\item{siret}{\code{character()} \cr
+Vecteur de sirets pour lesquels une explication est requise.}
 }
 \description{
 Explication locale d'une prédiction

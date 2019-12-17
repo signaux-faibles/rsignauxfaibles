@@ -14,10 +14,11 @@ Table d'importance comme produite en sortie de xgb.importance.}
 \item{aggregation_matrix}{\code{dataframe()} \cr
 Table de correspondance qui possède une colonne "variable" et une colonne
 correspondant au paramètre \code{group_name}. Si égal à NULL (défaut), alors les variables ne
-sont pas aggrégées.}
+sont pas aggrégées. Utiliser \code{read_aggregation_matrix()} pour lire la
+table de corrsepondance.}
 
 \item{group_name}{\code{character()} \cr Nom de la colonne de
-\code{aggregation_matrix} qui sert pour l'aggregation.}
+\code{aggregation_matrix} qui sert pour l'agrégation.}
 }
 \description{
 Les variables absentes de la matrice d'agrégation sont automatiquement

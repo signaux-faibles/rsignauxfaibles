@@ -5,7 +5,7 @@
 \title{Explains a single prediction}
 \usage{
 \method{explain}{sf_task}(task, type, aggregation_matrix = NULL,
-  group_name = NULL, ...)
+  group_name = NULL, data_to_explain = NULL, ...)
 }
 \arguments{
 \item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
@@ -18,6 +18,9 @@
 \item{group_name}{\code{character(1)} \cr Le nom de la colonne à utiliser dans
 le data.frame \code{aggregation_matrix}. Obligatoire si aggregation_matrix est
 différent de NULL.}
+
+\item{data_to_explain}{\code{data.frame()} \cr Si type = "local" uniquement, les
+données (lignes de "hist_data" ou "new_data") à expliquer.}
 
 \item{...}{Not used}
 }
