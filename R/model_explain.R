@@ -7,25 +7,26 @@
 #' @param group_name `character(1)` \cr Le nom de la colonne à utiliser dans
 #'   le data.frame `aggregation_matrix`. Obligatoire si aggregation_matrix est
 #'   différent de NULL.
-#' @param siret `character()` \cr Si type = "local", Le ou les sirets sur
-#' lesquels effectuer l'explication locale. Pas d'effet si non "local".
+#' @param data_to_explain `data.frame()` \cr Si type = "local" uniquement, les
+#'   données (lignes de "hist_data" ou "new_data") à expliquer.
 #'
 #' @export
-explain.sf_task <- function(task, type,  aggregation_matrix = NULL, group_name = NULL, siret = NULL, ...){
+explain.sf_task <- function(
+  task,
+  type,
+  aggregation_matrix = NULL,
+  group_name = NULL,
+  data_to_explain = NULL,
+  ...
+) {
   assertthat::assert_that(type %in% c("global", "local"))
 
   set_verbose_level(task)
 
   explainer <- switch(type,
-    global = xgboost_importance,
-    local = xgboost_local_explainer
+    "global" = xgboost_global_explainer,
+    "local" = xgboost_local_explainer
   )
-
-  if (type == "local") {
-    data_to_explain <- fetch_sirets(task, sirets)
-  } else {
-    data_to_explain <- NULL
-  }
 
   logger::log_info("Predictions are being explained")
   res <- explainer(
@@ -40,17 +41,6 @@ explain.sf_task <- function(task, type,  aggregation_matrix = NULL, group_name =
   return(res)
 }
 
-fetch_sirets <- function(task, sirets, periodes){
-  task[["new_data"]] <- task[["hist_data"]] %>%
-    dplyr::filter(siret = dplyr::one_of(sirets)) %>%
-    dplyr::group_by(siret) %>%
-    dplyr::arrange(desc(periode)) %>%
-    dplyr::filter(row_number() == 1) %>%
-    dplyr::ungroup()
-  task <- prepare(task, data_names = "new_data")
-  return(task[["prepared_new_data"]])
-}
-
 #' Explains global variable importance for an xgboost model
 #'
 #' Importance des variables d'un modèle xgboost, avec la possibilité
@@ -60,13 +50,19 @@ fetch_sirets <- function(task, sirets, periodes){
 #' @param aggregation_matrix `dataframe()` \cr
 #'   Table de correspondance qui possède une colonne "variable" et une colonne
 #'   correspondant au paramètre `group_name`. Si égal à NULL (défaut), alors les variables ne
-#'   sont pas aggrégées.
+#'   sont pas aggrégées. Utiliser `read_aggregation_matrix()` pour lire la
+#'   table de corrsepondance.
 #' @param group_name `character()` \cr Nom de la colonne de
-#'   `aggregation_matrix` qui sert pour l'aggregation.
+#'   `aggregation_matrix` qui sert pour l'agrégation.
 #'
-xgboost_importance <- function(task, aggregation_matrix, group_name, ...){
+xgboost_global_explainer <- function(
+  task,
+  aggregation_matrix,
+  group_name,
+  ...
+) {
   imp <- xgboost::xgb.importance(task[["features"]], task[["model"]])
-  if (!is.null(aggregation_matrix)){
+  if (!is.null(aggregation_matrix)) {
     imp <- aggregate_importance_frame(imp, aggregation_matrix, group_name)
   }
   return(imp)
@@ -75,7 +71,7 @@ xgboost_importance <- function(task, aggregation_matrix, group_name, ...){
 #' Explication locale d'une prédiction
 #'
 #' @inheritParams generic_task
-#' @inheritParams xgboost_importance
+#' @inheritParams xgboost_global_explainer
 #' @param siret `character()` \cr
 #'   Vecteur de sirets pour lesquels une explication est requise.
 xgboost_local_explainer <- function(
@@ -83,22 +79,27 @@ xgboost_local_explainer <- function(
   aggregation_matrix,
   group_name,
   data_to_explain
-  ){
+  ) {
 
-  if (requireNamespace("xgboostExplainer")){
+  if (requireNamespace("xgboostExplainer")) {
+
     explainer <- xgboostExplainer::buildExplainer(
       xgb.model = task[["model"]],
-      trainingData = task[["prepared_train_data"]],
+      trainingData = xgboost::xgb.DMatrix(task[["prepared_train_data"]]),
       type = "binary",
       base_score = 0.5,
       trees_idx = NULL
     )
+    explain_task <- task
+    explain_task[["new_data"]] <- data_to_explain
+    explain_task <- prepare(explain_task, data_names = "new_data")
+    data_to_explain <- explain_task[["prepared_new_data"]]
     pred_breakdown <- xgboostExplainer::explainPredictions(
       xgb.model = task[["model"]],
       explainer = explainer,
       data = data_to_explain
     )
-    if (!is.null(aggregation_matrix)){
+    if (!is.null(aggregation_matrix)) {
       pred_breakdown <- aggregate_local_explainer(
         pred_breakdown,
         aggregation_matrix,
@@ -116,13 +117,12 @@ xgboost_local_explainer <- function(
 #'
 #' @param frame `data.frame()` \cr
 #'   Table d'importance comme produite en sortie de xgb.importance.
-#' @inheritParams xgboost_importance
+#' @inheritParams xgboost_global_explainer
 aggregate_importance_frame <- function(
   frame,
   aggregation_matrix,
   group_name
-){
-
+) {
     merged <- dplyr::left_join(
       frame,
       aggregation_matrix,
@@ -135,7 +135,7 @@ aggregate_importance_frame <- function(
         c("Gain", "Cover", "Frequency"),
         sum
       )
-    colnames(merged)[1] = "Feature"
+    colnames(merged)[1]  <- "Feature"
     return(merged)
 }
 
@@ -145,12 +145,12 @@ aggregate_importance_frame <- function(
 #'
 #' @inheritParams aggregate_importance_frame
 aggregate_local_explainer <- function(
-  frame,
+  dt_frame,
   aggregation_matrix,
   group_name
-){
-  t_frame <- as.data.frame(t(frame))
-  colnames(t_frame) <- paste0("Value", 1:nrow(frame))
+) {
+  t_frame <- as.data.frame(t(dt_frame))
+  colnames(t_frame) <- paste0("Value", seq_len(nrow(dt_frame)))
   t_frame <- t_frame %>%
     dplyr::mutate(Feature = rownames(t_frame))
 
@@ -174,12 +174,12 @@ aggregate_local_explainer <- function(
       dplyr::vars(dplyr::starts_with("Value")),
       sum
     )
-  colnames(merged)[1] = "Feature"
+  colnames(merged)[1] <- "Feature"
   intercept_position <- which(merged$Feature == "intercept")
-  new_order <- c(
+  new_order <- unique(c(
     intercept_position,
-    order(abs(merged$Value1[-intercept_position]))
-  )
+    order(abs(merged$Value1))
+  ))
   merged <- merged[new_order, ]
   aggregated_frame <- data.table::data.table(t(as.matrix(
     merged %>% dplyr::select(dplyr::starts_with("Value"))

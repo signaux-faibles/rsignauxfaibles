@@ -1,57 +1,44 @@
 context("Test explain function")
 
+test_task <- get_test_task_2()
 
-test_task <- get_test_task()
-train <- test_task[["train_data"]]
-validation <- test_task[["validation_data"]]
+test_task <- train(test_task)
+test_task <- predict(test_task, data_names = "test_data")
 
-Xtrain <- train
-Xtrain$score <- NULL
-ytrain <- train$target
-
-Xtest <- validation
-Xtest$score <-NULL
-ytest <- validation$target
-xgb_train_data <- xgboost::xgb.DMatrix(data.matrix(Xtrain), label = ytrain, missing = NA)
-xgb_test_data <- xgboost::xgb.DMatrix(data.matrix(Xtest), missing = NA)
-
-xgb_model <- xgboost::xgboost(
-  data = xgb_train_data,
-  nrounds = 3
-)
-xgb_preds <- predict(xgb_model, xgb_test_data)
-
-test_task[["prepared_train_data"]] <- xgb_train_data
-test_task[["prepared_validation_data"]] <- xgb_test_data
-test_task[["model"]] <- xgb_model
-test_task[["features"]] <- c("siret", "periode", "score")
+test_aggregation_matrix <- data.frame(
+  variable = c(
+    "effectif",
+    "excedent_brut_d_exploitation",
+    "taux_marge",
+    "montant_part_patronale"
+  ),
+   group = c("effectif", "financier", "financier", "urssaf"),
+   stringsAsFactors = FALSE
+   )
 
 test_that("model_explain works as expected", {
-  without_aggregation <- xgboost_importance(test_task, NULL, NULL)
-  with_aggregation <- xgboost_importance(
+  without_aggregation <- explain(test_task, type = "global")
+
+  with_aggregation <- explain(
     test_task,
-    data.frame(
-      variable = c("siret", "periode", "score"),
-      source = c("a", "a", "a")
-      ),
-    group_name = "source"
+    type = "global",
+    aggregation_matrix = test_aggregation_matrix,
+    group_name = "group"
   )
 })
 
 test_that("xgboost_explainer works as expected", {
-  without_aggregation <- xgboost_local_explainer(
+  without_aggregation <- explain(
     test_task,
-    aggregation_matrix = NULL,
-    data_to_explain = test_task[["prepared_validation_data"]]
+    type = "local",
+    data_to_explain = test_task[["validation_data"]]
     )
 
-  with_aggregation <- xgboost_local_explainer(
+  with_aggregation <- explain(
     test_task,
-    aggregation_matrix = dplyr::data_frame(
-      variable = c("siret", "periode", "target"),
-      source = c("a", "a", "a")
-      ),
-    group_name = "source",
-    data_to_explain = test_task[["prepared_validation_data"]]
+    type = "local",
+    aggregation_matrix = test_aggregation_matrix,
+    group_name = "group",
+    data_to_explain = test_task[["validation_data"]]
     )
 })

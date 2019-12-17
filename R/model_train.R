@@ -49,17 +49,6 @@ train.sf_task <- function(
     msg = "task does not contain prepared train data."
     )
 
-  # if (is.null(parameters) &&
-  #   (!"model_parameters" %in% names(task))){
-  #   parameters  <- list(
-  #     learn_rate = 0.1,
-  #     max_depth = 4,
-  #     ntrees = 60,
-  #     min_child_weight = 1
-  #     )
-
-  #   task[["model_parameters"]] <- parameters
-  # } else
   if (is.null(parameters)){
     parameters <- task[["model_parameters"]]
   }
@@ -68,14 +57,22 @@ train.sf_task <- function(
     is.list(parameters)
     )
 
-
   set_verbose_level(task)
 
   logger::log_info("Model is being trained.")
 
+  assertthat::assert_that(
+    all(c("learn_rate", "max_depth", "ntrees", "min_child_weight") %in%
+      names(parameters)),
+    msg = paste("Following parameters are missing: ",
+      dplyr::setdiff(c("learn_rate", "max_depth", "ntrees", "min_child_weight"),
+        names(parameters)),
+      sep = ", ")
+  )
+
   model <- train_fun(
     train_data = task[["prepared_train_data"]],
-    outcome = task[["train_data"]][, outcome],
+    outcome = task[["outcome_train_data"]],
     learn_rate = parameters[["learn_rate"]],
     max_depth = parameters[["max_depth"]],
     ntrees = parameters[["ntrees"]],
@@ -160,20 +157,6 @@ train_xgboost <- function(
   min_child_weight = 1,
   seed
   ) {
-
-  assertthat::assert_that(
-    all(c("learn_rate", "max_depth", "ntrees", "min_child_weight") %in%
-      names(parameters)),
-    msg = paste("Following parameters are missing: ",
-      dplyr::setdiff(c("learn_rate", "max_depth", "ntrees", "min_child_weight"),
-      names(parameters)),
-      sep = ", ")
-    )
-
-  learn_rate <- parameters[["learn_rate"]]
-  max_depth <- parameters[["max_depth"]]
-  ntrees <- parameters[["ntrees"]]
-  min_child_weight <- parameters[["min_child_weight"]]
 
   #
   # Train the model
