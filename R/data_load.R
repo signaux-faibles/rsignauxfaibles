@@ -61,6 +61,7 @@ load_hist_data.sf_task <- function(
   min_effectif = 10L,
   siren = NULL,
   code_ape = NULL,
+  debug = FALSE,
   ...
   ){
   set_verbose_level(task)
@@ -79,7 +80,8 @@ load_hist_data.sf_task <- function(
     fields = fields,
     code_ape = NULL,
     subsample = subsample,
-    verbose = attr(task, "verbose")
+    verbose = attr(task, "verbose"),
+    debug = debug
   )
 
   if (nrow(hist_data) > 1) {
@@ -120,6 +122,7 @@ load_new_data.sf_task <- function(
   fields = get_fields(training = FALSE),
   min_effectif = 10L,
   rollback_months = 1L,
+  debug = FALSE,
   ...
   ){
 
@@ -134,7 +137,9 @@ load_new_data.sf_task <- function(
     date_inf = min(periods) %m-% months(rollback_months),
     date_sup = max(periods) %m+% months(1),
     min_effectif = min_effectif,
-    fields = fields
+    fields = fields,
+    verbose = attr(task, "verbose"),
+    debug = debug
   )
 
   if ("periode" %in% fields &&
@@ -192,7 +197,11 @@ load_new_data.sf_task <- function(
 #'   montant_part_patronale_past_12 = 0,
 #'   montant_part_ouvriere_past_12  = 0,
 #'   apart_heures_consommees        = 0,
-#'   apart_heures_autorisees        = 0
+#'   apart_heures_autorisees        = 0,
+#'   apart_entreprise               = 0,
+#'   tag_default                    = FALSE,
+#'   tag_failure                    = FALSE,
+#'   tag_outcome                    = FALSE
 #'   )
 #'
 #' @return `data.frame()`
@@ -210,8 +219,9 @@ connect_to_database <- function(
   fields = NULL,
   code_ape = NULL,
   subsample = NULL,
-  verbose = TRUE,
-  replace_missing = NULL
+  verbose,
+  replace_missing = NULL,
+  debug
   ) {
 
   if (is.null(replace_missing)){
@@ -233,6 +243,7 @@ connect_to_database <- function(
       montant_part_ouvriere_past_12  = 0,
       apart_heures_consommees        = 0,
       apart_heures_autorisees        = 0,
+      apart_entreprise               = 0,
       tag_default                    = FALSE,
       tag_failure                    = FALSE,
       tag_outcome                    = FALSE
@@ -255,6 +266,10 @@ connect_to_database <- function(
     code_ape,
     subsample
   )
+
+  if (debug){
+    cat(requete)
+  }
 
   assertthat::assert_that(
     is.null(fields) || all(c("periode", "siret") %in% fields)
@@ -302,17 +317,6 @@ connect_to_database <- function(
 
   logger::log_info(" Fini.")
 
-  # Champs par defaut lorsque absent.
-
-  if (any(names(replace_missing) %in% colnames(table_wholesample))){
-    logger::log_info("Filling missing values with default values")
-  }
-  table_wholesample <- table_wholesample %>%
-    replace_na(
-      replacements_by_column = replace_missing,
-      fail_if_column_missing = FALSE
-    )
-
   # Champs manquants
   champs_manquants <- fields[!fields %in% tbl_vars(table_wholesample)]
   if (length(champs_manquants) >= 1) {
@@ -327,6 +331,17 @@ connect_to_database <- function(
   table_wholesample <- table_wholesample %>%
     mutate_(.dots = remplacement)
   }
+
+  # Champs par defaut lorsque absent.
+  if (any(names(replace_missing) %in% colnames(table_wholesample))){
+    logger::log_info("Filling missing values with default values")
+  }
+  table_wholesample <- table_wholesample %>%
+    replace_na(
+      replacements_by_column = replace_missing,
+      fail_if_column_missing = FALSE
+    )
+
 
   # Régions comme facteurs
   if ("region" %in% fields){
@@ -396,7 +411,7 @@ factor_request <- function(
   }
 
   ## Construction de la requete ##
-  match_id <- paste0('"info.batch":"', batch, '"')
+  match_id <- paste0('"_id.batch":"', batch, '"')
 
   # Filtrage siren
 
@@ -407,7 +422,7 @@ factor_request <- function(
     for (i in seq_along(siren)) {
       match_siren <- c(
         match_siren,
-        paste0('{"info.siren":"', siren[i], '"}')
+        paste0('{"_id.siret": {"$regex": /^', siren[i], '/}}')
       )
     }
 
@@ -464,7 +479,7 @@ if (is.null(min_effectif)) {
 if (is.null(date_inf)) {
   match_date_1 <- ""
 } else {
-  match_date_1 <- paste0('"info.periode":{
+  match_date_1 <- paste0('"_id.periode":{
     "$gte": {"$date":"', date_inf, 'T00:00:00Z"}}')
 }
 
@@ -473,7 +488,7 @@ if (is.null(date_sup)) {
   match_date_2 <- ""
 } else {
   match_date_2 <- paste0(
-    '"info.periode":{"$lt": {"$date":"',
+    '"_id.periode":{"$lt": {"$date":"',
     date_sup,
     'T00:00:00Z"}}'
   )
