@@ -197,7 +197,11 @@ load_new_data.sf_task <- function(
 #'   montant_part_patronale_past_12 = 0,
 #'   montant_part_ouvriere_past_12  = 0,
 #'   apart_heures_consommees        = 0,
-#'   apart_heures_autorisees        = 0
+#'   apart_heures_autorisees        = 0,
+#'   apart_entreprise               = 0,
+#'   tag_default                    = FALSE,
+#'   tag_failure                    = FALSE,
+#'   tag_outcome                    = FALSE
 #'   )
 #'
 #' @return `data.frame()`
@@ -239,6 +243,7 @@ connect_to_database <- function(
       montant_part_ouvriere_past_12  = 0,
       apart_heures_consommees        = 0,
       apart_heures_autorisees        = 0,
+      apart_entreprise               = 0,
       tag_default                    = FALSE,
       tag_failure                    = FALSE,
       tag_outcome                    = FALSE
@@ -312,17 +317,6 @@ connect_to_database <- function(
 
   logger::log_info(" Fini.")
 
-  # Champs par defaut lorsque absent.
-
-  if (any(names(replace_missing) %in% colnames(table_wholesample))){
-    logger::log_info("Filling missing values with default values")
-  }
-  table_wholesample <- table_wholesample %>%
-    replace_na(
-      replacements_by_column = replace_missing,
-      fail_if_column_missing = FALSE
-    )
-
   # Champs manquants
   champs_manquants <- fields[!fields %in% tbl_vars(table_wholesample)]
   if (length(champs_manquants) >= 1) {
@@ -337,6 +331,17 @@ connect_to_database <- function(
   table_wholesample <- table_wholesample %>%
     mutate_(.dots = remplacement)
   }
+
+  # Champs par defaut lorsque absent.
+  if (any(names(replace_missing) %in% colnames(table_wholesample))){
+    logger::log_info("Filling missing values with default values")
+  }
+  table_wholesample <- table_wholesample %>%
+    replace_na(
+      replacements_by_column = replace_missing,
+      fail_if_column_missing = FALSE
+    )
+
 
   # Régions comme facteurs
   if ("region" %in% fields){
