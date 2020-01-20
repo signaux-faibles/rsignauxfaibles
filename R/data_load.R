@@ -387,7 +387,7 @@ factor_request <- function(
   }
 
   ## Construction de la requete ##
-  match_id <- paste0('"info.batch":"', batch, '"')
+  match_id <- paste0('"_id.batch":"', batch, '"')
 
   # Filtrage siren
 
@@ -398,7 +398,7 @@ factor_request <- function(
     for (i in seq_along(siren)) {
       match_siren <- c(
         match_siren,
-        paste0('{"info.siren":"', siren[i], '"}')
+        paste0('{"_id.siret": {"$regex": /^', siren[i], '/}}')
       )
     }
 
@@ -455,7 +455,7 @@ if (is.null(min_effectif)) {
 if (is.null(date_inf)) {
   match_date_1 <- ""
 } else {
-  match_date_1 <- paste0('"info.periode":{
+  match_date_1 <- paste0('"_id.periode":{
     "$gte": {"$date":"', date_inf, 'T00:00:00Z"}}')
 }
 
@@ -464,7 +464,7 @@ if (is.null(date_sup)) {
   match_date_2 <- ""
 } else {
   match_date_2 <- paste0(
-    '"info.periode":{"$lt": {"$date":"',
+    '"_id.periode":{"$lt": {"$date":"',
     date_sup,
     'T00:00:00Z"}}'
   )
