@@ -61,6 +61,7 @@ load_hist_data.sf_task <- function(
   min_effectif = 10L,
   siren = NULL,
   code_ape = NULL,
+  debug = FALSE,
   ...
   ){
   set_verbose_level(task)
@@ -79,7 +80,8 @@ load_hist_data.sf_task <- function(
     fields = fields,
     code_ape = NULL,
     subsample = subsample,
-    verbose = attr(task, "verbose")
+    verbose = attr(task, "verbose"),
+    debug = debug
   )
 
   if (nrow(hist_data) > 1) {
@@ -120,6 +122,7 @@ load_new_data.sf_task <- function(
   fields = get_fields(training = FALSE),
   min_effectif = 10L,
   rollback_months = 1L,
+  debug = FALSE,
   ...
   ){
 
@@ -134,7 +137,9 @@ load_new_data.sf_task <- function(
     date_inf = min(periods) %m-% months(rollback_months),
     date_sup = max(periods) %m+% months(1),
     min_effectif = min_effectif,
-    fields = fields
+    fields = fields,
+    verbose = attr(task, "verbose"),
+    debug = debug
   )
 
   if ("periode" %in% fields &&
@@ -210,8 +215,9 @@ connect_to_database <- function(
   fields = NULL,
   code_ape = NULL,
   subsample = NULL,
-  verbose = TRUE,
-  replace_missing = NULL
+  verbose,
+  replace_missing = NULL,
+  debug
   ) {
 
   if (is.null(replace_missing)){
@@ -255,6 +261,10 @@ connect_to_database <- function(
     code_ape,
     subsample
   )
+
+  if (debug){
+    cat(requete)
+  }
 
   assertthat::assert_that(
     is.null(fields) || all(c("periode", "siret") %in% fields)
