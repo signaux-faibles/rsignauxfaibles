@@ -42,3 +42,13 @@ test_that("xgboost_explainer works as expected", {
     data_to_explain = test_task[["validation_data"]]
     )
 })
+
+test_that("plot_waterfall works as expected", {
+  without_aggregation <- explain(
+    test_task,
+    type = "local",
+    data_to_explain = test_task[["validation_data"]]
+    )
+  plot_waterfall(without_aggregation[7,])
+
+})
