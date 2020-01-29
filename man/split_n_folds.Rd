@@ -4,18 +4,17 @@
 \alias{split_n_folds}
 \title{Prepare cross-validation}
 \usage{
-split_n_folds(task, n_folds = 4, frac_test = 0.2,
-  tracker = task[["tracker"]])
+split_n_folds(task, n_folds = 4, frac_test = 0.2, tracker = task[["tracker"]])
 }
 \arguments{
-\item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{n_folds}{\code{integer(1)} \cr Number of folds}
 
 \item{frac_test}{\code{numeric(1)} \cr Fraction of data which should be kept
 aside}
 
-\item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
+\item{tracker}{\verb{[mllogr::Tracker]} \cr Logger of ML experiment}
 }
 \value{
 \code{c(cv_task, sf_task)} \cr

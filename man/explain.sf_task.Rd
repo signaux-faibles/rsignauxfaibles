@@ -4,16 +4,24 @@
 \alias{explain.sf_task}
 \title{Explains a single prediction}
 \usage{
-\method{explain}{sf_task}(task, type, aggregation_matrix = NULL,
-  group_name = NULL, data_to_explain = NULL, ...)
+\method{explain}{sf_task}(
+  task,
+  type,
+  aggregation_matrix = NULL,
+  group_name = NULL,
+  data_to_explain = NULL,
+  plot_waterfall = FALSE,
+  ...
+)
 }
 \arguments{
-\item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{type}{\code{character()} \cr Ou bien "global", "local".}
 
 \item{aggregation_matrix}{\code{data.frame()} \cr  Une matrice d'agrégation. Si
-égal à NULL, alors les résultats ne sont pas agrégés.}
+égal à NULL, alors les résultats ne sont pas agrégés. Utiliser \code{read_aggregation_matrix()} pour lire la
+table de corrsepondance.}
 
 \item{group_name}{\code{character(1)} \cr Le nom de la colonne à utiliser dans
 le data.frame \code{aggregation_matrix}. Obligatoire si aggregation_matrix est

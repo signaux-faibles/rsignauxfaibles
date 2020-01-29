@@ -4,15 +4,23 @@
 \alias{get_last_batch}
 \title{Récupère les dernières données disponibles pour un batch}
 \usage{
-get_last_batch(last_batch, periods, database, collection, mongodb_uri,
-  fields, min_effectif, rollback_months)
+get_last_batch(
+  last_batch,
+  periods,
+  database,
+  collection,
+  mongodb_uri,
+  fields,
+  min_effectif,
+  rollback_months
+)
 }
 \arguments{
 \item{last_batch}{\code{character(1)} \cr Batch auquel doit être importées les
 données. Les modifications opérées par les batchs ultérieurs sont
 ignorées.}
 
-\item{periods}{\code{[Date()]} \cr Périodes d'intérêt, auquels charger les
+\item{periods}{\verb{[Date()]} \cr Périodes d'intérêt, auquels charger les
 données. Des périodes supplémentairs peuvent être chargées selon la
 valeur de rollback_months.}
 

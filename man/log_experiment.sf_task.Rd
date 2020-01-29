@@ -4,11 +4,16 @@
 \alias{log_experiment.sf_task}
 \title{Log des expérimentations Machine Learning}
 \usage{
-\method{log_experiment}{sf_task}(task, database = task[["database"]],
-  collection = "ml_logs", tracker = task[["tracker"]], ...)
+\method{log_experiment}{sf_task}(
+  task,
+  database = task[["database"]],
+  collection = "ml_logs",
+  tracker = task[["tracker"]],
+  ...
+)
 }
 \arguments{
-\item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{database}{\code{character(1)} \cr Nom de la base de données vers laquelle
 param exporter. Par défaut, celle stockée dans \code{task}.}
@@ -16,7 +21,7 @@ param exporter. Par défaut, celle stockée dans \code{task}.}
 \item{collection}{\code{character(1)}. La collection vers laquelle exporter. Par
 défaut, "ml_logs".}
 
-\item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
+\item{tracker}{\verb{[mllogr::Tracker]} \cr Logger of ML experiment}
 
 \item{...}{Not used}
 }

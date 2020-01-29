@@ -4,8 +4,12 @@
 \alias{prepare_train_frame_linear}
 \title{Préparation des données pour l'entraînement d'un modèle linéaire}
 \usage{
-prepare_train_frame_linear(data_to_prepare, training_fields, outcome_field,
-  target_encode_fields)
+prepare_train_frame_linear(
+  data_to_prepare,
+  training_fields,
+  outcome_field,
+  target_encode_fields
+)
 }
 \arguments{
 \item{data_to_prepare}{\code{data.frame()} \cr Données à préparer}

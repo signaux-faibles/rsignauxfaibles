@@ -4,8 +4,12 @@
 \alias{prepare_train_frame_xgboost}
 \title{Préparation des données pour l'entraînement}
 \usage{
-prepare_train_frame_xgboost(data_to_prepare, training_fields,
-  outcome_field, target_encode_fields)
+prepare_train_frame_xgboost(
+  data_to_prepare,
+  training_fields,
+  outcome_field,
+  target_encode_fields
+)
 }
 \arguments{
 \item{data_to_prepare}{\code{data.frame()} \cr Données à préparer}
@@ -14,7 +18,7 @@ prepare_train_frame_xgboost(data_to_prepare, training_fields,
 conservées pour l'entraînement, après toutes les phases de préparation,
 notamment le target encoding.}
 
-\item{shape_function}{\code{function(data.frame => ?)} \cr
+\item{shape_function}{\verb{function(data.frame => ?)} \cr
 Fonction qui met en forme les données pour l'apprentissage.}
 }
 \value{

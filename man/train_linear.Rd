@@ -4,8 +4,13 @@
 \alias{train_linear}
 \title{Train a linear model}
 \usage{
-train_linear(train_data, outcome, validation_data = NULL, parameters,
-  seed = 123)
+train_linear(
+  train_data,
+  outcome,
+  validation_data = NULL,
+  parameters,
+  seed = 123
+)
 }
 \arguments{
 \item{train_data}{\code{data.frame} \cr données d'entraînement, sous la forme d'un H2OFrame}

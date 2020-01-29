@@ -15,7 +15,6 @@ NULL
 NULL
 
 
-
 #' Chargement de données historiques
 #'
 #' Charge les données historiques de signaux faibles et les stocke dans un
@@ -74,11 +73,11 @@ load_hist_data.sf_task <- function(
     mongodb_uri = mongodb_uri,
     batch,
     min_effectif = min_effectif,
-    siren = NULL,
+    siren = siren,
     date_inf = date_inf,
     date_sup = date_sup,
     fields = fields,
-    code_ape = NULL,
+    code_ape = code_ape,
     subsample = subsample,
     verbose = attr(task, "verbose"),
     debug = debug
@@ -152,7 +151,7 @@ load_new_data.sf_task <- function(
 #'
 #' `connect_to_database` permet de requêter des données mongoDB pour en
 #' faire un dataframe ou un Spark dataframe. \cr
-#' `factor_request` permet de fabriquer la requête d'aggrégation
+#' `factor_query` permet de fabriquer la requête d'aggrégation
 #' correspondante. \cr
 #'
 #' @inheritParams mongodb_connection
@@ -256,7 +255,7 @@ connect_to_database <- function(
   } else {
     logger::log_threshold(logger::WARN)
   }
-  requete <- factor_request(
+  requete <- factor_query(
     batch,
     siren,
     date_inf,
@@ -386,7 +385,7 @@ get_sirets_of_detected <- function(
 
 
 #' @rdname connect_to_database
-factor_request <- function(
+factor_query <- function(
   batch,
   siren,
   date_inf,
@@ -422,7 +421,7 @@ factor_request <- function(
     for (i in seq_along(siren)) {
       match_siren <- c(
         match_siren,
-        paste0('{"_id.siret": {"$regex": /^', siren[i], '/}}')
+        paste0('{"_id.siret": {"$regex": "^', siren[i], '"}}')
       )
     }
 
@@ -512,7 +511,7 @@ if (is.null(fields)) {
 } else {
   assertthat::validate_that( # does not return an error if not verified
     all(c("periode", "siret") %in% fields),
-    msg = "Beware: siret and periode are not included in the request"
+    msg = "Beware: siret and periode are not included in the query"
   )
   projection_req <- paste0('"', fields, '":1')
   projection_req <- paste(projection_req, collapse = ",")

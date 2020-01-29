@@ -4,11 +4,10 @@
 \alias{xgboost_local_explainer}
 \title{Explication locale d'une prédiction}
 \usage{
-xgboost_local_explainer(task, aggregation_matrix, group_name,
-  data_to_explain)
+xgboost_local_explainer(task, aggregation_matrix, group_name, data_to_explain)
 }
 \arguments{
-\item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{aggregation_matrix}{\code{dataframe()} \cr
 Table de correspondance qui possède une colonne "variable" et une colonne

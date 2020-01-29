@@ -3,7 +3,8 @@
 #' @inheritParams generic_task
 #' @param type `character()` \cr Ou bien "global", "local".
 #' @param aggregation_matrix `data.frame()` \cr  Une matrice d'agrégation. Si
-#' égal à NULL, alors les résultats ne sont pas agrégés.
+#' égal à NULL, alors les résultats ne sont pas agrégés. Utiliser `read_aggregation_matrix()` pour lire la
+#'   table de corrsepondance.
 #' @param group_name `character(1)` \cr Le nom de la colonne à utiliser dans
 #'   le data.frame `aggregation_matrix`. Obligatoire si aggregation_matrix est
 #'   différent de NULL.

@@ -4,9 +4,16 @@
 \alias{train_xgboost}
 \title{Train an xgboost model}
 \usage{
-train_xgboost(train_data, outcome, validation_data = NULL,
-  learn_rate = 0.1, max_depth = 4, ntrees = 60,
-  min_child_weight = 1, seed)
+train_xgboost(
+  train_data,
+  outcome,
+  validation_data = NULL,
+  learn_rate = 0.1,
+  max_depth = 4,
+  ntrees = 60,
+  min_child_weight = 1,
+  seed
+)
 }
 \arguments{
 \item{train_data}{\code{data.frame} \cr données d'entraînement, sous la forme d'un H2OFrame}

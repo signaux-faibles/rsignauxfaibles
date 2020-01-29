@@ -4,11 +4,15 @@
 \alias{prepare_test_frame_xgboost}
 \title{Préparation des données pour la prédiction d'un modèle xgboost}
 \usage{
-prepare_test_frame_xgboost(data_to_prepare, preparation_map,
-  training_fields, outcome_field)
+prepare_test_frame_xgboost(
+  data_to_prepare,
+  preparation_map,
+  training_fields,
+  outcome_field
+)
 }
 \arguments{
-\item{preparation_map}{\code{?} \cr Carte de calcul du target encoding.}
+\item{preparation_map}{\verb{?} \cr Carte de calcul du target encoding.}
 
 \item{training_fields}{\code{character()} \cr Les champs qui doivent être
 conservées pour l'entraînement, après toutes les phases de préparation,

@@ -7,7 +7,7 @@
 xgboost_global_explainer(task, aggregation_matrix, group_name, ...)
 }
 \arguments{
-\item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{aggregation_matrix}{\code{dataframe()} \cr
 Table de correspondance qui possède une colonne "variable" et une colonne

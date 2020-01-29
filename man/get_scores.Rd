@@ -4,9 +4,15 @@
 \alias{get_scores}
 \title{Récupération des scores}
 \usage{
-get_scores(database = "test_signauxfaibles", collection = "Scores",
-  mongodb_uri, method = "last", algo = NULL, batchs = NULL,
-  sirets = NULL)
+get_scores(
+  database = "test_signauxfaibles",
+  collection = "Scores",
+  mongodb_uri,
+  method = "last",
+  algo = NULL,
+  batchs = NULL,
+  sirets = NULL
+)
 }
 \arguments{
 \item{database}{\code{character(1)} \cr Nom de la base de données vers laquelle

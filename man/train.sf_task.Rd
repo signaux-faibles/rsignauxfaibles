@@ -4,23 +4,30 @@
 \alias{train.sf_task}
 \title{Entraînement de l'algorithme}
 \usage{
-\method{train}{sf_task}(task, outcome = "outcome", parameters = NULL,
-  seed = 0, tracker = task[["tracker"]], train_fun = "xgboost", ...)
+\method{train}{sf_task}(
+  task,
+  outcome = "outcome",
+  parameters = NULL,
+  seed = 0,
+  tracker = task[["tracker"]],
+  train_fun = "xgboost",
+  ...
+)
 }
 \arguments{
-\item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{outcome}{\code{character()} \cr Nom de la colonne dans laquelle on trouve
 l'objectif d'apprentissage.}
 
 \item{parameters}{\code{list(any())} \cr Paramètres du modèle. Cf
-\code{[train_light_gradient_boosting]}. Si \code{NULL}, alors des paramètres par
+\verb{[train_light_gradient_boosting]}. Si \code{NULL}, alors des paramètres par
 défaut sont sélectionnés.}
 
 \item{seed}{\code{integer()}\cr Graîne pour que les calculs aléatoires soient
 reproductibles.}
 
-\item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
+\item{tracker}{\verb{[mllogr::Tracker]} \cr Logger of ML experiment}
 
 \item{train_fun}{\code{training_data} \cr Training_function, or "xgboost" or
 "linear"}
@@ -28,12 +35,12 @@ reproductibles.}
 \item{...}{Not used}
 }
 \value{
-\code{[sf_task]} \cr L'objet \code{task} donné en entré, auquel a été ajouté
+\verb{[sf_task]} \cr L'objet \code{task} donné en entré, auquel a été ajouté
 (ou écrasé) le champs "model", dans lequel est stocké un modèle compatible
-avec la fonction \code{[prepare.sf_task]}.
+avec la fonction \verb{[prepare.sf_task]}.
 }
 \description{
 Entraîne un algorithme sur les données \code{task[["train_data"]]}. Cf
-\code{[train_light_gradient_boosting]} pour plus de détails sur le modèle
+\verb{[train_light_gradient_boosting]} pour plus de détails sur le modèle
 entraîné.
 }

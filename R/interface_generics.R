@@ -118,7 +118,7 @@ print.sf_task <- function(x, ...){
 #' @param task `[sf_task]` \cr Objet s3 de type sf_task
 #' @param field_names `character()` \cr Nom des champs à vérifier.
 #' @return Nom des champs écrasés, `character(0)` sinon.
-check_overwrites <- function(task, field_names){
+check_overwrites <- function(task, field_names) {
   set_verbose_level(task)
   overwrite <- intersect(field_names, names(task))
   if (length(overwrite) > 1){

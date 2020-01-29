@@ -4,13 +4,18 @@
 \alias{prepare_test_frame_linear}
 \title{Préparation des données pour la prédiction d'un modèle linéaire}
 \usage{
-prepare_test_frame_linear(data_to_prepare, preparation_map,
-  training_fields, outcome_field, target_encode_fields)
+prepare_test_frame_linear(
+  data_to_prepare,
+  preparation_map,
+  training_fields,
+  outcome_field,
+  target_encode_fields
+)
 }
 \arguments{
 \item{data_to_prepare}{\code{data.frame()} \cr Données à préparer}
 
-\item{preparation_map}{\code{?} \cr Carte de calcul du target encoding.}
+\item{preparation_map}{\verb{?} \cr Carte de calcul du target encoding.}
 
 \item{training_fields}{\code{character()} \cr Les champs qui doivent être
 conservées pour l'entraînement, après toutes les phases de préparation,

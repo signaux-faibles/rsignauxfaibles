@@ -7,7 +7,7 @@
 check_overwrites(task, field_names)
 }
 \arguments{
-\item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{field_names}{\code{character()} \cr Nom des champs à vérifier.}
 }

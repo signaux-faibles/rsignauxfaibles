@@ -9,6 +9,9 @@ plot_waterfall(frame)
 \arguments{
 \item{frame}{\code{data.table}}
 }
+\value{
+
+}
 \description{
 Affiche le graphique des importances relatives
 }

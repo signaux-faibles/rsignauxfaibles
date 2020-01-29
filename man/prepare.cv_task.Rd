@@ -4,15 +4,20 @@
 \alias{prepare.cv_task}
 \title{Prepares a cross-validated task}
 \usage{
-\method{prepare}{cv_task}(task, data_names = c("train_data",
-  "validation_data", "test_data", "new_data"),
+\method{prepare}{cv_task}(
+  task,
+  data_names = c("train_data", "validation_data", "test_data", "new_data"),
   prepare_train_function = "xgboost",
-  prepare_test_function = "xgboost", outcome_field = "outcome",
-  tracker = NULL, preprocessing_strategy = NULL,
-  training_fields = get_fields(training = TRUE), ...)
+  prepare_test_function = "xgboost",
+  outcome_field = "outcome",
+  tracker = NULL,
+  preprocessing_strategy = NULL,
+  training_fields = get_fields(training = TRUE),
+  ...
+)
 }
 \arguments{
-\item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{data_names}{\code{character()} \cr Vecteur de noms des données à préparer.
 Doivent-être des noms de champs valides de \code{task}.}
@@ -31,7 +36,7 @@ validation data etc.)
 Can be equal to "xgboost" or "linear" for quick reference to the right
 preparation function.}
 
-\item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
+\item{tracker}{\verb{[mllogr::Tracker]} \cr Logger of ML experiment}
 
 \item{preprocessing_strategy}{character() \cr
 Description en langage naturel de la stratégie de préparation des données
