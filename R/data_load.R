@@ -88,7 +88,7 @@ load_hist_data.sf_task <- function(
   } else {
     logger::log_warn("Aucune donnee n'a ete chargee. Veuillez verifier la requete.")
   }
-  check_overwrites(task, "hist_data")
+  # check_overwrites(task, "hist_data")
   task[["hist_data"]] <- hist_data
   return(task)
 }
