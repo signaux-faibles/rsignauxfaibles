@@ -7,28 +7,50 @@ test_task[["prepared_test_data"]] <- NULL
 test_task[["prepared_validation_data"]] <- NULL
 test_task[["preparation_map"]] <- NULL
 
-fake_prepare_train_frame  <- function(data_to_prepare, ...){
-  offset <- 1
-  prepared_data <- data_to_prepare %>%
-    dplyr::mutate(target = target + offset)
-  return(list(data = prepared_data, preparation_map = offset))
+fake_preparation_map_function <- function(data_to_prepare, options) {
+  if (!is.null(options[["offset"]])) {
+    return(options[["offset"]])
+  }
+  return(1)
 }
 
-fake_prepare_test_frame  <- function(data_to_prepare, preparation_map, ...){
-  offset <- preparation_map
+fake_prepare_function  <- function(data_to_prepare, is_train_frame, options) {
+  if (!is.null(options[["cancel_offset"]])) {
+    return(data_to_prepare)
+  }
+
   prepared_data <- data_to_prepare %>%
-    dplyr::mutate(target = target + offset)
-  return(data = prepared_data)
+    dplyr::mutate(target = target + options[["preparation_map"]])
+  return(prepared_data)
+}
+
+matrix_or_identity <- function(x, options) {
+  if (!is.null(options[["as_matrix"]])) {
+    return(as.matrix(x))
+  }
+  return(x)
+}
+
+create_prepared_task <- function(test_task,
+  preparation_map_options = list(),
+  prepare_options = list(),
+  shape_frame_options = list()
+  ) {
+  prepared_task <- prepare(
+    test_task,
+    preparation_map_function = fake_preparation_map_function,
+    prepare_function = fake_prepare_function,
+    shape_frame_function = matrix_or_identity,
+    preparation_map_options = preparation_map_options,
+    prepare_options = prepare_options,
+    shape_frame_options = shape_frame_options,
+    training_fields = c("target", "score")
+  )
+  return(prepared_task)
 }
 
 test_that("Prepare task works as expected", {
-  prepared_task <- prepare(
-    test_task,
-    prepare_train_function = fake_prepare_train_frame,
-    prepare_test_function = fake_prepare_test_frame,
-    outcome_field = "target"
-  )
-
+  prepared_task <- get_prepared_task(test_task)
   expect_true(all(
       c("prepared_train_data", "prepared_test_data", "prepared_validation_data",
       "preparation_map") %in% names(prepared_task)
@@ -48,34 +70,85 @@ test_that("Prepare task works as expected", {
   )
 })
 
-fake_prepare_train_frame_2  <- function(data_to_prepare, training_fields, ...){
-  prepared_data <- dplyr::select(data_to_prepare, training_fields)
-  return(list(data = prepared_data, preparation_map = list()))
-}
-
-fake_prepare_test_frame_2  <- function(data_to_prepare, training_fields, ...){
-  prepared_data <- dplyr::select(data_to_prepare, training_fields)
-  return(data = prepared_data)
-}
-
-test_that("Training_fields works as expected", {
-  prepared_task <- prepare(
+test_that("Prepare task works with options as expected", {
+  offset2_task <- get_prepared_task(
     test_task,
-    prepare_train_function = fake_prepare_train_frame_2,
-    prepare_test_function = fake_prepare_test_frame_2,
-    training_fields = c("target")
+    preparation_map_options = list(offset = 2)
   )
-  expect_equal(ncol(prepared_task[["prepared_validation_data"]]), 1)
-  expect_equal(ncol(prepared_task[["prepared_train_data"]]), 1)
+
+  no_offset_task <- get_prepared_task(
+    test_task,
+    prepare_options = list(cancel_offset = TRUE)
+    )
+
+  matrix_task <- get_prepared_task(
+    test_task,
+    shape_frame_options = list(as_matrix = TRUE)
+    )
+
+  expect_equal(offset2_task[["preparation_map"]], 2)
+  expect_equal(
+    no_offset_task[["prepared_train_data"]]$target,
+    no_offset_task[["train_data"]]$target
+  )
+  expect_equal(class(matrix_task[["prepared_test_data"]]), "matrix")
 })
 
+create_fte_test_task <- function() {
+  set.seed(1)
+  test_task <- get_test_task()
 
-test_that("transformation_map_create and apply work as expected", {
-   test_task <- get_test_task()
-   test_data  <- test_task[["validation_data"]] %>%
-     select(score, target)
-   transformation_map <- transformation_map_create(test_data)
-   res_data <- transformation_map_apply(transformation_map, test_data)
-   expect_equal(res_data[[1]], transformation_map[[1]][["x.t"]])
-   expect_equal(res_data[[2]], transformation_map[[2]][["x.t"]])
-})
+  test_task[["prepared_train_data"]] <- NULL
+  test_task[["prepared_test_data"]] <- NULL
+  test_task[["prepared_validation_data"]] <- NULL
+  test_task[["preparation_map"]] <- NULL
+  test_task[["validation_data"]] <- cbind(test_task[["validation_data"]],
+    ab = sample(c("a", "b"), nrow(test_task[["validation_data"]]), replace =
+      TRUE),
+    cd = sample(c("c", "d"), nrow(test_task[["validation_data"]]), replace =
+      TRUE),
+    outcome = sample(c(TRUE, FALSE), nrow(test_task[["validation_data"]]), replace =
+      TRUE)
+    )
+  test_task[["train_data"]] <- cbind(test_task[["train_data"]],
+    ab = sample(c("a", "b"), nrow(test_task[["train_data"]]), replace = TRUE),
+    cd = sample(c("c", "d"), nrow(test_task[["train_data"]]), replace =
+      TRUE),
+    outcome = sample(c(TRUE, FALSE), nrow(test_task[["train_data"]]), replace
+      = TRUE)
+    )
+  return(test_task)
+}
+create_prepared_fte_test_task <- function() {
+  fte_test_task <- create_fte_test_task()
+
+  prepared_task <- prepare(
+    fte_test_task,
+    data_names = c("train_data", "validation_data"),
+    preparation_map_options = list(
+      outcome_field = "outcome",
+      target_encode_fields = c("ab", "cd")
+      ),
+    prepare_options = list(
+      outcome_field = "outcome",
+      target_encode_fields = c("ab", "cd")
+      ),
+    training_fields = c("target", "score", "target_encode_ab",
+      "target_encode_cd")
+    )
+  return(prepared_task)
+ }
+
+test_that("map creation works as expected", {
+  prep_task <- create_prepared_fte_test_task()
+  expect_equal(
+    prep_task[["prepared_validation_data"]],
+    structure(c(0.415763281518593, 0.0886256091762334, 0.0203380864113569,
+        0.784198996145278, 0.010076787089929, 0.425349598750472,
+        0.738037971779704, 0.626527328975499, 0.0963920175563544,
+        0.794141964288428, 0.742424242424242, 0.742424242424242,
+        0.742424242424242, 0.758064516129032, 0.742424242424242, 0.734375,
+        0.734375, 0.765625, 0.734375, 0.734375), .Dim = 5:4, .Dimnames = list(
+        NULL, c("target", "score", "target_encode_ab", "target_encode_cd")))
+  )
+    })
