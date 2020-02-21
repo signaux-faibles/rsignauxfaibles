@@ -62,7 +62,7 @@ load_hist_data.sf_task <- function(
   code_ape = NULL,
   debug = FALSE,
   ...
-  ){
+  ) {
   set_verbose_level(task)
 
   logger::log_info("Chargement des donnees historiques.")
@@ -86,7 +86,8 @@ load_hist_data.sf_task <- function(
   if (nrow(hist_data) > 1) {
     logger::log_info("Les donnees ont ete chargees avec succes.")
   } else {
-    logger::log_warn("Aucune donnee n'a ete chargee. Veuillez verifier la requete.")
+    logger::log_warn("Aucune donnee n'a ete chargee. Veuillez verifier la
+      requete.")
   }
   # check_overwrites(task, "hist_data")
   task[["hist_data"]] <- hist_data
