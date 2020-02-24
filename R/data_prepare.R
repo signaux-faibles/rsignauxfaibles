@@ -126,19 +126,20 @@ prepare_one_data_name <- function(
 
   is_train_data <- (data_name == "train_data")
   if (is_train_data) {
-
     task[["preparation_map"]]  <- preparation_map_function(
       task[[data_name]],
       preparation_map_options
     )
   }
+
   # Maybe set prepare_train_options to default here
   prepared_data <- prepare_function(
     task[[data_name]],
     is_train_data,
     c(
       prepare_options,
-      list(preparation_map = task[["preparation_map"]])
+      list(PREPARATION_MAP = task[["preparation_map"]]),
+      list(IS_TRAIN_DATA = is_train_data)
       )
     )
 
@@ -223,7 +224,6 @@ create_fte_map <- function(
 #' @export
 apply_fte_map <- function(
   data_to_prepare,
-  is_train_frame,
   options
   ) {
 
@@ -238,7 +238,7 @@ apply_fte_map <- function(
     return(data_to_prepare)
   }
 
-  if (is_train_frame) {
+  if (options[["IS_TRAIN_DATA"]]) {
     holdout_type <- "leave_one_out"
     prior_sample_size <- 30
     noise_level <- 0.02
@@ -252,7 +252,7 @@ apply_fte_map <- function(
     data = data_to_prepare,
     group_variables =  target_encode_fields,
     outcome_variable = outcome_field,
-    preparation_map = options[["preparation_map"]],
+    preparation_map = options[["PREPARATION_MAP"]],
     holdout_type = holdout_type,
     prior_sample_size = prior_sample_size,
     noise_level = noise_level

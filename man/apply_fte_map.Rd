@@ -4,7 +4,7 @@
 \alias{apply_fte_map}
 \title{Préparation des données pour l'entraînement}
 \usage{
-apply_fte_map(data_to_prepare, is_train_frame, options)
+apply_fte_map(data_to_prepare, options)
 }
 \arguments{
 \item{data_to_prepare}{\code{data.frame()} \cr Données à préparer}
