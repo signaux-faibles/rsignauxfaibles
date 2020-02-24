@@ -477,8 +477,18 @@ prepare.cv_task <- function( #nolint
     "test_data",
     "new_data"
     ),
-  prepare_train_function = prepare_train_frame_xgboost,
-  prepare_test_function = prepare_test_frame_xgboost,
+  preparation_map_function = create_fte_map,
+  preparation_map_options = list(
+    outcome_field = outcome_field,
+    target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3")
+    ),
+  prepare_function = apply_fte_map,
+  prepare_options = list(
+    outcome_field = outcome_field,
+    target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3")
+    ),
+  shape_frame_function = shape_for_xgboost,
+  shape_frame_options = list(),
   outcome_field = "outcome",
   tracker = NULL,
   preprocessing_strategy = NULL,
@@ -492,8 +502,18 @@ prepare.cv_task <- function( #nolint
     .x = task[["cross_validation"]],
     .f = prepare.sf_task,
     data_names = data_names,
-    prepare_train_function = prepare_train_function,
-    prepare_test_function = prepare_test_function,
+    preparation_map_function = create_fte_map,
+    preparation_map_options = list(
+      outcome_field = outcome_field,
+      target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3")
+      ),
+    prepare_function = apply_fte_map,
+    prepare_options = list(
+      outcome_field = outcome_field,
+      target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3")
+      ),
+    shape_frame_function = shape_for_xgboost,
+    shape_frame_options = list(),
     outcome_field = outcome_field,
     tracker = tracker,
     preprocessing_strategy = preprocessing_strategy,

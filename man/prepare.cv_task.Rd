@@ -7,8 +7,14 @@
 \method{prepare}{cv_task}(
   task,
   data_names = c("train_data", "validation_data", "test_data", "new_data"),
-  prepare_train_function = prepare_train_frame_xgboost,
-  prepare_test_function = prepare_test_frame_xgboost,
+  preparation_map_function = create_fte_map,
+  preparation_map_options = list(outcome_field = outcome_field, target_encode_fields =
+    c("code_ape_niveau2", "code_ape_niveau3")),
+  prepare_function = apply_fte_map,
+  prepare_options = list(outcome_field = outcome_field, target_encode_fields =
+    c("code_ape_niveau2", "code_ape_niveau3")),
+  shape_frame_function = shape_for_xgboost,
+  shape_frame_options = list(),
   outcome_field = "outcome",
   tracker = NULL,
   preprocessing_strategy = NULL,
@@ -21,19 +27,6 @@
 
 \item{data_names}{\code{character()} \cr Vecteur de noms des données à préparer.
 Doivent-être des noms de champs valides de \code{task}.}
-
-\item{prepare_train_function}{:: (data_to_prepare :: data.frame) ->
-list(data :: data.frame, preparation_map :: any) \cr
-A function that prepares the training data and gives a preparation_map to
-be applied for further data preparation. Defaults to
-\code{prepare_train_frame_xgboost}.
-/!\ Beware, this function is not yet generic !}
-
-\item{prepare_test_function}{:: (data_to_prepare :: data.frame,
-preparation_map :: any) -> data.frame \cr
-A function that uses the preparation map to prepare further data (test,
-validation data etc.). Defaults to \code{prepare_test_frame_xgboost}.
-/!\ Beware, this function is not yet generic !}
 
 \item{tracker}{\verb{[mllogr::Tracker]} \cr Logger of ML experiment}
 
