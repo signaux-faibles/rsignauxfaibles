@@ -14,13 +14,13 @@ fake_preparation_map_function <- function(data_to_prepare, options) {
   return(1)
 }
 
-fake_prepare_function  <- function(data_to_prepare, is_train_frame, options) {
+fake_prepare_function  <- function(data_to_prepare, options) {
   if (!is.null(options[["cancel_offset"]])) {
     return(data_to_prepare)
   }
 
   prepared_data <- data_to_prepare %>%
-    dplyr::mutate(target = target + options[["preparation_map"]])
+    dplyr::mutate(target = target + options[["PREPARATION_MAP"]])
   return(prepared_data)
 }
 
@@ -50,7 +50,7 @@ create_prepared_task <- function(test_task,
 }
 
 test_that("Prepare task works as expected", {
-  prepared_task <- get_prepared_task(test_task)
+  prepared_task <- create_prepared_task(test_task)
   expect_true(all(
       c("prepared_train_data", "prepared_test_data", "prepared_validation_data",
       "preparation_map") %in% names(prepared_task)
@@ -71,17 +71,17 @@ test_that("Prepare task works as expected", {
 })
 
 test_that("Prepare task works with options as expected", {
-  offset2_task <- get_prepared_task(
+  offset2_task <- create_prepared_task(
     test_task,
     preparation_map_options = list(offset = 2)
   )
 
-  no_offset_task <- get_prepared_task(
+  no_offset_task <- create_prepared_task(
     test_task,
     prepare_options = list(cancel_offset = TRUE)
     )
 
-  matrix_task <- get_prepared_task(
+  matrix_task <- create_prepared_task(
     test_task,
     shape_frame_options = list(as_matrix = TRUE)
     )

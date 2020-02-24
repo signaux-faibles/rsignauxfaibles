@@ -135,7 +135,6 @@ prepare_one_data_name <- function(
   # Maybe set prepare_train_options to default here
   prepared_data <- prepare_function(
     task[[data_name]],
-    is_train_data,
     c(
       prepare_options,
       list(PREPARATION_MAP = task[["preparation_map"]]),
