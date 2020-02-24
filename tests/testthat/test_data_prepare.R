@@ -107,9 +107,12 @@ create_fte_test_task <- function() {
       TRUE),
     cd = sample(c("c", "d"), nrow(test_task[["validation_data"]]), replace =
       TRUE),
-    outcome = sample(c(TRUE, FALSE), nrow(test_task[["validation_data"]]), replace =
-      TRUE)
+    outcome = sample(
+      c(TRUE, FALSE),
+      nrow(test_task[["validation_data"]]),
+      replace =TRUE
     )
+  )
   test_task[["train_data"]] <- cbind(test_task[["train_data"]],
     ab = sample(c("a", "b"), nrow(test_task[["train_data"]]), replace = TRUE),
     cd = sample(c("c", "d"), nrow(test_task[["train_data"]]), replace =
@@ -151,4 +154,4 @@ test_that("map creation works as expected", {
         0.734375, 0.765625, 0.734375, 0.734375), .Dim = 5:4, .Dimnames = list(
         NULL, c("target", "score", "target_encode_ab", "target_encode_cd")))
   )
-    })
+})

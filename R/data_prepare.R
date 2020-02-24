@@ -41,20 +41,18 @@ prepare.sf_task <- function( #nolint
     "test_data",
     "new_data"
     ),
+  training_fields = get_fields(training = TRUE),
+  outcome_field = "outcome",
   preparation_map_function = create_fte_map,
   preparation_map_options = list(
-    outcome_field = outcome_field,
     target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3")
     ),
   prepare_function = apply_fte_map,
   prepare_options = list(
-    outcome_field = outcome_field,
     target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3")
     ),
   shape_frame_function = shape_for_xgboost,
   shape_frame_options = list(),
-  training_fields = get_fields(training = TRUE),
-  outcome_field = "outcome",
   tracker = NULL,
   preprocessing_strategy = NULL,
   ...
@@ -128,7 +126,13 @@ prepare_one_data_name <- function(
   if (is_train_data) {
     task[["preparation_map"]]  <- preparation_map_function(
       task[[data_name]],
-      preparation_map_options
+      c(
+        preparation_map_options,
+        list(
+          TRAINING_FIELDS = task[["training_fields"]],
+          OUTCOME_FIELD = task[["outcome_field"]]
+        )
+      )
     )
   }
 
@@ -137,8 +141,12 @@ prepare_one_data_name <- function(
     task[[data_name]],
     c(
       prepare_options,
-      list(PREPARATION_MAP = task[["preparation_map"]]),
-      list(IS_TRAIN_DATA = is_train_data)
+      list(
+        PREPARATION_MAP = task[["preparation_map"]],
+        IS_TRAIN_DATA = is_train_data,
+        TRAINING_FIELDS = task[["training_fields"]],
+        OUTCOME_FIELD = task[["outcome_field"]]
+      )
       )
     )
 
@@ -187,10 +195,10 @@ create_fte_map <- function(
   options
   ) {
   assertthat::assert_that(all(
-      c("outcome_field", "target_encode_fields") %in%
+      c("target_encode_fields") %in%
         names(options)
       ))
-  outcome_field <- options[["outcome_field"]]
+  outcome_field <- options[["OUTCOME_FIELD"]]
   target_encode_fields <- options[["target_encode_fields"]]
 
   preparation_map <- fte::target_encode_create(
@@ -227,10 +235,10 @@ apply_fte_map <- function(
   ) {
 
   assertthat::assert_that(all(
-      c("outcome_field", "target_encode_fields") %in%
+      c("target_encode_fields") %in%
         names(options)
       ))
-  outcome_field <- options[["outcome_field"]]
+  outcome_field <- options[["OUTCOME_FIELD"]]
   target_encode_fields <- options[["target_encode_fields"]]
   should_target_encode <- length(target_encode_fields) > 0
   if (! should_target_encode) {
