@@ -7,16 +7,16 @@
 \method{prepare}{sf_task}(
   task,
   data_names = c("train_data", "validation_data", "test_data", "new_data"),
-  preparation_map_function = create_fte_map,
-  preparation_map_options = list(outcome_field = outcome_field, target_encode_fields =
-    c("code_ape_niveau2", "code_ape_niveau3")),
-  prepare_function = apply_fte_map,
-  prepare_options = list(outcome_field = outcome_field, target_encode_fields =
-    c("code_ape_niveau2", "code_ape_niveau3")),
-  shape_frame_function = shape_for_xgboost,
-  shape_frame_options = list(),
   training_fields = get_fields(training = TRUE),
   outcome_field = "outcome",
+  preparation_map_function = create_fte_map,
+  preparation_map_options = list(target_encode_fields = c("code_ape_niveau2",
+    "code_ape_niveau3")),
+  prepare_function = apply_fte_map,
+  prepare_options = list(target_encode_fields = c("code_ape_niveau2",
+    "code_ape_niveau3")),
+  shape_frame_function = shape_for_xgboost,
+  shape_frame_options = list(),
   tracker = NULL,
   preprocessing_strategy = NULL,
   ...

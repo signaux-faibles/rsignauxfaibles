@@ -73,7 +73,7 @@ train.sf_task <- function(
   outcome <- task[["train_data"]][[task[["outcome_field"]]]]
   model <- train_fun(
     train_data = task[["prepared_train_data"]],
-    outcome = task[["train_data"]],
+    outcome = outcome,
     learn_rate = parameters[["learn_rate"]],
     max_depth = parameters[["max_depth"]],
     ntrees = parameters[["ntrees"]],
