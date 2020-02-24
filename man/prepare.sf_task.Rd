@@ -7,13 +7,18 @@
 \method{prepare}{sf_task}(
   task,
   data_names = c("train_data", "validation_data", "test_data", "new_data"),
-  prepare_train_function = prepare_train_frame_xgboost,
-  prepare_test_function = prepare_test_frame_xgboost,
+  preparation_map_function = create_fte_map,
+  preparation_map_options = list(outcome_field = outcome_field, target_encode_fields =
+    c("code_ape_niveau2", "code_ape_niveau3")),
+  prepare_function = apply_fte_map,
+  prepare_options = list(outcome_field = outcome_field, target_encode_fields =
+    c("code_ape_niveau2", "code_ape_niveau3")),
+  shape_frame_function = shape_for_xgboost,
+  shape_frame_options = list(),
+  training_fields = get_fields(training = TRUE),
   outcome_field = "outcome",
   tracker = NULL,
   preprocessing_strategy = NULL,
-  training_fields = get_fields(training = TRUE),
-  target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3"),
   ...
 )
 }
@@ -22,6 +27,18 @@
 
 \item{data_names}{\code{character()} \cr Vecteur de noms des données à préparer.
 Doivent-être des noms de champs valides de \code{task}.}
+
+\item{training_fields}{\code{character()} \cr Les champs qui doivent être
+conservées pour l'entraînement, après toutes les phases de préparation,
+notamment le target encoding.}
+
+\item{tracker}{\verb{[mllogr::Tracker]} \cr Logger of ML experiment}
+
+\item{preprocessing_strategy}{character() \cr
+Description en langage naturel de la stratégie de préparation des données
+pour le logging de l'expérience.}
+
+\item{...}{Unused.}
 
 \item{prepare_train_function}{:: (data_to_prepare :: data.frame) ->
 list(data :: data.frame, preparation_map :: any) \cr
@@ -35,18 +52,6 @@ preparation_map :: any) -> data.frame \cr
 A function that uses the preparation map to prepare further data (test,
 validation data etc.). Defaults to \code{prepare_test_frame_xgboost}.
 /!\ Beware, this function is not yet generic !}
-
-\item{tracker}{\verb{[mllogr::Tracker]} \cr Logger of ML experiment}
-
-\item{preprocessing_strategy}{character() \cr
-Description en langage naturel de la stratégie de préparation des données
-pour le logging de l'expérience.}
-
-\item{training_fields}{\code{character()} \cr Les champs qui doivent être
-conservées pour l'entraînement, après toutes les phases de préparation,
-notamment le target encoding.}
-
-\item{...}{Unused.}
 }
 \value{
 \verb{[sf_task]} \cr
