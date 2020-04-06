@@ -101,7 +101,11 @@ load_hist_data.sf_task <- function(
     target = "outcome"
   )
   mlr3t$col_roles$name <- c("siret")
-  task$col_roles$feature <- setdiff(task$col_roles$feature, "siret")
+  mlr3t$col_roles$group <- c("siren")
+  mlr3t$col_roles$feature <- setdiff(
+    task$col_roles$feature,
+    c("siret", "siren")
+  )
   task[["mlr3task"]] <- mlr3t
 
   return(task)
