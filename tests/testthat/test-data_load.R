@@ -20,7 +20,7 @@ test_that("Les requêtes sont bien formées", {
   aux_null <- function(x) ifelse(is.na(x), return(NULL), return(x))
   aux_test_function <- function(batch, date_inf, date_sup, min_effectif,
     fields, siren, code_ape, subsample) {
-    req <- factor_request(
+    req <- factor_query(
       batch = batch,
       date_inf = aux_null(date_inf),
       date_sup = aux_null(date_sup),
@@ -50,7 +50,7 @@ test_that("Les requêtes sont bien formées", {
 
 
 test_that("Une requête vide renvoie un dataframe vide", {
-  empty_query <- connect_to_database(
+  empty_query <- import_data(
     test_db,
     test_col,
     mongodb_uri = "mongodb://localhost:27017",
@@ -64,7 +64,7 @@ test_that("Une requête vide renvoie un dataframe vide", {
 })
 
 test_that(": Un champs vide présent et complété avec des NA", {
-  missing_field <- connect_to_database(
+  missing_field <- import_data(
     test_db,
     test_col,
     mongodb_uri = "mongodb://localhost:27017",
@@ -79,7 +79,7 @@ test_that(": Un champs vide présent et complété avec des NA", {
         )))
 })
 
-test_frame_1 <- connect_to_database(
+test_frame_1 <- import_data(
   test_db,
   test_col,
   mongodb_uri = "mongodb://localhost:27017",
@@ -93,7 +93,7 @@ test_frame_1 <- connect_to_database(
   verbose = FALSE
   )
 
-test_frame_2 <- connect_to_database(
+test_frame_2 <- import_data(
   test_db,
   test_col,
   mongodb_uri = "mongodb://localhost:27017",

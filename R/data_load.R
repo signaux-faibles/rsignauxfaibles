@@ -63,10 +63,9 @@ load_hist_data.sf_task <- function(
                                    debug = FALSE,
                                    ...) {
   set_verbose_level(task)
+  logger::log_info("Chargement des données historiques.")
 
-  logger::log_info("Chargement des donnees historiques.")
-
-  hist_data <- connect_to_database(
+  hist_data <- import_data(
     database,
     collection,
     mongodb_uri = mongodb_uri,
@@ -117,7 +116,7 @@ load_hist_data.sf_task <- function(
 #' @param periods `[Date()]` \cr Périodes d'intérêt, auquels charger les
 #'   données. Des périodes supplémentairs peuvent être chargées selon la
 #'   valeur de rollback_months.
-#' @inheritParams connect_to_database
+#' @inheritParams import_data
 #' @param rollback_months `integer(1)`\cr Nombre de mois précédant le premier
 #'   mois de `periods` à charger. Permet d'effectuer des calculs de différences
 #'   ou de moyennes glissantes pour les périodes d'intérêt.
@@ -145,7 +144,7 @@ load_new_data.sf_task <- function(
   set_verbose_level(task)
 
   logger::log_info("Loading data from last batch")
-  task[["new_data"]] <- connect_to_database(
+  task[["new_data"]] <- import_data(
     database = database,
     collection = collection,
     mongodb_uri = mongodb_uri,
@@ -164,9 +163,10 @@ load_new_data.sf_task <- function(
   }
   return(task)
 }
+
 #' Connexion à la base de donnée
 #'
-#' `connect_to_database` permet de requêter des données mongoDB pour en
+#' `import_data` permet de requêter des données mongoDB pour en
 #' faire un dataframe ou un Spark dataframe. \cr
 #' `factor_query` permet de fabriquer la requête d'aggrégation
 #' correspondante. \cr
@@ -225,7 +225,7 @@ load_new_data.sf_task <- function(
 #' @return `data.frame()`
 #'
 #' @export
-connect_to_database <- function(
+import_data <- function(
                                 database,
                                 collection,
                                 mongodb_uri,
@@ -402,7 +402,7 @@ get_sirets_of_detected <- function(
 ###################################
 
 
-#' @rdname connect_to_database
+#' @rdname import_data
 factor_query <- function(
                          batch,
                          siren,
@@ -1094,7 +1094,7 @@ get_last_batch <- function(
                            fields,
                            min_effectif,
                            rollback_months) {
-  current_data <- connect_to_database(
+  current_data <- import_data(
     database,
     collection,
     mongodb_uri,
