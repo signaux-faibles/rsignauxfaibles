@@ -49,6 +49,30 @@ test_that("Les requêtes sont bien formées", {
 })
 
 
+replace_missing_data_table <- tibble::tribble(
+  ~description, ~df, ~fields, ~replace_missing, ~expected,
+  "should add empty columns if nrow = 0", data.frame(), "a", list(), data.frame(a = logical(0))
+  )
+test_replace_missing_data <- function(
+                                      description,
+                                      df,
+                                      fields,
+                                      replace_missing,
+                                      expected) {
+  testthat::test_that("replace_missing_data " %>% paste0(description), {
+    expect_equal(
+      replace_missing_data(df, fields, replace_missing),
+      expected
+    )
+  })
+}
+
+purrr::pwalk(
+  .l = replace_missing_data_table,
+  .f = test_replace_missing_data
+)
+
+
 test_that("Une requête vide renvoie un dataframe vide", {
   empty_query <- import_data(
     test_db,
@@ -62,6 +86,8 @@ test_that("Une requête vide renvoie un dataframe vide", {
     )
   expect_true(any(dim(empty_query %>% collect()) == 0))
 })
+
+
 
 test_that(": Un champs vide présent et complété avec des NA", {
   missing_field <- import_data(
@@ -90,7 +116,8 @@ test_frame_1 <- import_data(
   fields = NULL,
   code_ape = NULL,
   subsample = NULL,
-  verbose = FALSE
+  verbose = FALSE,
+  debug = TRUE
   )
 
 test_frame_2 <- import_data(

@@ -226,20 +226,102 @@ load_new_data.sf_task <- function(
 #'
 #' @export
 import_data <- function(
-                                database,
-                                collection,
-                                mongodb_uri,
-                                batch,
-                                min_effectif,
-                                siren = NULL,
-                                date_inf = NULL,
-                                date_sup = NULL,
-                                fields = NULL,
-                                code_ape = NULL,
-                                subsample = NULL,
-                                verbose = FALSE,
-                                replace_missing = NULL,
-                                debug = FALSE) {
+                        database,
+                        collection,
+                        mongodb_uri,
+                        batch,
+                        min_effectif,
+                        siren = NULL,
+                        date_inf = NULL,
+                        date_sup = NULL,
+                        fields = NULL,
+                        code_ape = NULL,
+                        subsample = NULL,
+                        verbose = FALSE,
+                        replace_missing = NULL,
+                        debug = FALSE) {
+  requireNamespace("logger")
+  if (verbose) {
+    logger::log_threshold(logger::TRACE)
+  } else {
+    logger::log_threshold(logger::WARN)
+  }
+  query <- factor_query(
+    batch,
+    siren,
+    date_inf,
+    date_sup,
+    min_effectif,
+    fields,
+    code_ape,
+    subsample
+  )
+
+  if (debug) {
+    cat(query)
+  }
+
+  assertthat::assert_that(
+    is.null(fields) || all(c("periode", "siret") %in% fields)
+  )
+
+  logger::log_info("Connexion a la collection mongodb {collection} ...")
+  df <- query_database(query, database, collection, mongodb_uri, verbose)
+  logger::log_info("Import fini.")
+
+  n_eta <- dplyr::n_distinct(df$siret)
+  n_ent <- dplyr::n_distinct(df$siret %>% stringr::str_sub(1, 9))
+  logger::log_info(
+    "Import de {n_eta} etablissements issus de {n_ent} entreprises."
+  )
+
+  df <- replace_missing_data(
+    df = df,
+    fields = fields,
+    replace_missing = replace_missing
+  )
+
+  df <- update_types(
+    df = df
+  )
+
+  check_valid_data(df)
+
+  logger::log_info(" Fini.")
+
+
+
+
+  return(df)
+}
+
+query_database <- function(
+                           query,
+                           database,
+                           collection,
+                           mongodb_uri,
+                           verbose) {
+  dbconnection <- mongolite::mongo(
+    collection = collection,
+    db = database,
+    url = mongodb_uri,
+    verbose = verbose
+  )
+  logger::log_info("Connexion effectuée avec succès. Début de l'import.")
+  df <- dbconnection$aggregate(query)
+  return(df)
+}
+
+replace_missing_data <- function(
+                                 df,
+                                 fields,
+                                 replace_missing) {
+  df <- add_missing_fields(
+    df = df,
+    fields = fields
+  )
+
+  # Default values
   if (is.null(replace_missing)) {
     replace_missing <- list(
       montant_part_patronale = 0,
@@ -264,111 +346,64 @@ import_data <- function(
       tag_failure = FALSE,
       tag_outcome = FALSE
     )
+
+    if (any(names(replace_missing) %in% colnames(df))) {
+      logger::log_info("Filling missing values with default values.")
+    }
+
+    df <- df %>%
+      tidyr::replace_na(
+        replace = replace_missing,
+      )
   }
 
-  requireNamespace("logger")
-  if (verbose) {
-    logger::log_threshold(logger::TRACE)
-  } else {
-    logger::log_threshold(logger::WARN)
+  return(df)
+}
+
+
+add_missing_fields <- function(
+                               df,
+                               fields) {
+  missing_fields <- fields[
+    !fields %in% names(df)
+  ]
+
+  if (length(missing_fields) >= 1) {
+    logger::log_info("Champ(s) manquant(s): {missing_fields}")
+    logger::log_info("Remplacements par NA.")
+
+    for (missing_field in missing_fields) {
+      df <- df %>% dplyr::mutate(!!missing_field := NA)
+    }
   }
-  requete <- factor_query(
-    batch,
-    siren,
-    date_inf,
-    date_sup,
-    min_effectif,
-    fields,
-    code_ape,
-    subsample
-  )
+  return(df)
+}
 
-  if (debug) {
-    cat(requete)
-  }
 
-  assertthat::assert_that(
-    is.null(fields) || all(c("periode", "siret") %in% fields)
-  )
+update_types <- function(
+                         df) {
 
-  logger::log_info("Connexion a la collection mongodb {collection} ...")
-
-  dbconnection <- mongolite::mongo(
-    collection = collection,
-    db = database,
-    url = mongodb_uri,
-    verbose = verbose
-  )
-  logger::log_info(" Connexion effectuee avec succes.")
-
-  # Import dataframe
-  logger::log_info("Import en cours...")
-
-  donnees <- dbconnection$aggregate(requete)
-
-  logger::log_info(" Import fini.")
-
-  if (dim(donnees)[1] == 0) {
-    return(tibble::tibble(siret = character(0), periode = character(0)))
-  }
-  assertthat::assert_that(
-    all(c("periode", "siret") %in% names(donnees))
-  )
-
-  assertthat::assert_that(
-    anyDuplicated(donnees %>% select(siret, periode)) == 0,
-    msg = "La base importee contient des lignes identiques"
-  )
-
-  table_wholesample <- donnees %>%
-    arrange(periode) %>%
+  # Dates de type Date
+  df <- df %>%
     mutate_if(lubridate::is.POSIXct, as.Date)
 
-  n_eta <- table_wholesample$siret %>%
-    n_distinct()
-  n_ent <- table_wholesample$siret %>%
-    stringr::str_sub(1, 9) %>%
-    n_distinct()
-  logger::log_info(
-    "Import de {n_eta} etablissements issus de {n_ent} entreprises"
-  )
-
-  logger::log_info(" Fini.")
-
-  # Champs manquants
-  champs_manquants <- fields[!fields %in% tbl_vars(table_wholesample)]
-  if (length(champs_manquants) >= 1) {
-    logger::log_info("Champ manquant: {champs_manquants}")
-    logger::log_info("Remplacements par NA")
-    NA_variable <- NA_character_
-    remplacement <- paste0(
-      NA_variable,
-      character(length(champs_manquants))
-    ) %>%
-      stats::setNames(champs_manquants)
-    table_wholesample <- table_wholesample %>%
-      mutate_(.dots = remplacement)
-  }
-
-  # Champs par defaut lorsque absent.
-  if (any(names(replace_missing) %in% colnames(table_wholesample))) {
-    logger::log_info("Filling missing values with default values")
-  }
-  table_wholesample <- table_wholesample %>%
-    replace_na(
-      replacements_by_column = replace_missing,
-      fail_if_column_missing = FALSE
-    )
-
-
-  # Régions comme facteurs
+  # Régions de type facteurs
   if ("region" %in% fields) {
-    table_wholesample <- table_wholesample %>%
+    df <- df %>%
       mutate(region = factor(region))
   }
+}
 
-
-  return(table_wholesample)
+check_valid_data <- function(
+                             df) {
+  assertthat::assert_that(
+    all(c("periode", "siret") %in% names(df)),
+    msg = "Les données importées ne contiennent pas la clé (siret x période)"
+  )
+  assertthat::assert_that(
+    anyDuplicated(df %>% select(siret, periode)) == 0,
+    msg = "La base importee contient des lignes identiques."
+  )
 }
 
 #' Get sirets of companies detected by SF
@@ -430,7 +465,6 @@ factor_query <- function(
   match_id <- paste0('"_id.batch":"', batch, '"')
 
   # Filtrage siren
-
   if (is.null(siren)) {
     match_siren <- ""
   } else {
@@ -438,7 +472,7 @@ factor_query <- function(
     for (i in seq_along(siren)) {
       match_siren <- c(
         match_siren,
-        paste0('{"_id.siret": {"$regex": "^', siren[i], '"}}')
+        paste0('{"_id.siret": {"$regex": "^', siren[i], '", "$options": ""}}')
       )
     }
 

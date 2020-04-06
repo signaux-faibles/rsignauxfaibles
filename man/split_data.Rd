@@ -40,10 +40,11 @@ de \code{task[["hist_data"]]} et un sous-ensemble (possiblement vide) de ces
 lignes.
 }
 \description{
-Scinde les données historiques en échantillon d'entraînement, de validation et de
-test, selon les proportions souhaitées. S'assure que deux établissements de la même entreprise ne soient pas
-à la fois dans deux échantillons différents pour éviter la fuite
-d'information d'un échantillon vers l'autre.
+Scinde les données historiques en échantillon d'entraînement, de validation
+et de test, selon les proportions souhaitées. S'assure que deux
+établissements de la même entreprise ne soient pas à la fois dans deux
+échantillons différents pour éviter la fuite d'information d'un échantillon
+vers l'autre.
 }
 \details{
 La fraction de l'échantillon de test est calculée par
