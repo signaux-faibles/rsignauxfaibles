@@ -269,16 +269,17 @@ import_data <- function(
   df <- query_database(query, database, collection, mongodb_uri, verbose)
   logger::log_info("Import fini.")
 
-  n_eta <- dplyr::n_distinct(df$siret)
-  n_ent <- dplyr::n_distinct(df$siret %>% stringr::str_sub(1, 9))
-  logger::log_info(
-    "Import de {n_eta} etablissements issus de {n_ent} entreprises."
-  )
 
   df <- replace_missing_data(
     df = df,
     fields = fields,
     replace_missing = replace_missing
+  )
+
+  n_eta <- dplyr::n_distinct(df$siret)
+  n_ent <- dplyr::n_distinct(df$siret %>% stringr::str_sub(1, 9))
+  logger::log_info(
+    "Import de {n_eta} etablissements issus de {n_ent} entreprises."
   )
 
   df <- update_types(
@@ -346,17 +347,16 @@ replace_missing_data <- function(
       tag_failure = FALSE,
       tag_outcome = FALSE
     )
-
-    if (any(names(replace_missing) %in% colnames(df))) {
-      logger::log_info("Filling missing values with default values.")
-    }
-
-    df <- df %>%
-      tidyr::replace_na(
-        replace = replace_missing,
-      )
   }
 
+  if (any(names(replace_missing) %in% colnames(df))) {
+    logger::log_info("Filling missing values with default values.")
+  }
+
+  df <- df %>%
+    tidyr::replace_na(
+      replace = replace_missing,
+    )
   return(df)
 }
 
@@ -388,10 +388,11 @@ update_types <- function(
     mutate_if(lubridate::is.POSIXct, as.Date)
 
   # Régions de type facteurs
-  if ("region" %in% fields) {
+  if ("region" %in% names(df)) {
     df <- df %>%
       mutate(region = factor(region))
   }
+  return(df)
 }
 
 check_valid_data <- function(

@@ -1,8 +1,4 @@
-context("Check database connection")
-# Tester à chaque fois pour un frame spark et pour un dataframe
-
-test_db <- "unittest_signauxfaibles"
-test_col <- "Features_for_tests"
+context("Check database connection and data import and cleaning")
 
 test_that("Les requêtes sont bien formées", {
   test_grid <- expand.grid(
@@ -49,10 +45,10 @@ test_that("Les requêtes sont bien formées", {
 })
 
 
-replace_missing_data_table <- tibble::tribble(
-  ~description, ~df, ~fields, ~replace_missing, ~expected,
-  "should add empty columns if nrow = 0", data.frame(), "a", list(), data.frame(a = logical(0))
-  )
+#
+# Test replace_missing_data
+#
+
 test_replace_missing_data <- function(
                                       description,
                                       df,
@@ -67,107 +63,87 @@ test_replace_missing_data <- function(
   })
 }
 
+replace_missing_data_table <- tibble::tribble(
+  ~description,
+  ~df,
+  ~fields,
+  ~replace_missing,
+  ~expected,
+
+  "should add empty columns if nrow = 0",
+  data.frame(),
+  "a",
+  list(),
+  data.frame(a = logical(0)),
+
+  "should replace NA in existing columns with numeric replacement",
+  data.frame(a = c(NA)),
+  "a",
+  list(a = 0),
+  data.frame(a = c(0)),
+
+  "should replace NA in existing columns with logical replacement",
+  data.frame(a = c(NA)),
+  "a",
+  list(a = TRUE),
+  data.frame(a = c(TRUE)),
+
+  "should replace NA in existing columns with character replacement",
+  data.frame(a = c(NA)),
+  "a",
+  list(a = "a"),
+  data.frame(a = c("a"), stringsAsFactors = FALSE),
+
+  "should create non-existing columns with replacement, if in fields",
+  data.frame(),
+  "a",
+  list(a = 0),
+  data.frame(a = numeric(0)),
+
+  "should not create columns if not in fields",
+  data.frame(),
+  c(),
+  list(a = "a"),
+  data.frame(),
+  )
+
 purrr::pwalk(
   .l = replace_missing_data_table,
   .f = test_replace_missing_data
 )
 
+#
+# End-to-end: import_data
+#
 
-test_that("Une requête vide renvoie un dataframe vide", {
-  empty_query <- import_data(
+import_test_data <- function(batch, fields) {
+  test_db <- "unittest_signauxfaibles"
+  test_col <- "Features_for_tests"
+  empty_data_import <- import_data(
     test_db,
     test_col,
     mongodb_uri = "mongodb://localhost:27017",
-    batch = "1901_interim",
+    batch = batch,
     min_effectif = 10,
-    date_sup = "2001-01-01",
-    fields = c("siret", "periode"),
+    date_inf = "2014-01-01",
+    date_sup = "2014-02-01",
+    fields = fields,
     verbose = FALSE
     )
-  expect_true(any(dim(empty_query %>% collect()) == 0))
+}
+test_that("une requête vide renvoie un dataframe vide", {
+  empty_data <- import_test_data("wrong_batch", fields = c("siret", "periode"))
+  expect_equal(dim(empty_data), c(0, 2))
+})
+
+test_that("On arrive à récupérer les éléments de la base", {
+  fields <- c("siret", "periode")
+  test_object <- import_test_data("test_batch_1", fields = fields)
+  expect_equal(names(test_object), fields)
+  expect_equal(test_object$siret, "01234567891011")
+  expect_equal(test_object$periode, as.Date("2014-01-01"))
 })
 
 
-
-test_that(": Un champs vide présent et complété avec des NA", {
-  missing_field <- import_data(
-    test_db,
-    test_col,
-    mongodb_uri = "mongodb://localhost:27017",
-    batch = "1901_interim",
-    min_effectif = 10,
-    fields = c("siret", "periode", "missing_field"),
-    verbose = FALSE
-    )
-
-  expect_true(all(is.na(
-        missing_field %>% select("missing_field") %>% collect()
-        )))
-})
-
-test_frame_1 <- import_data(
-  test_db,
-  test_col,
-  mongodb_uri = "mongodb://localhost:27017",
-  batch = "1901_interim",
-  siren = c("012345678", "876543210"),
-  date_inf = "2014-06-01",
-  min_effectif = 10,
-  fields = NULL,
-  code_ape = NULL,
-  subsample = NULL,
-  verbose = FALSE,
-  debug = TRUE
-  )
-
-test_frame_2 <- import_data(
-  test_db,
-  test_col,
-  mongodb_uri = "mongodb://localhost:27017",
-  batch = "1901_interim",
-  siren = NULL,
-  date_inf = NULL,
-  min_effectif = NULL,
-  fields = c("siret", "siren", "periode", "effectif", "code_naf"),
-  code_ape = c("H"),
-  subsample = NULL,
-  verbose = FALSE
-  )
-
-test_that("Les filtres fonctionnent comme espéré", {
-  test_summary <- test_frame_1 %>%
-    summarize(
-      date_min = min(periode),
-      effectif_min = min(effectif)
-      ) %>%
-  collect()
-
-expect_gte(
-  as.numeric(as.Date(test_summary$date_min)),
-  as.numeric(as.Date("2014-01-01"))
-  )
-expect_gte(test_summary$effectif_min, 10)
-
-sirens_summary <- test_frame_1 %>%
-  select("siren") %>%
-  distinct() %>%
-  collect()
-# test siren
-expect_setequal(sirens_summary$siren, c("012345678", "876543210"))
-
-# Test fields and code_ape
-expect_setequal(
-  tbl_vars(test_frame_2),
-  c("siret", "siren", "periode", "effectif", "code_naf")
-  )
-expect_equal(
-  test_frame_2 %>%
-    select(code_naf) %>%
-    distinct() %>%
-    collect() %>%
-    .$code_naf,
-  "H"
-  )
-  })
 
 # TODO: wrong database or collection should throw an error, not returning empty dataframe.
