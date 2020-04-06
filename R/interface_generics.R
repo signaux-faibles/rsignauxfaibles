@@ -31,26 +31,24 @@ NULL
 #'
 #' @export
 sf_task <- function(
-  verbose,
-  database = "test_signauxfaibles",
-  collection = "Features",
-  mongodb_uri,
-  experiment_name,
-  experiment_description,
-  tracker = NULL
-  ){
-
+                    verbose,
+                    database = "test_signauxfaibles",
+                    collection = "Features",
+                    mongodb_uri,
+                    experiment_name = "",
+                    experiment_description = "",
+                    tracker = NULL) {
   res <- list(
     database = database,
+
     collection = collection,
     mongodb_uri = mongodb_uri
   )
   class(res) <- "sf_task"
   attr(res, "verbose") <- verbose
-  if (is.null(tracker) && requireNamespace("MLlogr")){
-
+  if (is.null(tracker) && requireNamespace("MLlogr")) {
     res[["tracker"]] <- MLlogr::Tracker$new(
-      #TODO: Mieux gérer la base de logging
+      # TODO: Mieux gérer la base de logging
       # f4737679-916d-4aeb-84ba-958046f4ca31
       database = database,
       collection = collection,
@@ -71,9 +69,9 @@ sf_task <- function(
 #' niveau de logging
 #' @param task `[sf_task]` \cr Objet s3 de type sf_task
 #' @return TRUE
-set_verbose_level <- function(task){
+set_verbose_level <- function(task) {
   requireNamespace("logger")
-  if (attr(task, "verbose")){
+  if (attr(task, "verbose")) {
     logger::log_threshold(logger::TRACE)
   } else {
     logger::log_threshold(logger::WARN)
@@ -88,11 +86,11 @@ set_verbose_level <- function(task){
 #'
 #' @return invisible(x)
 #' @export
-print.sf_task <- function(x, ...){
+print.sf_task <- function(x, ...) {
   requireNamespace("purrr")
   cat("-- FIELDS --\n")
-  aux_fun <- function(name, x){
-    if (!is.character(x) || length(x) > 1){
+  aux_fun <- function(name, x) {
+    if (!is.character(x) || length(x) > 1) {
       cat(paste0("  * ", name, " (", paste0(class(x), collapse = ", "), ")\n"))
     } else {
       cat(paste0("  * ", name, " : ", x, "\n"))
@@ -105,7 +103,7 @@ print.sf_task <- function(x, ...){
     names(x[["tracker"]]$values),
     x[["tracker"]]$values,
     aux_fun
-    )
+  )
   return(invisible(x))
 }
 
@@ -118,7 +116,7 @@ print.sf_task <- function(x, ...){
 #' @param task `[sf_task]` \cr Objet s3 de type sf_task
 #' @param field_names `character()` \cr Nom des champs à vérifier.
 #' @return Nom des champs écrasés, `character(0)` sinon.
-check_overwrites <- function(task, field_names){
+check_overwrites <- function(task, field_names) {
   set_verbose_level(task)
   overwrite <- intersect(field_names, names(task))
   if (length(overwrite) > 1) {
