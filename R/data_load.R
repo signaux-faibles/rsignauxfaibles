@@ -124,7 +124,7 @@ load_new_data.sf_task <- function(
   rollback_months = 1L,
   debug = FALSE,
   ...
-  ){
+  ) {
 
   set_verbose_level(task)
 
@@ -384,6 +384,28 @@ get_sirets_of_detected <- function(
 
 ###################################
 
+query_or_null <- function(value_to_test, query) {
+  if (is.null(value_to_test)) {
+    return(NULL)
+  } else {
+    return(query)
+  }
+}
+
+date_query <- function(date, gte_or_lt) {
+  assertthat::assert_that(gte_or_lt %in% c("gte", "lt"))
+  query <- query_or_null(
+      date,
+      list(
+        "_id.periode" = list()
+        )
+      )
+  if (!is.null(query)) {
+    query[["_id.periode"]][[paste0("$", gte_or_lt)]] <-
+      list("$date" = paste0(date, "T00:00:00Z"))
+  }
+  return(query)
+}
 
 #' @rdname connect_to_database
 factor_query <- function(
@@ -396,151 +418,86 @@ factor_query <- function(
   code_ape,
   subsample
   ) {
-  # Util functions
-
-  make_query <- function(x) {
-    if (any(x != "")) {
-      return(paste0(
-          '{"$match":{
-             "$and":[{',
-          paste0(x[x != ""], collapse = "}, {"), "}]}}"
-          ))
-    } else {
-      return("")
-    }
-  }
-
-  ## Construction de la requete ##
-  match_id <- paste0('"_id.batch":"', batch, '"')
-
-  # Filtrage siren
-
-  if (is.null(siren)) {
-    match_siren <- ""
-  } else {
-    match_siren <- c()
-    for (i in seq_along(siren)) {
-      match_siren <- c(
-        match_siren,
-        paste0('{"value.siren": "', siren[i], '"}')
-      )
-    }
-
-    match_siren <- paste0('"$or":[', paste(match_siren, collapse = ","), "]")
-  }
-
-  # Unwind du tableau
-  unwind_req <- '{"$unwind":{"path": "$value"}}'
-
-  # Sample
-  if (is.null(subsample)) {
-    sample_req <- '{"$sort": {"value.random_order": -1}}'
-  } else {
-    sample_req <- paste0(
-      '{"$sort": {"value.random_order": -1}}, {"$limit" :', subsample, "}"
+    ## Construction de la requete ##
+  match_batch <- list("_id.batch"  = batch)
+  match_date_inf <- date_query(date_inf, "gte")
+  match_date_sup <- date_query(date_sup, "lt")
+  match_eff <- query_or_null(
+    min_effectif,
+    list(value.effectif = list("$gte" = min_effectif))
     )
-  }
+  unwind <- list("$unwind" = list(path = "$value"))
+  sort_random_order <- list("$sort" = list(value.random_order = -1))
+  limit <- list("$limit" = subsample)
 
-  # Filtrage code APE
+  match_query <- list(
+    "$and" = c(
+      list(match_batch),
+      list(match_date_inf),
+      list(match_date_sup),
+      list(match_eff)
+    )
+  ) %>%
+    .[!purrr::map_lgl(., is.null)]
 
-  if (is.null(code_ape)) {
-    match_APE <- ""
-  } else {
-    niveau_code_ape <- nchar(code_ape)
-    if (any(niveau_code_ape >= 2)) {
-      ape_or_naf <- "code_ape"
-    } else {
-      ape_or_naf <- "code_naf"
-    }
-    match_APE <- c()
-    for (i in seq_along(code_ape)) {
-      match_APE <- c(
-        match_APE,
-        paste0('{"value.', ape_or_naf, '":
-          {"$regex":"^', code_ape[i], '", "$options":"i"}
-    }')
-        )
-  }
-  match_APE <- paste0('"$or":[', paste(match_APE, collapse = ","), "]")
-  # FIX ME: Requete nettement sous-optimale
-}
-
-# Filtrage effectif
-if (is.null(min_effectif)) {
-  match_eff <- ""
-} else {
-  match_eff <- paste0(
-    '"value.effectif":{"$gte":',
-    min_effectif, "}"
+  replace_root <- list("$replaceRoot" = list("newRoot" =  "$value"))
+  projection_query <- list()
+  projection_query[["$project"]] <- setNames(rep(list(1), length(fields)), fields)
+  projection <- query_or_null(
+    fields,
+    projection_query
   )
-}
 
-# Filtrage date
-if (is.null(date_inf)) {
-  match_date_1 <- ""
-} else {
-  match_date_1 <- paste0('"_id.periode":{
-    "$gte": {"$date":"', date_inf, 'T00:00:00Z"}}')
-}
+  query <- list(
+    match_query,
+    sort_random_order,
+    limit,
+    replace_root,
+    projection
+  )  %>%
+  .[!purrr::map_lgl(., is.null)] %>%
+  jsonlite::toJSON()
 
-# Filtrage date
-if (is.null(date_sup)) {
-  match_date_2 <- ""
-} else {
-  match_date_2 <- paste0(
-    '"_id.periode":{"$lt": {"$date":"',
-    date_sup,
-    'T00:00:00Z"}}'
-  )
-}
+  # TODO Make query with this !
+  # # Filtrage siren
+  # if (is.null(siren)) {
+  #   match_siren <- ""
+  # } else {
+  #   match_siren <- c()
+  #   for (i in seq_along(siren)) {
+  #     match_siren <- c(
+  #                      match_siren,
+  #                      paste0('{"value.siren": "', siren[i], '"}')
+  #     )
+  #   }
 
-match_req <- make_query(
-  c(
-    match_id,
-    match_date_1,
-    match_date_2,
-    match_eff,
-    match_siren,
-    match_APE
-  )
-)
+  #   match_siren <- paste0('"$or":[', paste(match_siren, collapse = ","), "]")
+  # }
 
-# Construction de la projection
+  # # Filtrage code APE
 
-if (is.null(fields)) {
-  projection_req <- ""
-} else {
-  assertthat::validate_that( # does not return an error if not verified
-    all(c("periode", "siret") %in% fields),
-    msg = "Beware: siret and periode are not included in the query"
-  )
-  projection_req <- paste0('"', fields, '":1')
-  projection_req <- paste(projection_req, collapse = ",")
-  projection_req <- paste0('{"$project":{', projection_req, "}}")
-}
-
-# Remplacement de la racine
-
-new_root <- "{\"$replaceRoot\" : {\"newRoot\": \"$value\"}}"
-
-reqs <- c(
-  match_req,
-  sample_req,
-  new_root,
-  projection_req
-)
-
-requete <- paste(
-  reqs[reqs != ""],
-  collapse = ", "
-)
-requete <- paste0(
-  "[",
-  requete,
-  "]"
-)
-
-return(requete)
+  # if (is.null(code_ape)) {
+  #   match_APE <- ""
+  # } else {
+  #   niveau_code_ape <- nchar(code_ape)
+  #   if (any(niveau_code_ape >= 2)) {
+  #     ape_or_naf <- "code_ape"
+  #   } else {
+  #     ape_or_naf <- "code_naf"
+  #   }
+  #   match_APE <- c()
+  #   for (i in seq_along(code_ape)) {
+  #     match_APE <- c(
+  #                    match_APE,
+  #                    paste0('{"value.', ape_or_naf, '":
+  #                           {"$regex":"^', code_ape[i], '", "$options":"i"}
+  #   }')
+  #                    )
+  # }
+  # match_APE <- paste0('"$or":[', paste(match_APE, collapse = ","), "]")
+  # # FIX ME: Requete nettement sous-optimale
+  # }
+  return(query)
 }
 
 
