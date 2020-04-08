@@ -422,7 +422,7 @@ factor_query <- function(
     for (i in seq_along(siren)) {
       match_siren <- c(
         match_siren,
-        paste0('{"_id.siret": {"$regex": "^', siren[i], '", "$options":""}}')
+        paste0('{"value.siren": "', siren[i], '"}')
       )
     }
 
