@@ -456,7 +456,7 @@ factor_query <- function(
     projection
   )  %>%
   .[!purrr::map_lgl(., is.null)] %>%
-  jsonlite::toJSON()
+  jsonlite::toJSON(auto_unbox = TRUE)
 
   # TODO Make query with this !
   # # Filtrage siren
