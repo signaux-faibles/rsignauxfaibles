@@ -431,11 +431,13 @@ factor_query <- function(
   limit <- list("$limit" = subsample)
 
   match_query <- list(
-    "$and" = c(
-      list(match_batch),
-      list(match_date_inf),
-      list(match_date_sup),
-      list(match_eff)
+    "$match" = list(
+      "$and" = c(
+        list(match_batch),
+        list(match_date_inf),
+        list(match_date_sup),
+        list(match_eff)
+      )
     )
   ) %>%
     .[!purrr::map_lgl(., is.null)]
