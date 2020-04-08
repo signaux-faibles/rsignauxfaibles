@@ -256,18 +256,37 @@ connect_to_database <- function(
   } else {
     logger::log_threshold(logger::WARN)
   }
-  requete <- factor_query(
-    batch,
-    siren,
-    date_inf,
-    date_sup,
-    min_effectif,
-    fields,
-    code_ape,
-    subsample
-  )
 
-  if (debug){
+  if (is.null(siren) && is.null(code_ape)) {
+    query <- factor_standard_query(
+      batch,
+      date_inf,
+      date_sup,
+      min_effectif,
+      fields,
+      subsample
+    )
+  } else if !is.null(siren) {
+    assertthat::assert_that(
+      is.null(subsample),
+      msg = "L'option subsample n'est pas valide si le paramètre 'siren' est renseigné."
+      )
+    assertthat::assert_that(
+      is.null(siren) || is.null(code_ape),
+      msg = "Les valeurs 'siren' et 'code_ape' ne peuvent pas être requêtées en même temps"
+      )
+    query <- factor_siret_query(
+
+              )
+  } else {
+
+    query <- factor_sector_query(
+
+      )
+  }
+  requete <- query # TODO
+
+  if (debug) {
     cat(requete)
   }
 
@@ -408,14 +427,12 @@ date_query <- function(date, gte_or_lt) {
 }
 
 #' @rdname connect_to_database
-factor_query <- function(
+factor_standard_query <- function(
   batch,
-  siren,
   date_inf,
   date_sup,
   min_effectif,
   fields,
-  code_ape,
   subsample
   ) {
     ## Construction de la requete ##
@@ -459,22 +476,52 @@ factor_query <- function(
   )  %>%
   .[!purrr::map_lgl(., is.null)] %>%
   jsonlite::toJSON(auto_unbox = TRUE)
+  return(query)
+}
 
-  # TODO Make query with this !
-  # # Filtrage siren
-  # if (is.null(siren)) {
-  #   match_siren <- ""
-  # } else {
-  #   match_siren <- c()
-  #   for (i in seq_along(siren)) {
-  #     match_siren <- c(
-  #                      match_siren,
-  #                      paste0('{"value.siren": "', siren[i], '"}')
-  #     )
-  #   }
+factor_siret_query <- function(
+  batch,
+  date_inf,
+  date_sup,
+  sirets,
+  min_effectif,
+  fields
+  ){
 
-  #   match_siren <- paste0('"$or":[', paste(match_siren, collapse = ","), "]")
-  # }
+
+  library(lubridate)
+  n_periods <- interval(date_inf, date_sup) %/% months(1) - 1
+  discrete_periods <- date_inf + 0:n_periods * months(1)
+
+  make_id_objects <- function(siret) {
+    id_objects <- purrr::map(
+      discrete_periods,
+      ~list(batch = batch, periode = ., siret = siret)
+    )
+    return(id_objects)
+  }
+
+  all_id_objects <- purrr::map(sirets, make_id_objects) %>%
+    purrr::reduce(c)
+
+  query <- list(
+    "_id" = list(
+      "$in" = c(
+         all_id_objects
+        )
+      )
+    )
+  return(jsonlite::toJSON(auto_unbox = TRUE))
+
+}
+
+factor_sector_query <- function(
+  batch,
+  date_inf,
+  date_sup,
+  code_ape
+  min_effectif,
+  fields) {
 
   # # Filtrage code APE
 
@@ -499,9 +546,8 @@ factor_query <- function(
   # match_APE <- paste0('"$or":[', paste(match_APE, collapse = ","), "]")
   # # FIX ME: Requete nettement sous-optimale
   # }
-  return(query)
-}
 
+}
 
 #' Get a list of field names
 #'
@@ -1057,3 +1103,4 @@ get_last_batch <- function(
   }
   return(current_data)
 }
+
