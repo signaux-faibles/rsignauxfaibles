@@ -190,45 +190,55 @@ test_that("build_standard_query builds a valid query", {
 })
 
 test_that("build_siret_match_stage builds a valid match stage", {
+  # One siret, unusual date_sup
   expect_equal(
     jsonlite::toJSON(
       build_siret_match_stage(
         batch = "2001",
-        date_inf = as.Date("2001-01-01"),
-        date_sup = as.Date("2021-01-01"),
+        date_inf = as.Date("2014-01-01"),
+        date_sup = as.Date("2014-01-02"),
         sirets = c("01234567891011")
       ),
       auto_unbox = TRUE
     ) %>%
       toString(),
     paste0(
-      '{"$match":{',
-       '{"_id": {"$in":[',
-       '{"batch": "test_batch_1",',
+      '{"$match":',
+       '{"_id":{"$in":[',
+       '{"batch":"2001",',
        '"siret":"01234567891011",',
-       '"periode": {"$date": "2014-01-01T00:00:00.000Z"}}',
-       "]}}"
+       '"periode":{"$date":"2014-01-01T00:00:00Z"}}',
+       "]}}}"
       )
   )
-
+  # Several sirets, several periods
   expect_equal(
     jsonlite::toJSON(
-      build_standard_match_stage(
-        "2001",
-        as.Date("2001-01-01"),
-        as.Date("2021-01-01"),
-        NULL
+      build_siret_match_stage(
+        batch = "2001",
+        date_inf = as.Date("2014-01-01"),
+        date_sup = as.Date("2014-03-01"),
+        sirets = c("01234567891011", "11109876543210")
       ),
       auto_unbox = TRUE
     ) %>%
       toString(),
     paste0(
-      '{"$match":{"$and":[',
-      '{"_id.batch":"2001"},',
-      '{"_id.periode":{"$gte":{"$date":"2001-01-01T00:00:00Z"}}},',
-      '{"_id.periode":{"$lt":{"$date":"2021-01-01T00:00:00Z"}}},',
-      '{"value.effectif":{"$gte":1}}',
-      "]}}"
+      '{"$match":',
+       '{"_id":{"$in":[',
+       '{"batch":"2001",',
+       '"siret":"01234567891011",',
+       '"periode":{"$date":"2014-01-01T00:00:00Z"}},',
+       '{"batch":"2001",',
+       '"siret":"01234567891011",',
+       '"periode":{"$date":"2014-02-01T00:00:00Z"}},',
+       '{"batch":"2001",',
+       '"siret":"11109876543210",',
+       '"periode":{"$date":"2014-01-01T00:00:00Z"}},',
+       '{"batch":"2001",',
+       '"siret":"11109876543210",',
+       '"periode":{"$date":"2014-02-01T00:00:00Z"}}',
+       "]}}}"
       )
   )
 })

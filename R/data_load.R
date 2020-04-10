@@ -227,6 +227,8 @@ import_data <- function(
   } else {
     logger::log_threshold(logger::WARN)
   }
+
+  assertthat::assert_that(date_sup > date_inf)
   if (is.null(siren) && is.null(code_ape)) {
     query <- build_standard_query(
       batch = batch,
@@ -558,17 +560,22 @@ build_siret_match_stage <- function(
 
 
   library(lubridate)
-  n_periods <- interval(date_inf, date_sup) %/% months(1) - 1
-  discrete_periods <- date_inf + 0:n_periods * months(1)
+  n_periods <- interval(date_inf, date_sup) %/% months(1)
+  if (n_periods == 0) {
+    discrete_periods <- date_inf
+  } else {
+    discrete_periods <- date_inf %m+%
+      ((seq_len(n_periods) - 1) * months(1))
+  }
 
 
   make_id_objects <- function(siret) {
     id_objects <- purrr::map(
       discrete_periods,
-      ~list(
+      ~ list(
         batch = batch,
         siret = siret,
-        periode = .
+        periode = list("$date" =  paste0(., "T00:00:00Z"))
       )
     )
     return(id_objects)
