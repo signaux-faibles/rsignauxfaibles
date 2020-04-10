@@ -67,7 +67,7 @@ load_hist_data.sf_task <- function(
 
   logger::log_info("Chargement des donnees historiques.")
 
-  hist_data <- connect_to_database(
+  hist_data <- import_data(
     database,
     collection,
     mongodb_uri = mongodb_uri,
@@ -100,7 +100,7 @@ load_hist_data.sf_task <- function(
 #' @param periods `[Date()]` \cr Périodes d'intérêt, auquels charger les
 #'   données. Des périodes supplémentairs peuvent être chargées selon la
 #'   valeur de rollback_months.
-#' @inheritParams connect_to_database
+#' @inheritParams import_data
 #' @param rollback_months `integer(1)`\cr Nombre de mois précédant le premier mois de
 #'   `periods` à charger. Permet d'effectuer des calculs de différences ou de
 #'   moyennes glissantes pour les périodes d'intérêt.
@@ -129,7 +129,7 @@ load_new_data.sf_task <- function(
   set_verbose_level(task)
 
   logger::log_info("Loading data from last batch")
-  task[["new_data"]] <- connect_to_database(
+  task[["new_data"]] <- import_data(
     database = database,
     collection = collection,
     mongodb_uri = mongodb_uri,
@@ -150,7 +150,7 @@ load_new_data.sf_task <- function(
 }
 #' Connexion à la base de donnée
 #'
-#' `connect_to_database` permet de requêter des données mongoDB pour en
+#' `import_data` permet de requêter des données mongoDB pour en
 #' faire un dataframe ou un Spark dataframe. \cr
 #' `factor_query` permet de fabriquer la requête d'aggrégation
 #' correspondante. \cr
@@ -207,7 +207,7 @@ load_new_data.sf_task <- function(
 #' @return `data.frame()`
 #'
 #' @export
-connect_to_database <- function(
+import_data <- function(
   database,
   collection,
   mongodb_uri,
@@ -221,7 +221,7 @@ connect_to_database <- function(
   subsample = NULL,
   verbose,
   replace_missing = NULL,
-  debug
+  debug = FALSE
   ) {
 
   if (is.null(replace_missing)){
@@ -258,7 +258,7 @@ connect_to_database <- function(
   }
 
   if (is.null(siren) && is.null(code_ape)) {
-    query <- factor_standard_query(
+    query <- build_standard_query(
       batch,
       date_inf,
       date_sup,
@@ -266,7 +266,7 @@ connect_to_database <- function(
       fields,
       subsample
     )
-  } else if !is.null(siren) {
+  } else if (!is.null(siren)) {
     assertthat::assert_that(
       is.null(subsample),
       msg = "L'option subsample n'est pas valide si le paramètre 'siren' est renseigné."
@@ -275,12 +275,16 @@ connect_to_database <- function(
       is.null(siren) || is.null(code_ape),
       msg = "Les valeurs 'siren' et 'code_ape' ne peuvent pas être requêtées en même temps"
       )
-    query <- factor_siret_query(
-
-              )
+    query <- build_siret_query(
+      batch,
+      date_inf,
+      date_sup,
+      sirets,
+      fields
+    )
   } else {
 
-    query <- factor_sector_query(
+    query <- build_sector_query(
 
       )
   }
@@ -307,6 +311,7 @@ connect_to_database <- function(
   # Import dataframe
   logger::log_info("Import en cours...")
 
+  browser()
   donnees <- dbconnection$aggregate(requete)
 
   logger::log_info(" Import fini.")
@@ -368,7 +373,6 @@ connect_to_database <- function(
       mutate(region = factor(region))
   }
 
-
   return(table_wholesample)
 }
 
@@ -426,28 +430,84 @@ date_query <- function(date, gte_or_lt) {
   return(query)
 }
 
-#' @rdname connect_to_database
-factor_standard_query <- function(
+build_standard_query <- function(
+    batch,
+    date_inf,
+    date_sup,
+    min_effectif,
+    subsample,
+    fields
+) {
+
+  match_stage <- build_standard_match_stage(
+    batch,
+    date_inf,
+    date_sup,
+    min_effectif
+  )
+  sort <- build_sort_stage()
+  limit <- build_limit_stage(subsample)
+  replace_root <- build_replace_root_stage()
+  projection <- build_projection_stage(fields)
+
+  query <- assemble_stages_to_query(
+    match_stage,
+    sort,
+    limit,
+    replace_root,
+    projection
+  )
+
+  return(query)
+}
+
+assemble_stages_to_query <- function(...) {
+    query <- list(...)  %>%
+    .[!purrr::map_lgl(., is.null)] %>%
+    jsonlite::toJSON(auto_unbox = TRUE)
+  return(query)
+}
+
+build_sort_stage <- function() {
+  sort_stage <- list("$sort" = list(value.random_order = -1))
+  return(sort_stage)
+}
+
+build_limit_stage <- function(subsample) {
+  limit_stage <- list("$limit" = subsample)
+  return(limit_stage)
+}
+
+build_replace_root_stage <- function() {
+  list("$replaceRoot" = list("newRoot" =  "$value"))
+}
+
+build_projection_stage <- function(fields) {
+  projection_stage <- list()
+  projection_stage[["$project"]] <- setNames(rep(list(1), length(fields)), fields)
+  projection_stage <- query_or_null(
+    fields,
+    projection_stage
+  )
+  return(projection_stage)
+}
+
+build_standard_match_stage <- function(
   batch,
   date_inf,
   date_sup,
-  min_effectif,
-  fields,
-  subsample
+  min_effectif
   ) {
     ## Construction de la requete ##
   match_batch <- list("_id.batch"  = batch)
   match_date_inf <- date_query(date_inf, "gte")
   match_date_sup <- date_query(date_sup, "lt")
-  match_eff <- query_or_null(
-    min_effectif,
-    list(value.effectif = list("$gte" = min_effectif))
-    )
-  unwind <- list("$unwind" = list(path = "$value"))
-  sort_random_order <- list("$sort" = list(value.random_order = -1))
-  limit <- list("$limit" = subsample)
+  if (is.null(min_effectif)) {
+    min_effectif = 1
+  }
+  match_eff <- list(value.effectif = list("$gte" = min_effectif))
 
-  match_query <- list(
+  match_stage <- list(
     "$match" = list(
       "$and" = c(
         list(match_batch),
@@ -456,47 +516,33 @@ factor_standard_query <- function(
         list(match_eff)
       )
     )
-  ) %>%
-    .[!purrr::map_lgl(., is.null)]
-
-  replace_root <- list("$replaceRoot" = list("newRoot" =  "$value"))
-  projection_query <- list()
-  projection_query[["$project"]] <- setNames(rep(list(1), length(fields)), fields)
-  projection <- query_or_null(
-    fields,
-    projection_query
   )
-
-  query <- list(
-    match_query,
-    sort_random_order,
-    limit,
-    replace_root,
-    projection
-  )  %>%
-  .[!purrr::map_lgl(., is.null)] %>%
-  jsonlite::toJSON(auto_unbox = TRUE)
-  return(query)
+  return(match_stage)
 }
 
-factor_siret_query <- function(
+build_siret_match_stage <- function(
   batch,
   date_inf,
   date_sup,
   sirets,
   min_effectif,
   fields
-  ){
+  ) {
 
 
   library(lubridate)
   n_periods <- interval(date_inf, date_sup) %/% months(1) - 1
-  discrete_periods <- date_inf + 0:n_periods * months(1)
+  discrete_periods <- date_inf + 0:n_periods * months(1) %>%
+    as.POSIXct()
 
   make_id_objects <- function(siret) {
     id_objects <- purrr::map(
       discrete_periods,
-      ~list(batch = batch, periode = ., siret = siret)
+      ~list(
+        batch = batch,
+        siret = siret,
+        periode = .
+      )
     )
     return(id_objects)
   }
@@ -504,22 +550,23 @@ factor_siret_query <- function(
   all_id_objects <- purrr::map(sirets, make_id_objects) %>%
     purrr::reduce(c)
 
-  query <- list(
-    "_id" = list(
-      "$in" = c(
-         all_id_objects
+  match_query <- list(
+    "$match" = list(
+      "_id" = list(
+        "$in" = c(
+           all_id_objects
         )
       )
     )
-  return(jsonlite::toJSON(auto_unbox = TRUE))
-
+  )
+  return(match_query)
 }
 
-factor_sector_query <- function(
+build_sector_query <- function(
   batch,
   date_inf,
   date_sup,
-  code_ape
+  code_ape,
   min_effectif,
   fields) {
 
@@ -1087,7 +1134,7 @@ get_last_batch <- function(
   min_effectif,
   rollback_months) {
 
-  current_data <- connect_to_database(
+  current_data <- import_data(
     database,
     collection,
     mongodb_uri,
