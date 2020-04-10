@@ -154,6 +154,30 @@ test_that("build_standard_match_stage builds a valid match stage", {
   )
 })
 
+
+test_that("build_standard_match_stage builds a valid match stage", {
+  expect_equal(
+    jsonlite::toJSON(
+      build_sector_match_stage(
+        "2001",
+        as.Date("2001-01-01"),
+        as.Date("2021-01-01"),
+        code_ape = c("1234B")
+      ),
+      auto_unbox = TRUE
+    ) %>%
+      toString(),
+    paste0(
+      '{"$match":{"$and":[',
+      '{"_id.batch":"2001"},',
+      '{"_id.periode":{"$gte":{"$date":"2001-01-01T00:00:00Z"}}},',
+      '{"_id.periode":{"$lt":{"$date":"2021-01-01T00:00:00Z"}}},',
+      '{"value.code_ape":{"$in":["1234B"]}}',
+      "]}}"
+      )
+  )
+})
+
 test_that(
   "assemble_stages_to_query returns a json array of objects, in same order", {
    expect_equal(

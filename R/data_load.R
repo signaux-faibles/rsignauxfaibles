@@ -521,6 +521,25 @@ build_siret_query <- function(
   return(query)
 }
 
+build_sector_query <- function(
+                               batch,
+                               date_inf,
+                               date_sup,
+                               code_ape,
+                               min_effectif,
+                               fields) {
+
+  match_ape <- build_sector_match_stage(batch, date_inf, date_sup, code_ape)
+  replace_root <- build_replace_root_stage()
+  projection <- build_projection_stage(fields)
+  query <- assemble_stages_to_query(
+    match_ape,
+    replace_root,
+    projection
+  )
+  return(query)
+}
+
 assemble_stages_to_query <- function(...) {
     query <- list(...)  %>%
     .[!purrr::map_lgl(., is.null)] %>%
@@ -617,7 +636,7 @@ build_siret_match_stage <- function(
     "$match" = list(
       "_id" = list(
         "$in" = c(
-           all_id_objects
+           I(all_id_objects)
         )
       )
     )
@@ -626,39 +645,31 @@ build_siret_match_stage <- function(
 }
 
 
-build_sector_query <- function(
+build_sector_match_stage <- function(
   batch,
   date_inf,
   date_sup,
-  code_ape,
-  min_effectif,
-  fields) {
+  code_ape
+) {
 
-  # # Filtrage code APE
+  match_batch <- list("_id.batch"  = batch)
+  match_date_inf <- date_query(date_inf, "gte")
+  match_date_sup <- date_query(date_sup, "lt")
+  match_ape <- list("value.code_ape" = list("$in" = I(code_ape)))
 
-  # if (is.null(code_ape)) {
-  #   match_APE <- ""
-  # } else {
-  #   niveau_code_ape <- nchar(code_ape)
-  #   if (any(niveau_code_ape >= 2)) {
-  #     ape_or_naf <- "code_ape"
-  #   } else {
-  #     ape_or_naf <- "code_naf"
-  #   }
-  #   match_APE <- c()
-  #   for (i in seq_along(code_ape)) {
-  #     match_APE <- c(
-  #                    match_APE,
-  #                    paste0('{"value.', ape_or_naf, '":
-  #                           {"$regex":"^', code_ape[i], '", "$options":"i"}
-  #   }')
-  #                    )
-  # }
-  # match_APE <- paste0('"$or":[', paste(match_APE, collapse = ","), "]")
-  # # FIX ME: Requete nettement sous-optimale
-  # }
-
+  match_stage <- list(
+    "$match" = list(
+      "$and" = c(
+        list(match_batch),
+        list(match_date_inf),
+        list(match_date_sup),
+        list(match_ape)
+      )
+    )
+  )
+  return(match_stage)
 }
+
 
 #' Get a list of field names
 #'
