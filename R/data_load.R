@@ -248,11 +248,11 @@ import_data <- function(
       msg = "Les valeurs 'siren' et 'code_ape' ne peuvent pas être requêtées en même temps"
       )
     query <- build_siret_query(
-      batch,
-      date_inf,
-      date_sup,
-      sirets,
-      fields
+      batch = batch,
+      date_inf = date_inf,
+      date_sup = date_sup,
+      sirets = siren,
+      fields = fields
     )
   } else {
 
@@ -492,6 +492,32 @@ build_standard_query <- function(
   return(query)
 }
 
+build_siret_query <- function(
+                              batch,
+                              date_inf,
+                              date_sup,
+                              sirets,
+                              fields
+                              ) {
+
+  match_stage <- build_siret_match_stage(
+    batch,
+    date_inf,
+    date_sup,
+    sirets
+  )
+  replace_root <- build_replace_root_stage()
+  projection <- build_projection_stage(fields)
+
+  query <- assemble_stages_to_query(
+    match_stage,
+    replace_root,
+    projection
+  )
+
+  return(query)
+}
+
 assemble_stages_to_query <- function(...) {
     query <- list(...)  %>%
     .[!purrr::map_lgl(., is.null)] %>%
@@ -595,6 +621,7 @@ build_siret_match_stage <- function(
   )
   return(match_query)
 }
+
 
 build_sector_query <- function(
   batch,

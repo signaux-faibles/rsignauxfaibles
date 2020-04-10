@@ -252,7 +252,10 @@ test_that("build_siret_match_stage builds a valid match stage", {
 # End-to-end: import_data
 #
 
-import_test_data <- function(batch, fields, sirets) {
+import_test_data <- function(
+                             batch,
+                             fields,
+                             sirets) {
   test_db <- "unittest_signauxfaibles"
   test_col <- "Features_for_tests"
   if (!is.null(sirets)) {
@@ -260,7 +263,7 @@ import_test_data <- function(batch, fields, sirets) {
   } else {
     subsample <- 10
   }
-  empty_data_import <- import_data(
+  data_import <- import_data(
     test_db,
     test_col,
     mongodb_uri = "mongodb://localhost:27017",
@@ -271,8 +274,10 @@ import_test_data <- function(batch, fields, sirets) {
     subsample = subsample,
     fields = fields,
     siren = sirets,
-    verbose = FALSE
+    verbose = FALSE,
+    debug = TRUE
   )
+  return(data_import)
 }
 
 test_that(
@@ -314,7 +319,7 @@ test_that(
   test_object <- import_test_data(
     "test_batch_1",
     fields = fields,
-    sirets = NULL
+    sirets = c("01234567891011")
   )
   expect_equal(names(test_object), fields)
   expect_equal(test_object$siret, "01234567891011")
