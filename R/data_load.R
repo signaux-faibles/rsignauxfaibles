@@ -33,7 +33,7 @@ NULL
 #'   données.
 #' @param min_effectif `integer(1)` \cr Limite basse du filtrage de l'effectif
 #'   (la limite est incluse)
-#' @param siren `character()` \cr Liste de sirens à exporter. Si égale à
+#' @param sirets `character()` \cr Liste de sirets à exporter. Si égale à
 #'   \code{NULL}, charge tous les sirens disponibles.
 #' @param code_ape `character()` \cr Liste de codes APE à exporter. Si égale à
 #'   \code{NULL}, charge tous les codes disponibles.
@@ -58,7 +58,7 @@ load_hist_data.sf_task <- function(
                                    date_inf = as.Date("2015-01-01"),
                                    date_sup = as.Date("2017-01-01"),
                                    min_effectif = 10L,
-                                   siren = NULL,
+                                   sirets = NULL,
                                    code_ape = NULL,
                                    debug = FALSE,
                                    ...) {
@@ -71,7 +71,7 @@ load_hist_data.sf_task <- function(
     mongodb_uri = mongodb_uri,
     batch,
     min_effectif = min_effectif,
-    siren = siren,
+    sirets = sirets,
     date_inf = date_inf,
     date_sup = date_sup,
     fields = fields,
@@ -157,7 +157,7 @@ load_new_data.sf_task <- function(
 #' @param batch `character(1)` \cr Batch auquel doit être importées les
 #'   données. Les modifications opérées par les batchs ultérieurs sont
 #'   ignorées.
-#' @param siren `character()` \cr Liste de sirens à exporter. Si égale à
+#' @param sirets `character()` \cr Liste de sirens à exporter. Si égale à
 #'   \code{NULL}, charge tous les sirens disponibles.
 #' @param date_inf `Date(1)` \cr Limite inférieure de la période de temps
 #' requêtée
@@ -212,7 +212,7 @@ import_data <- function(
                         mongodb_uri,
                         batch,
                         min_effectif,
-                        siren = NULL,
+                        sirets = NULL,
                         date_inf = NULL,
                         date_sup = NULL,
                         fields = NULL,
@@ -229,7 +229,7 @@ import_data <- function(
   }
 
   assertthat::assert_that(date_sup > date_inf)
-  if (is.null(siren) && is.null(code_ape)) {
+  if (is.null(sirets) && is.null(code_ape)) {
     query <- build_standard_query(
       batch = batch,
       date_inf = date_inf,
@@ -238,20 +238,20 @@ import_data <- function(
       subsample = subsample,
       fields = fields
     )
-  } else if (!is.null(siren)) {
+  } else if (!is.null(sirets)) {
     assertthat::assert_that(
       is.null(subsample),
-      msg = "L'option subsample n'est pas valide si le paramètre 'siren' est renseigné."
+      msg = "L'option subsample n'est pas valide si le paramètre 'sirets' est renseigné."
       )
     assertthat::assert_that(
-      is.null(siren) || is.null(code_ape),
-      msg = "Les valeurs 'siren' et 'code_ape' ne peuvent pas être requêtées en même temps"
+      is.null(sirets) || is.null(code_ape),
+      msg = "Les valeurs 'sirets' et 'code_ape' ne peuvent pas être requêtées en même temps"
       )
     query <- build_siret_query(
       batch = batch,
       date_inf = date_inf,
       date_sup = date_sup,
-      sirets = siren,
+      sirets = sirets,
       fields = fields
     )
   } else {

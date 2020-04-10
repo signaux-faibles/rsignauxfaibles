@@ -273,7 +273,7 @@ import_test_data <- function(
     date_sup = as.Date("2014-02-01"),
     subsample = subsample,
     fields = fields,
-    siren = sirets,
+    sirets = sirets,
     verbose = FALSE,
     debug = TRUE
   )
