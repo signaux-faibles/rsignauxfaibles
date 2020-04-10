@@ -204,8 +204,10 @@ import_test_data <- function(batch, fields) {
     min_effectif = 10,
     date_inf = as.Date("2014-01-01"),
     date_sup = as.Date("2014-02-01"),
+    subsample = 10,
     fields = fields,
-    verbose = FALSE
+    verbose = FALSE,
+    debug = TRUE
     )
 }
 
@@ -221,7 +223,5 @@ test_that("On arrive à récupérer les éléments de la base", {
   expect_equal(test_object$siret, "01234567891011")
   expect_equal(test_object$periode, as.Date("2014-01-01"))
 })
-
-
 
 # TODO: wrong database or collection should throw an error, not returning empty dataframe.

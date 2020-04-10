@@ -229,12 +229,12 @@ import_data <- function(
   }
   if (is.null(siren) && is.null(code_ape)) {
     query <- build_standard_query(
-      batch,
-      date_inf,
-      date_sup,
-      min_effectif,
-      fields,
-      subsample
+      batch = batch,
+      date_inf = date_inf,
+      date_sup = date_sup,
+      min_effectif = min_effectif,
+      subsample = subsample,
+      fields = fields
     )
   } else if (!is.null(siren)) {
     assertthat::assert_that(
