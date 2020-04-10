@@ -84,7 +84,8 @@ test_that("build_limit_stage builds a valid limit stage", {
 
 test_that("build_replace_root_stage builds a valid replaceRoot stage", {
   expect_equal(
-    jsonlite::toJSON(build_replace_root_stage(), auto_unbox = TRUE) %>% toString(),
+    jsonlite::toJSON(build_replace_root_stage(), auto_unbox = TRUE) %>%
+      toString(),
     '{"$replaceRoot":{"newRoot":"$value"}}'
   )
 })
@@ -94,15 +95,18 @@ test_that("build_projection_stage builds a valid projection stage", {
     build_projection_stage(NULL)
   )
   expect_equal(
-    jsonlite::toJSON(build_projection_stage("a"), auto_unbox = TRUE) %>% toString(),
+    jsonlite::toJSON(build_projection_stage("a"), auto_unbox = TRUE) %>%
+      toString(),
     '{"$project":{"a":1}}'
   )
   expect_equal(
-    jsonlite::toJSON(build_projection_stage(c("a", "b")), auto_unbox = TRUE) %>% toString(),
+    jsonlite::toJSON(build_projection_stage(c("a", "b")), auto_unbox = TRUE) %>%
+      toString(),
     '{"$project":{"a":1,"b":1}}'
   )
   expect_equal(
-    jsonlite::toJSON(build_projection_stage(c("_id")), auto_unbox = TRUE) %>% toString(),
+    jsonlite::toJSON(build_projection_stage(c("_id")), auto_unbox = TRUE) %>%
+      toString(),
     '{"$project":{"_id":1}}'
   )
 })
@@ -150,7 +154,8 @@ test_that("build_standard_match_stage builds a valid match stage", {
   )
 })
 
-test_that("assemble_stages_to_query returns a json array of objects, in same order", {
+test_that(
+  "assemble_stages_to_query returns a json array of objects, in same order", {
    expect_equal(
       assemble_stages_to_query(list(b = 0), list(a = 1)) %>% toString(),
       '[{"b":0},{"a":1}]'
@@ -247,9 +252,14 @@ test_that("build_siret_match_stage builds a valid match stage", {
 # End-to-end: import_data
 #
 
-import_test_data <- function(batch, fields) {
+import_test_data <- function(batch, fields, sirets) {
   test_db <- "unittest_signauxfaibles"
   test_col <- "Features_for_tests"
+  if (!is.null(sirets)) {
+    subsample <- NULL
+  } else {
+    subsample <- 10
+  }
   empty_data_import <- import_data(
     test_db,
     test_col,
@@ -258,24 +268,57 @@ import_test_data <- function(batch, fields) {
     min_effectif = 10,
     date_inf = as.Date("2014-01-01"),
     date_sup = as.Date("2014-02-01"),
-    subsample = 10,
+    subsample = subsample,
     fields = fields,
-    verbose = FALSE,
-    debug = TRUE
-    )
+    siren = sirets,
+    verbose = FALSE
+  )
 }
 
-test_that("une requête vide renvoie un dataframe vide", {
-  empty_data <- import_test_data("wrong_batch", fields = c("siret", "periode"))
+test_that(
+  "une requête vide renvoie un dataframe vide avec une requête standard", {
+  empty_data <- import_test_data(
+    "wrong_batch",
+    fields = c("siret", "periode"),
+    sirets = NULL
+  )
   expect_equal(dim(empty_data), c(0, 2))
 })
 
-test_that("On arrive à récupérer les éléments de la base", {
+test_that(
+  "On arrive à récupérer les éléments de la base avec une requête standard", {
   fields <- c("siret", "periode")
-  test_object <- import_test_data("test_batch_1", fields = fields)
+  test_object <- import_test_data(
+    "test_batch_1",
+    fields = fields,
+    sirets = NULL
+  )
   expect_equal(names(test_object), fields)
   expect_equal(test_object$siret, "01234567891011")
   expect_equal(test_object$periode, as.Date("2014-01-01"))
 })
 
-# TODO: wrong database or collection should throw an error, not returning empty dataframe.
+test_that(
+  "une requête vide renvoie un dataframe vide avec une requête par siret", {
+  empty_data <- import_test_data(
+    "test_batch_1",
+    fields = c("siret", "periode"),
+    sirets = c("1110987654321")
+  )
+  expect_equal(dim(empty_data), c(0, 2))
+})
+
+test_that(
+  "On arrive à récupérer les éléments de la base avec une requête par siret", {
+  fields <- c("siret", "periode")
+  test_object <- import_test_data(
+    "test_batch_1",
+    fields = fields,
+    sirets = NULL
+  )
+  expect_equal(names(test_object), fields)
+  expect_equal(test_object$siret, "01234567891011")
+  expect_equal(test_object$periode, as.Date("2014-01-01"))
+})
+# TODO: wrong database or collection should throw an error, not returning
+# empty dataframe.
