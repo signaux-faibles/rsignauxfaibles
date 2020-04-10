@@ -255,9 +255,12 @@ import_data <- function(
       fields = fields
     )
   } else {
-
     query <- build_sector_query(
-
+      batch = batch,
+      date_inf = date_inf,
+      date_sup = date_sup,
+      code_ape = code_ape,
+      fields = fields
       )
   }
 

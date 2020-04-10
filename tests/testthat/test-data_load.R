@@ -255,7 +255,8 @@ test_that("build_siret_match_stage builds a valid match stage", {
 import_test_data <- function(
                              batch,
                              fields,
-                             sirets) {
+                             sirets,
+                             code_ape) {
   test_db <- "unittest_signauxfaibles"
   test_col <- "Features_for_tests"
   if (!is.null(sirets)) {
@@ -274,6 +275,7 @@ import_test_data <- function(
     subsample = subsample,
     fields = fields,
     sirets = sirets,
+    code_ape = code_ape,
     verbose = FALSE,
     debug = TRUE
   )
@@ -285,7 +287,8 @@ test_that(
   empty_data <- import_test_data(
     "wrong_batch",
     fields = c("siret", "periode"),
-    sirets = NULL
+    sirets = NULL,
+    code_ape = NULL
   )
   expect_equal(dim(empty_data), c(0, 2))
 })
@@ -296,7 +299,8 @@ test_that(
   test_object <- import_test_data(
     "test_batch_1",
     fields = fields,
-    sirets = NULL
+    sirets = NULL,
+    code_ape = NULL
   )
   expect_equal(names(test_object), fields)
   expect_equal(test_object$siret, "01234567891011")
@@ -308,7 +312,8 @@ test_that(
   empty_data <- import_test_data(
     "test_batch_1",
     fields = c("siret", "periode"),
-    sirets = c("1110987654321")
+    sirets = c("1110987654321"),
+    code_ape = NULL
   )
   expect_equal(dim(empty_data), c(0, 2))
 })
@@ -319,7 +324,23 @@ test_that(
   test_object <- import_test_data(
     "test_batch_1",
     fields = fields,
-    sirets = c("01234567891011")
+    sirets = c("01234567891011"),
+    code_ape = NULL
+  )
+  expect_equal(names(test_object), fields)
+  expect_equal(test_object$siret, "01234567891011")
+  expect_equal(test_object$periode, as.Date("2014-01-01"))
+})
+
+
+test_that(
+  "On arrive à récupérer les éléments de la base avec une requête par siret", {
+  fields <- c("siret", "periode")
+  test_object <- import_test_data(
+    "test_batch_1",
+    fields = fields,
+    sirets = NULL,
+    code_ape = "1234B"
   )
   expect_equal(names(test_object), fields)
   expect_equal(test_object$siret, "01234567891011")
