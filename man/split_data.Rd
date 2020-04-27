@@ -6,14 +6,18 @@
 \title{Scission des données en échantillon d'entraînement, de validation et de
 test.}
 \usage{
-\method{split_data}{sf_task}(task, fracs = c(0.6, 0.2, 0.2),
+\method{split_data}{sf_task}(
+  task,
+  fracs = c(0.6, 0.2, 0.2),
   names = c("train", "validation", "test"),
-  tracker = task[["tracker"]], ...)
+  tracker = task[["tracker"]],
+  ...
+)
 
 split_data(task, ...)
 }
 \arguments{
-\item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{fracs}{\code{numeric()} \cr Fraction des différents sous-échantillons.
 Toutes les fractions doivent être dans ]0,1] et leur somme doit être égale
@@ -23,12 +27,12 @@ Toutes les fractions doivent être dans ]0,1] et leur somme doit être égale
 longueur que les fractions, ou de longueur 1. Si de longueur 1, alors un
 préfixe "_X", avec X la numérotation des échantillons, est automatiquement ajouté.}
 
-\item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
+\item{tracker}{\verb{[mllogr::Tracker]} \cr Logger of ML experiment}
 
 \item{...}{Not used}
 }
 \value{
-\code{[sf_task]} \cr
+\verb{[sf_task]} \cr
 L'objet \code{task} donné en entrée auquel les champs "train_data",
 "validation_data" et "test_data" ont été
 ajoutés (ou écrasés), chacun contenant un data.frame() avec les colonnes
@@ -36,10 +40,11 @@ de \code{task[["hist_data"]]} et un sous-ensemble (possiblement vide) de ces
 lignes.
 }
 \description{
-Scinde les données historiques en échantillon d'entraînement, de validation et de
-test, selon les proportions souhaitées. S'assure que deux établissements de la même entreprise ne soient pas
-à la fois dans deux échantillons différents pour éviter la fuite
-d'information d'un échantillon vers l'autre.
+Scinde les données historiques en échantillon d'entraînement, de validation
+et de test, selon les proportions souhaitées. S'assure que deux
+établissements de la même entreprise ne soient pas à la fois dans deux
+échantillons différents pour éviter la fuite d'information d'un échantillon
+vers l'autre.
 }
 \details{
 La fraction de l'échantillon de test est calculée par

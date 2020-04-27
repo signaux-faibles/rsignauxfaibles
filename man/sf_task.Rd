@@ -4,9 +4,15 @@
 \alias{sf_task}
 \title{Initialiser une tâche d'apprentissage}
 \usage{
-sf_task(verbose, database = "test_signauxfaibles",
-  collection = "Features", mongodb_uri, experiment_name,
-  experiment_description, tracker = NULL)
+sf_task(
+  verbose,
+  database = "test_signauxfaibles",
+  collection = "Features",
+  mongodb_uri,
+  experiment_name = "",
+  experiment_description = "",
+  tracker = NULL
+)
 }
 \arguments{
 \item{verbose}{\code{logical(1)} \cr
@@ -26,13 +32,13 @@ Quel est l'objet de cette tâche ?}
 \item{experiment_description}{\code{character()} \cr
 Descriptions supplémentaires sur l'expérimentation en cours.}
 
-\item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
+\item{tracker}{\verb{[mllogr::Tracker]} \cr Logger of ML experiment}
 }
 \value{
-\code{[rsignauxfaibles::sf_task]} \cr
-Un objet sf_task avec un attribut de type \code{logical} "verbose", qui définit le niveau de log,
-ainsi qu'un attribut "to_log" de type \code{list} dans lequel seront stockés des
-informations spécifiques pour le log.
+\verb{[rsignauxfaibles::sf_task]} \cr
+Un objet sf_task avec un attribut de type \code{logical} "verbose", qui
+définit le niveau de log, ainsi qu'un attribut "to_log" de type \code{list}
+dans lequel seront stockés des informations spécifiques pour le log.
 }
 \description{
 Un objet s3 de type sf_task est défini, dans lequel seront défini et

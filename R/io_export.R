@@ -36,6 +36,7 @@ export.sf_task <- function(
   mongodb_uri = task[["mongodb_uri"]],
   collection_features = task[["collection"]],
   collection_scores = "Scores",
+  algo_name = "algo",
   ...
 ){
 
@@ -123,7 +124,7 @@ export.sf_task <- function(
       }},
       formatted_data = res,
       batch = batch,
-      algo = "algo"
+      algo = algo_name
       )
   }
   logger::log_info("Data exported with success to
@@ -211,7 +212,7 @@ format_for_export <- function(
   logger::log_info("Preparation a l'export ... ")
   logger::log_info("Derniere periode connue: {last_period}")
 
-  donnees <- connect_to_database(
+  donnees <- import_data(
     database = database,
     collection = collection,
     mongodb_uri = mongodb_uri,
@@ -625,7 +626,7 @@ export_fiche_visite <- function(
   absolute_path){
 
   for (i in seq_along(sirets)) {
-    elementary_info <- connect_to_database(
+    elementary_info <- import_data(
       database = database,
       collection = collection,
       mongodb_uri = mongodb_uri,

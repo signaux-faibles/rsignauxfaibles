@@ -4,8 +4,16 @@
 \alias{format_for_export}
 \title{Prepare_for_export}
 \usage{
-format_for_export(data_to_export, export_fields, database, collection,
-  mongodb_uri, last_batch, known_sirens_full_path, verbose)
+format_for_export(
+  data_to_export,
+  export_fields,
+  database,
+  collection,
+  mongodb_uri,
+  last_batch,
+  known_sirens_full_path,
+  verbose
+)
 }
 \arguments{
 \item{data_to_export}{\code{data.frame(1)} \cr Données à exporter. Doit avoir

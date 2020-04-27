@@ -7,7 +7,7 @@
 log_experiment(task, ...)
 }
 \arguments{
-\item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{...}{Additional parameters depending on class of task}
 }

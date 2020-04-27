@@ -4,10 +4,17 @@
 \alias{evaluate}
 \title{Évaluation du modèle}
 \usage{
-evaluate(..., eval_function = NULL, data_name = "validation_data",
-  plot = TRUE, prediction_names = NULL, target_names = "outcome",
-  segment_names = NULL, remove_strong_signals = TRUE,
-  tracker = task[["tracker"]])
+evaluate(
+  ...,
+  eval_function = NULL,
+  data_name = "validation_data",
+  plot = TRUE,
+  prediction_names = NULL,
+  target_names = "outcome",
+  segment_names = NULL,
+  remove_strong_signals = TRUE,
+  tracker = task[["tracker"]]
+)
 }
 \arguments{
 \item{...}{\code{tasks} \cr Tasks to be evaluated.}
@@ -36,7 +43,7 @@ validation les entrerprises qui présentent des signaux forts, c'est-à-dire 3 m
 procédure collective en cours ? Nécessite que les données contenues dans
 \code{task[["hist_data"]]} possèdent le champs "time_til_outcome".}
 
-\item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
+\item{tracker}{\verb{[mllogr::Tracker]} \cr Logger of ML experiment}
 }
 \value{
 \code{task} donnée en entrée à laquelle s'est ajoutée (ou a été

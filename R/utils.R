@@ -15,33 +15,32 @@
 #'   selon les indications de `replacements_by_column`
 #' @export
 #'
-replace_na <- function(
-  frame,
-  replacements_by_column,
-  fail_if_column_missing = TRUE
-) {
+# replace_na <- function(
+#   frame,
+#   replacements_by_column,
+#   fail_if_column_missing = TRUE
+# ) {
+#   requireNamespace("purrr")
+#   if (any(!names(replacements_by_column) %in% colnames(frame)) &&
+#     fail_if_column_missing &&
+#     requireNamespace("logger")){
+#     stop(
+#       "{names(replacements_by_column)[!names(replacements_by_column) %in%
+#       colnames(frame)]} is missing from the dataframe"
+#     )
+#   }
 
-  requireNamespace("purrr")
-  if (any(!names(replacements_by_column) %in% colnames(frame)) &&
-    fail_if_column_missing &&
-    requireNamespace("logger")){
-    stop(
-      "{names(replacements_by_column)[!names(replacements_by_column) %in%
-      colnames(frame)]} is missing from the dataframe"
-    )
-  }
+#   replacements_by_column <- replacements_by_column[
+#     names(replacements_by_column) %in% colnames(frame)
+#   ]
 
-  replacements_by_column <- replacements_by_column[
-    names(replacements_by_column) %in% colnames(frame)
-  ]
-
-  purrr::walk2(replacements_by_column, names(replacements_by_column),
-    function(na_value, name) {
-      frame[is.na(frame[, name]), name] <<- na_value
-    }
-    )
-  return(frame)
-}
+#   purrr::walk2(replacements_by_column, names(replacements_by_column),
+#     function(na_value, name) {
+#       frame[is.na(frame[, name]), name] <<- na_value
+#     }
+#     )
+#   return(frame)
+# }
 
 #' Gives alert levels from prediction and F-scores
 #'

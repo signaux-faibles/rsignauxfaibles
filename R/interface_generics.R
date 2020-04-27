@@ -25,32 +25,30 @@ NULL
 #'   Descriptions supplémentaires sur l'expérimentation en cours.
 #'
 #' @return `[rsignauxfaibles::sf_task]` \cr
-#'   Un objet sf_task avec un attribut de type `logical` "verbose", qui définit le niveau de log,
-#'   ainsi qu'un attribut "to_log" de type `list` dans lequel seront stockés des
-#'   informations spécifiques pour le log.
+#'   Un objet sf_task avec un attribut de type `logical` "verbose", qui
+#'   définit le niveau de log, ainsi qu'un attribut "to_log" de type `list`
+#'   dans lequel seront stockés des informations spécifiques pour le log.
 #'
 #' @export
 sf_task <- function(
-  verbose,
-  database = "test_signauxfaibles",
-  collection = "Features",
-  mongodb_uri,
-  experiment_name,
-  experiment_description,
-  tracker = NULL
-  ){
-
+                    verbose,
+                    database = "test_signauxfaibles",
+                    collection = "Features",
+                    mongodb_uri,
+                    experiment_name = "",
+                    experiment_description = "",
+                    tracker = NULL) {
   res <- list(
     database = database,
+
     collection = collection,
     mongodb_uri = mongodb_uri
   )
   class(res) <- "sf_task"
   attr(res, "verbose") <- verbose
-  if (is.null(tracker) && requireNamespace("MLlogr")){
-
+  if (is.null(tracker) && requireNamespace("MLlogr")) {
     res[["tracker"]] <- MLlogr::Tracker$new(
-      #TODO: Mieux gérer la base de logging
+      # TODO: Mieux gérer la base de logging
       # f4737679-916d-4aeb-84ba-958046f4ca31
       database = database,
       collection = collection,
@@ -71,9 +69,9 @@ sf_task <- function(
 #' niveau de logging
 #' @param task `[sf_task]` \cr Objet s3 de type sf_task
 #' @return TRUE
-set_verbose_level <- function(task){
+set_verbose_level <- function(task) {
   requireNamespace("logger")
-  if (attr(task, "verbose")){
+  if (attr(task, "verbose")) {
     logger::log_threshold(logger::TRACE)
   } else {
     logger::log_threshold(logger::WARN)
@@ -88,11 +86,11 @@ set_verbose_level <- function(task){
 #'
 #' @return invisible(x)
 #' @export
-print.sf_task <- function(x, ...){
+print.sf_task <- function(x, ...) {
   requireNamespace("purrr")
   cat("-- FIELDS --\n")
-  aux_fun <- function(name, x){
-    if (!is.character(x) || length(x) > 1){
+  aux_fun <- function(name, x) {
+    if (!is.character(x) || length(x) > 1) {
       cat(paste0("  * ", name, " (", paste0(class(x), collapse = ", "), ")\n"))
     } else {
       cat(paste0("  * ", name, " : ", x, "\n"))
@@ -105,7 +103,7 @@ print.sf_task <- function(x, ...){
     names(x[["tracker"]]$values),
     x[["tracker"]]$values,
     aux_fun
-    )
+  )
   return(invisible(x))
 }
 
@@ -118,10 +116,10 @@ print.sf_task <- function(x, ...){
 #' @param task `[sf_task]` \cr Objet s3 de type sf_task
 #' @param field_names `character()` \cr Nom des champs à vérifier.
 #' @return Nom des champs écrasés, `character(0)` sinon.
-check_overwrites <- function(task, field_names){
+check_overwrites <- function(task, field_names) {
   set_verbose_level(task)
   overwrite <- intersect(field_names, names(task))
-  if (length(overwrite) > 1){
+  if (length(overwrite) > 1) {
     logger::log_info(
       'Les champs {paste(overwrite, collapse = ",")} sont ecrases avec
       les nouvelles valeurs.'
@@ -135,64 +133,64 @@ check_overwrites <- function(task, field_names){
 #' @param task `[sf_task]` \cr Objet s3 de type sf_task
 #' @param ... Additional parameters depending on class of task
 #' @export
-load_hist_data <- function(task, ...){
+load_hist_data <- function(task, ...) {
   UseMethod("load_hist_data", task)
 }
 
 #' Loads new data
 #' @inheritParams load_hist_data
 #' @export
-load_new_data <- function(task, ...){
+load_new_data <- function(task, ...) {
   UseMethod("load_new_data", task)
 }
 
 #' Splits data
 #' @inheritParams load_hist_data
 #' @export
-split_data <- function(task, ...){
+split_data <- function(task, ...) {
   UseMethod("split_data", task)
 }
 
 #' Prepare data
 #' @inheritParams load_hist_data
 #' @export
-prepare <- function(task, ...){
+prepare <- function(task, ...) {
   UseMethod("prepare", task)
 }
 
 #' Optimize hyperparameters
 #' @inheritParams load_hist_data
 #' @export
-optimize_hyperparameters <- function(task, ...){
+optimize_hyperparameters <- function(task, ...) {
   UseMethod("optimize_hyperparameters", task)
 }
 
 #' Trains model on data
 #' @inheritParams load_hist_data
 #' @export
-train <- function(task, ...){
+train <- function(task, ...) {
   UseMethod("train", task)
 }
 
 #' Loads task
 #' @inheritParams load_hist_data
 #' @export
-load <- function(task, ...){
+load <- function(task, ...) {
   UseMethod("load", task)
 }
 
-load.default <- function(task, ...){
+load.default <- function(task, ...) {
   base::load(task, ...)
 }
 
 #' Saves task
 #' @inheritParams load_hist_data
 #' @export
-save <- function(task, ...){
+save <- function(task, ...) {
   UseMethod("save", task)
 }
 
-save.default <- function(task, ...){
+save.default <- function(task, ...) {
   base::save(task, ...)
 }
 
@@ -200,7 +198,7 @@ save.default <- function(task, ...){
 #'
 #' @inheritParams load_hist_data
 #' @export
-export <- function(task, ...){
+export <- function(task, ...) {
   UseMethod("export", task)
 }
 
@@ -208,13 +206,13 @@ export <- function(task, ...){
 #'
 #' @inheritParams load_hist_data
 #' @export
-log_experiment <- function(task, ...){
+log_experiment <- function(task, ...) {
   UseMethod("log_experiment", task)
 }
 
 #' Explains model results
 #' @inheritParams load_hist_data
 #' @export
-explain <- function(task, ...){
+explain <- function(task, ...) {
   UseMethod("explain", task)
 }

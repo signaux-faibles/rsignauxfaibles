@@ -8,7 +8,7 @@ aux_custom_plot_urssaf(eval_frame)
 }
 \arguments{
 \item{eval_frame}{\code{data.frame()} \cr Table évaluée tel que donné par la fonction
-\code{[aux_custom_eval_urssaf]} avec paramètres wrap_eval_fun et unnest = TRUE.}
+\verb{[aux_custom_eval_urssaf]} avec paramètres wrap_eval_fun et unnest = TRUE.}
 }
 \description{
 Cette fonction est prévue pour construire un objet EvaluationFunctions

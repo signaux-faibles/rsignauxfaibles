@@ -5,17 +5,26 @@
 \alias{load_new_data}
 \title{Chargement de nouvelles données}
 \usage{
-\method{load_new_data}{sf_task}(task, periods, batch,
-  database = task[["database"]], collection = task[["collection"]],
-  mongodb_uri = task[["mongodb_uri"]], fields = get_fields(training =
-  FALSE), min_effectif = 10L, rollback_months = 1L, ...)
+\method{load_new_data}{sf_task}(
+  task,
+  periods,
+  batch,
+  database = task[["database"]],
+  collection = task[["collection"]],
+  mongodb_uri = task[["mongodb_uri"]],
+  fields = get_fields(training = FALSE),
+  min_effectif = 10L,
+  rollback_months = 1L,
+  debug = FALSE,
+  ...
+)
 
 load_new_data(task, ...)
 }
 \arguments{
-\item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
-\item{periods}{\code{[Date()]} \cr Périodes d'intérêt, auquels charger les
+\item{periods}{\verb{[Date()]} \cr Périodes d'intérêt, auquels charger les
 données. Des périodes supplémentairs peuvent être chargées selon la
 valeur de rollback_months.}
 
@@ -38,17 +47,18 @@ charge tous les champs disponibles.}
 \item{min_effectif}{\code{integer(1)} \cr Limite basse du filtrage de l'effectif
 (la limite est incluse)}
 
-\item{rollback_months}{\code{integer(1)}\cr Nombre de mois précédant le premier mois de
-\code{periods} à charger. Permet d'effectuer des calculs de différences ou de
-moyennes glissantes pour les périodes d'intérêt.}
+\item{rollback_months}{\code{integer(1)}\cr Nombre de mois précédant le premier
+mois de \code{periods} à charger. Permet d'effectuer des calculs de différences
+ou de moyennes glissantes pour les périodes d'intérêt.}
 
 \item{...}{Additional parameters depending on class of task}
 }
 \value{
-\code{[sf_task]} \cr
+\verb{[sf_task]} \cr
 L'objet \code{task} donné en entrée auquel le champs "new_data" a été
-ajouté (ou écrasé), contenant un  data.frame() avec les colonnes incluses dans le paramètre d'entrée
-\code{fields}, et pour chaque ligne un couple unique siret x periode.
+ajouté (ou écrasé), contenant un  data.frame() avec les colonnes incluses
+dans le paramètre d'entrée \code{fields}, et pour chaque ligne un couple
+unique siret x periode.
 }
 \description{
 Chargement de nouvelles données
