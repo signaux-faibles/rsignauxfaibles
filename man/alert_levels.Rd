@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{alert_levels}
 \alias{alert_levels}
-\title{Remplacement de NA dans un data.frame}
+\title{Gives alert levels from prediction and F-scores}
 \usage{
 alert_levels(prediction, F1, F2)
 }
@@ -12,24 +12,11 @@ alert_levels(prediction, F1, F2)
 \item{F1}{\code{Double(1)}. F1 threshold}
 
 \item{F2}{\code{Double(1)}. F2 threshold}
-
-\item{frame}{\code{data.frame()} \cr
-Le \code{data.frame()} dans lequel les NA doivent être remplacés.}
-
-\item{replacements_by_column}{\code{list()} \cr Une liste nommée, dans laquelle
-les noms sont des noms de colonnes, et les valeurs les valeurs de
-remplacement pour ces colonnes.}
-
-\item{fail_if_column_missing}{\code{logical(1)} \cr Si \code{true}, déclenche une
-erreur si un nom de \code{replacements_by_column} ne figure pas dans la liste.}
 }
 \value{
-La table \code{frame} dans laquelle les valeurs NA ont été remplacées
-selon les indications de \code{replacements_by_column}
-
 A factor vector with alert levels.
 }
 \description{
-Remplace toutes les valeurs NA dans un data.frame par les valeurs spécifiés
-colonne par colonne dans \code{replace_missing}
+Lower thresholds are strict (a prediction falling on the threshold is
+binned to the lower alert level)
 }

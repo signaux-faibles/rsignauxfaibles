@@ -16,7 +16,7 @@
   date_inf = as.Date("2015-01-01"),
   date_sup = as.Date("2017-01-01"),
   min_effectif = 10L,
-  siren = NULL,
+  sirets = NULL,
   code_ape = NULL,
   debug = FALSE,
   ...
@@ -54,7 +54,7 @@ données.}
 \item{min_effectif}{\code{integer(1)} \cr Limite basse du filtrage de l'effectif
 (la limite est incluse)}
 
-\item{siren}{\code{character()} \cr Liste de sirens à exporter. Si égale à
+\item{sirets}{\code{character()} \cr Liste de sirets à exporter. Si égale à
 \code{NULL}, charge tous les sirens disponibles.}
 
 \item{code_ape}{\code{character()} \cr Liste de codes APE à exporter. Si égale à
