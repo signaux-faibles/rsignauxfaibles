@@ -45,3 +45,5 @@ Suggests:
     xgboostExplainer
 RoxygenNote: 7.1.0
 Roxygen: list(markdown = TRUE)
+URL: https://github.com/signaux-faibles/rsignauxfaibles
+BugReports: https://github.com/signaux-faibles/rsignauxfaibles/issues
