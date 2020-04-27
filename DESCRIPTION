@@ -11,7 +11,6 @@ LazyData: true
 Imports:
     assertthat,
     dplyr,
-    h2o,
     lubridate,
     logger,
     mongolite,
@@ -29,17 +28,20 @@ Imports:
     xgboost,
     rlang
 Suggests:
+    corrplot,
     jsonlite,
     ggplot2,
     Hmisc,
     lhs,
     mlr,
     mlrMBO,
+    moments,
     ParamHelpers,
     rgenoud,
     smoof,
     rmarkdown,
     DiceKriging,
-    testthat (>= 2.1.0)
-RoxygenNote: 6.1.1
+    testthat (>= 2.1.0),
+    xgboostExplainer
+RoxygenNote: 7.0.2
 Roxygen: list(markdown = TRUE)

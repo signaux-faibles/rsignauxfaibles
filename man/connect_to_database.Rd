@@ -2,16 +2,36 @@
 % Please edit documentation in R/data_load.R
 \name{connect_to_database}
 \alias{connect_to_database}
-\alias{factor_request}
+\alias{factor_query}
 \title{Connexion à la base de donnée}
 \usage{
-connect_to_database(database, collection, mongodb_uri, batch, min_effectif,
-  siren = NULL, date_inf = NULL, date_sup = NULL, fields = NULL,
-  code_ape = NULL, subsample = NULL, verbose = TRUE,
-  replace_missing = NULL)
+connect_to_database(
+  database,
+  collection,
+  mongodb_uri,
+  batch,
+  min_effectif,
+  siren = NULL,
+  date_inf = NULL,
+  date_sup = NULL,
+  fields = NULL,
+  code_ape = NULL,
+  subsample = NULL,
+  verbose,
+  replace_missing = NULL,
+  debug
+)
 
-factor_request(batch, siren, date_inf, date_sup, min_effectif, fields,
-  code_ape, subsample)
+factor_query(
+  batch,
+  siren,
+  date_inf,
+  date_sup,
+  min_effectif,
+  fields,
+  code_ape,
+  subsample
+)
 }
 \arguments{
 \item{database}{\code{character(1)} \cr Nom de la base de données vers laquelle
@@ -60,7 +80,7 @@ Si égal à NULL, alors des remplacements par défauts}
 \description{
 \code{connect_to_database} permet de requêter des données mongoDB pour en
 faire un dataframe ou un Spark dataframe. \cr
-\code{factor_request} permet de fabriquer la requête d'aggrégation
+\code{factor_query} permet de fabriquer la requête d'aggrégation
 correspondante. \cr
 }
 \section{Remplacement des valeurs manquantes par défaut}{
@@ -82,7 +102,11 @@ montant_part_ouvriere_past_6   = 0,
 montant_part_patronale_past_12 = 0,
 montant_part_ouvriere_past_12  = 0,
 apart_heures_consommees        = 0,
-apart_heures_autorisees        = 0
+apart_heures_autorisees        = 0,
+apart_entreprise               = 0,
+tag_default                    = FALSE,
+tag_failure                    = FALSE,
+tag_outcome                    = FALSE
 )
 }
 

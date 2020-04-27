@@ -29,8 +29,48 @@ get_test_task <- function(seed = 1793){
   return(task)
 }
 
+#' Get a test task for tests
+#'
+#' Loads fake data to run tests.
+#'
+#' @export
+get_test_task_2 <- function() {
 
-get_cv_test_task <- function(){
+  task <- sf_task(
+    verbose = FALSE,
+    mongodb_uri = "fake_uri",
+    database = "fake_database",
+    collection = "fake_collection",
+    experiment_name = "Fake task",
+    experiment_description = "I am a fake task"
+  )
+
+  task[["hist_data"]] <- readr::read_csv("testing.csv")
+  task[["new_data"]]  <- task[["hist_data"]]
+
+  task <- split_data(task)
+  task <- prepare(
+    task,
+    training_fields = c(
+      "effectif",
+      "excedent_brut_d_exploitation",
+      "taux_marge",
+      "montant_part_patronale"
+    ),
+    data_names = c("train_data", "validation_data", "test_data"),
+    target_encode_fields = c()
+  )
+  task[["model_parameters"]] <- list(
+      learn_rate = 0.1,
+        max_depth = 2,
+        ntrees = 23,
+        min_child_weight = 1
+     )
+  return(task)
+}
+
+
+get_cv_test_task <- function() {
   sf_task <- get_test_task()
 
   cv_task <-  sf_task[c(

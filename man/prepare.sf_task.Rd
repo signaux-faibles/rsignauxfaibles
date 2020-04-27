@@ -4,29 +4,40 @@
 \alias{prepare.sf_task}
 \title{Préparation des échantillons pour l'entraînement et l'évaluation}
 \usage{
-\method{prepare}{sf_task}(task, data_names = c("train_data",
-  "validation_data", "test_data", "new_data"),
-  prepare_train_function = NULL, prepare_test_function = NULL,
-  tracker = NULL, preprocessing_strategy = NULL,
-  training_fields = get_fields(training = TRUE), ...)
+\method{prepare}{sf_task}(
+  task,
+  data_names = c("train_data", "validation_data", "test_data", "new_data"),
+  prepare_train_function = "xgboost",
+  prepare_test_function = "xgboost",
+  outcome_field = "outcome",
+  tracker = NULL,
+  preprocessing_strategy = NULL,
+  training_fields = get_fields(training = TRUE),
+  target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3"),
+  ...
+)
 }
 \arguments{
-\item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{data_names}{\code{character()} \cr Vecteur de noms des données à préparer.
 Doivent-être des noms de champs valides de \code{task}.}
 
-\item{prepare_train_function}{:: (data_to_prepare :: data.frame) -> list(data :: data.frame,
-preparation_map :: any) \cr
-A function that prepares the training data and gives a preparation_map to be applied for
-further data preparation}
+\item{prepare_train_function}{:: (data_to_prepare :: data.frame) ->
+list(data :: data.frame, preparation_map :: any) \cr
+A function that prepares the training data and gives a preparation_map to
+be applied for further data preparation.
+Can be equal to "xgboost" or "linear" for quick reference to the right
+preparation function.}
 
 \item{prepare_test_function}{:: (data_to_prepare :: data.frame,
 preparation_map :: any) -> data.frame \cr
 A function that uses the preparation map to prepare further data (test,
-validation data etc.)}
+validation data etc.)
+Can be equal to "xgboost" or "linear" for quick reference to the right
+preparation function.}
 
-\item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
+\item{tracker}{\verb{[mllogr::Tracker]} \cr Logger of ML experiment}
 
 \item{preprocessing_strategy}{character() \cr
 Description en langage naturel de la stratégie de préparation des données
@@ -36,10 +47,10 @@ pour le logging de l'expérience.}
 conservées pour l'entraînement, après toutes les phases de préparation,
 notamment le target encoding.}
 
-\item{...}{Not used}
+\item{...}{Unused.}
 }
 \value{
-\code{[sf_task]} \cr
+\verb{[sf_task]} \cr
 L'objet \code{task} donné en entrée auquel les champs de données
 préparées ont été ajoutées, avec une convention de nommage d'apposition
 du préfixe "prepared_" aux noms des données préparées (par exemple:
@@ -47,6 +58,6 @@ du préfixe "prepared_" aux noms des données préparées (par exemple:
 }
 \description{
 Prépare les échantillons souhaités (listés dans \code{data_names}) pour
-l'entraînement ou la prédiction de l'algorithme. Cf \code{[prepare_data]} pour
+l'entraînement ou la prédiction de l'algorithme. Cf \verb{[prepare_data]} pour
 la nature de cette préparation.
 }

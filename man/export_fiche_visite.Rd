@@ -4,9 +4,15 @@
 \alias{export_fiche_visite}
 \title{Export d'une fiche visite}
 \usage{
-export_fiche_visite(sirets, database = "test_signauxfaibles",
-  collection = "Features", mongodb_uri, batch, with_urssaf = FALSE,
-  absolute_path)
+export_fiche_visite(
+  sirets,
+  database = "test_signauxfaibles",
+  collection = "Features",
+  mongodb_uri,
+  batch,
+  with_urssaf = FALSE,
+  absolute_path
+)
 }
 \arguments{
 \item{sirets}{Vecteur de sirets des établissements dont il faut exporter la

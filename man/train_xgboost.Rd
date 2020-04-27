@@ -4,9 +4,16 @@
 \alias{train_xgboost}
 \title{Train an xgboost model}
 \usage{
-train_xgboost(train_data, outcome, validation_data = NULL,
-  learn_rate = 0.1, max_depth = 4, ntrees = 60,
-  min_child_weight = 1, seed = 123)
+train_xgboost(
+  train_data,
+  outcome,
+  validation_data = NULL,
+  learn_rate = 0.1,
+  max_depth = 4,
+  ntrees = 60,
+  min_child_weight = 1,
+  seed
+)
 }
 \arguments{
 \item{train_data}{\code{data.frame} \cr données d'entraînement, sous la forme d'un H2OFrame}
@@ -16,19 +23,11 @@ d'apprentissage}
 
 \item{validation_data}{\code{H2OFrame} \cr Données d'évaluation, sous la forme d'un H2OFrame}
 
-\item{learn_rate}{\code{numeric(1)} \cr}
-
-\item{max_depth}{\code{integer(1)} \cr  Specify the maximum tree depth. Higher
-values will make the model more complex and can lead to overfitting.
-Setting this value to 0 specifies no limit.}
-
-\item{ntrees}{\code{integer(1)} \cr Specify the number of trees to build.}
-
-\item{min_child_weight}{\code{integer(1)} \cr Specify the minimum number of
-observations for a leaf.}
-
 \item{seed}{\code{integer(1)} \cr Graine aléatoire pour que les opérations
 aléatoires soient reproductibles.}
+
+\item{parameters}{\code{list()} \cr list of parameters with fields "learn_rate",
+"max_depth", "ntrees", "min_child_weight".}
 }
 \value{
 \code{H2OBinomialModel} \cr

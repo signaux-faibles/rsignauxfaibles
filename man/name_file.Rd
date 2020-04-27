@@ -4,8 +4,7 @@
 \alias{name_file}
 \title{Nomme un fichier}
 \usage{
-name_file(absolute_path, file_detail, file_extension = "",
-  full_path = FALSE)
+name_file(absolute_path, file_detail, file_extension = "", full_path = FALSE)
 }
 \arguments{
 \item{absolute_path}{\code{character(1)}\cr Chemin d'accès depuis

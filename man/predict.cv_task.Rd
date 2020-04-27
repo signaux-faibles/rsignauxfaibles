@@ -4,9 +4,12 @@
 \alias{predict.cv_task}
 \title{Predict model on new data for a cross-validated task}
 \usage{
-\method{predict}{cv_task}(object, data_names = c("new_data",
-  "train_data", "validation_data", "test_data"),
-  predict_fun = predict_model, ...)
+\method{predict}{cv_task}(
+  object,
+  data_names = c("new_data", "train_data", "validation_data", "test_data"),
+  predict_fun = predict_model,
+  ...
+)
 }
 \arguments{
 \item{object}{\code{sf_task()} \cr Objet \code{sf_task} avec un modèle entraîné dans
@@ -14,7 +17,7 @@ le champs \code{model}. Les données doivent avoir été préparées.}
 
 \item{data_names}{\code{character()} \cr Nom des données sur lesquelles prédire.}
 
-\item{predict_fun}{\code{model, new_data -> predictions} \cr Prediction function}
+\item{predict_fun}{\verb{model, new_data -> predictions} \cr Prediction function}
 
 \item{...}{Useless.}
 }

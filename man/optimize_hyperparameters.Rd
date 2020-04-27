@@ -7,17 +7,23 @@
 \usage{
 optimize_hyperparameters(task, ...)
 
-\method{optimize_hyperparameters}{sf_task}(task,
-  fields = get_fields(training = TRUE), n_init = NULL, n_iter = 12,
-  train_pipe = NULL, optim_bounds = NULL, ...)
+\method{optimize_hyperparameters}{sf_task}(
+  task,
+  fields = get_fields(training = TRUE),
+  n_init = NULL,
+  n_iter = 12,
+  train_pipe = NULL,
+  optim_bounds = NULL,
+  ...
+)
 }
 \arguments{
-\item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{...}{Additional parameters depending on class of task}
 
 \item{fields}{\code{character()} \cr Liste des variables pour l'entraînement. Cf
-\code{[get_fields]} pour les variables par défaut.}
+\verb{[get_fields]} pour les variables par défaut.}
 
 \item{n_init}{\code{integer(1)} \cr Nombre d'évaluations aléatoires initiales.}
 
@@ -26,10 +32,10 @@ optimize_hyperparameters(task, ...)
 \item{train_pipe}{\code{function} \cr Fonction d'entraînement et d'évaluation
 compatible avec l'optimisation avec "mlrMBO" (donc avec des attributs
 spécifiques), notamment comme celles créées avec
-\code{[smoof::makeSingleObjectiveFunction]}}
+\verb{[smoof::makeSingleObjectiveFunction]}}
 
 \item{optim_bounds}{\code{ParamSet} \cr Objet précisant l'espace exploré par
-l'optimisation, tel que donné par \code{[ParamHelpers::ParamSet]}. Si NULL,
+l'optimisation, tel que donné par \verb{[ParamHelpers::ParamSet]}. Si NULL,
 alors des limites par défaut sont fixées.}
 }
 \value{

@@ -7,7 +7,7 @@
 set_verbose_level(task)
 }
 \arguments{
-\item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 }
 \value{
 TRUE

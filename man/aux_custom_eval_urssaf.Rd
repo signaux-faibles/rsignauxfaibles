@@ -21,7 +21,7 @@ les données d'entraînement.}
 "target_type", "segment"; les colonnes "statut" (niveau d'alerte), "count"
 (nombre d'entreprises); "moyenne" (taux de défaillance moyen), "lconf" et
 "hconf" (limites basse et haute respectivement de l'intervalle de confiance
-issue d'une loi binomiale, à 95%)
+issue d'une loi binomiale, à 95\%)
 }
 \description{
 Cette fonction est prévue pour construire un objet de type

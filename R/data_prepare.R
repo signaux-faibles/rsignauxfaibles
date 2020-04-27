@@ -7,21 +7,25 @@
 #' @inheritParams generic_task
 #' @param data_names `character()` \cr Vecteur de noms des données à préparer.
 #'   Doivent-être des noms de champs valides de `task`.
-#' @param prepare_train_function :: (data_to_prepare :: data.frame) -> list(data :: data.frame,
-#' preparation_map :: any) \cr
-#'   A function that prepares the training data and gives a preparation_map to be applied for
-#'   further data preparation
+#' @param prepare_train_function :: (data_to_prepare :: data.frame) ->
+#'   list(data :: data.frame, preparation_map :: any) \cr
+#'   A function that prepares the training data and gives a preparation_map to
+#'   be applied for further data preparation.
+#'   Can be equal to "xgboost" or "linear" for quick reference to the right
+#'   preparation function.
 #' @param prepare_test_function :: (data_to_prepare :: data.frame,
 #' preparation_map :: any) -> data.frame \cr
 #'   A function that uses the preparation map to prepare further data (test,
 #'   validation data etc.)
+#'   Can be equal to "xgboost" or "linear" for quick reference to the right
+#'   preparation function.
 #' @param preprocessing_strategy character() \cr
 #'   Description en langage naturel de la stratégie de préparation des données
 #'   pour le logging de l'expérience.
 #' @param training_fields `character()` \cr Les champs qui doivent être
 #'   conservées pour l'entraînement, après toutes les phases de préparation,
 #'   notamment le target encoding.
-#'
+#' @param ... Unused.
 #'
 #' @return `[sf_task]` \cr
 #'   L'objet \code{task} donné en entrée auquel les champs de données
@@ -38,36 +42,70 @@ prepare.sf_task <- function(
     "test_data",
     "new_data"
     ),
-  prepare_train_function = NULL,
-  prepare_test_function = NULL,
+  prepare_train_function = "xgboost",
+  prepare_test_function = "xgboost",
+  outcome_field = "outcome",
   tracker = NULL,
   preprocessing_strategy = NULL,
-  training_fields =  get_fields(training = TRUE),
+  training_fields = get_fields(training = TRUE),
+  target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3"),
   ...
-  ){
-
-  # Defaults values
-  if (is.null(prepare_train_function))
-    prepare_train_function <- prepare_train_frame
-  if (is.null(prepare_test_function))
-    prepare_test_function <- prepare_test_frame
-  if (is.null(tracker))
-    tracker  <- task[["tracker"]]
-  if (is.null(preprocessing_strategy))
-    preprocessing_strategy <- "Target encoding with fte"
+  ) {
 
   set_verbose_level(task)
+  ## Assertions ##
+  admissible_character_types <- c("xgboost", "linear")
+  assertthat::assert_that(
+    (length(prepare_train_function) == 1 &&
+      prepare_train_function %in% admissible_character_types) ||
+    !is.character(prepare_train_function)
+  )
+  assertthat::assert_that(
+    (length(prepare_test_function) == 1 &&
+      prepare_test_function %in% admissible_character_types) ||
+    !is.character(prepare_test_function)
+  )
+
+
+  ## Defaults ##
+  if (is.null(tracker)) {
+    tracker  <- task[["tracker"]]
+  }
+  if (is.null(preprocessing_strategy)) {
+    preprocessing_strategy <- "Target encoding with fte"
+  }
+
+  ## Function selection ##
+  if (is.character(prepare_train_function)) {
+    prepare_train_function <- select_prepare_function(
+      prepare_train_function,
+      "train"
+    )
+  }
+  if (is.character(prepare_test_function)) {
+    prepare_test_function  <- select_prepare_function(
+      prepare_test_function,
+      "test"
+    )
+  }
+
+  ## Core ##
   task[["features"]] <- training_fields
 
-  aux_prepare_train_or_test <- function(task, name){
-    if (name %in% names(task)){
-      if (name == "train_data"){
+  aux_prepare_train_or_test <- function(task, name) {
+    if (name %in% names(task)) {
+      if (name == "train_data") {
         logger::log_info("Preparing {name} for training")
         out <- prepare_train_function(
           data = task[[name]],
-          training_fields = training_fields
+          training_fields = training_fields,
+          outcome_field = outcome_field,
+          target_encode_fields = target_encode_fields
         )
+        task[["training_fields"]] <- training_fields
+        task[["outcome_field"]] <- outcome_field
         task[[paste0("prepared_", name)]]  <- out[["data"]]
+        task[[paste0("outcome_", name)]]  <- out[["outcome"]]
         task[["preparation_map"]]  <- out[["preparation_map"]]
       } else {
         logger::log_info("Preparing {name} for predicting")
@@ -76,15 +114,18 @@ prepare.sf_task <- function(
           msg = 'No preparation map has been found. Have you loaded a task, or
           prepared the "train_data" first ?'
         )
-
-        task[[paste0("prepared_", name)]]  <- prepare_test_function(
+        out <- prepare_test_function(
           data = task[[name]],
           preparation_map = task[["preparation_map"]],
-          training_fields = training_fields
+          training_fields = task[["training_fields"]],
+          outcome_field = task[["outcome_field"]]
         )
+
+        task[[paste0("prepared_", name)]]  <- out[["data"]]
+        task[[paste0("outcome_", name)]]  <- out[["outcome"]]
       }
     } else {
-      log_warn("There is no {name} in current task")
+      logger::log_warn("There is no {name} in current task")
     }
     return(invisible(task))
   }
@@ -95,7 +136,7 @@ prepare.sf_task <- function(
     .init = task
   )
 
-  if (!is.null(tracker)){
+  if (!is.null(tracker)) {
     tracker$set(preprocessing_strategy = preprocessing_strategy)
   }
   return(task)
@@ -116,8 +157,9 @@ prepare.cv_task <- function(
     "test_data",
     "new_data"
     ),
-  prepare_train_function = NULL,
-  prepare_test_function = NULL,
+  prepare_train_function = "xgboost",
+  prepare_test_function = "xgboost",
+  outcome_field = "outcome",
   tracker = NULL,
   preprocessing_strategy = NULL,
   training_fields =  get_fields(training = TRUE),
@@ -132,11 +174,41 @@ prepare.cv_task <- function(
     data_names = data_names,
     prepare_train_function = prepare_train_function,
     prepare_test_function = prepare_test_function,
+    outcome_field = outcome_field,
     tracker = tracker,
     preprocessing_strategy = preprocessing_strategy,
     training_fields = training_fields
   )
   return(task)
+}
+
+
+#' Selectionne la fonction de préparation adéquate selon son intitulé
+#'
+#' @param prepare_type `character(1)` \cr Intitulé de la fonction préparation.
+#' @param test_or_train `"test" || "train"` \cr Fonction utilisée pour
+#' préparer un échantillon d'entraînement ou de test ?
+#'
+#' @return Une fonction de préparation
+#'
+select_prepare_function <- function(prepare_type, test_or_train){
+  assertthat::assert_that(test_or_train %in% c("test", "train"))
+
+  if (test_or_train == "train") {
+    prepare_function <- switch(
+      prepare_type,
+      xgboost = prepare_train_frame_xgboost,
+      linear = prepare_train_frame_linear
+    )
+  } else if (test_or_train == "test") {
+    prepare_function <- switch(
+      prepare_type,
+      xgboost = prepare_test_frame_xgboost,
+      linear = prepare_test_frame_linear
+    )
+  }
+
+  return(prepare_function)
 }
 
 #' Préparation des données pour l'entraînement
@@ -149,58 +221,188 @@ prepare.cv_task <- function(
 #'
 #' @inheritParams prepare.sf_task
 #' @param data_to_prepare `data.frame()` \cr Données à préparer
+#' @param shape_function `function(data.frame => ?)` \cr
+#'   Fonction qui met en forme les données pour l'apprentissage.
 #'
 #' @return `list(2)` \cr
 #'   Une liste avec deux champs:
 #'   * "data": `H2OFrame`; les données préparées
 #'   * "preparation_map": `list(H2OFrame)`; la carte de target encoding
-prepare_train_frame <- function(
+prepare_train_frame_xgboost <- function(
   data_to_prepare,
-  training_fields
-  ){
+  training_fields,
+  outcome_field,
+  target_encode_fields
+  ) {
 
   holdout_type <- "leave_one_out"
   prior_sample_size <- 30
   noise_level <- 0.02
-  outcome <- "outcome"
 
-  preparation_map <- fte::target_encode_create(
-    data_to_encode = data_to_prepare,
-    group_variables = list(
-      c("code_naf"),
-      c("code_ape_niveau2"),
-      c("code_ape_niveau3")
-      ),
-    outcome_variable = outcome
-  )
 
-  prepared_data <- fte::target_encode_apply(
-    data = data_to_prepare,
-    group_variables = list(
-      c("code_naf"),
-      c("code_ape_niveau2"),
-      c("code_ape_niveau3")
-      ),
-    outcome_variable = outcome,
-    preparation_map = preparation_map,
-    holdout_type = holdout_type,
-    prior_sample_size = prior_sample_size,
-    noise_level = noise_level
-  )
+  if (length(target_encode_fields) > 0) {
+    preparation_map <- fte::target_encode_create(
+      data_to_encode = data_to_prepare,
+      group_variables = target_encode_fields,
+      outcome_variable = outcome_field
+    )
 
-  prepared_data <- prepare_data_shape(
-    data_to_prepare = prepared_data,
-    training_fields = training_fields
-  )
+    prepared_data <- fte::target_encode_apply(
+      data = data_to_prepare,
+      group_variables =  target_encode_fields,
+      outcome_variable = outcome,
+      preparation_map = preparation_map,
+      holdout_type = holdout_type,
+      prior_sample_size = prior_sample_size,
+      noise_level = noise_level
+    )
+
+  }  else {
+    preparation_map <- list()
+    prepared_data <- data_to_prepare
+  }
+
+  prepared_data <- prepared_data %>%
+    dplyr::select(dplyr::one_of(training_fields))
+
+  prepared_data <- as.matrix(prepared_data)
 
   res <- list(
     data = prepared_data,
+    outcome = data_to_prepare[[outcome_field]],
     preparation_map = preparation_map
   )
   return(res)
 }
 
-#' Préparation des données pour la prédiction
+#' Préparation des données pour la prédiction d'un modèle xgboost
+#'
+#' Inclut le target encoding.
+#' La map pour le target encoding peut être sauvegardé, afin de permettre de
+#' l'appliquer à de nouvelles données.
+#' Le target encoding se fait avec du bruit pour éviter le surapprentissage.
+#'
+#' @inheritParams prepare.sf_task
+#' @param preparation_map `?` \cr Carte de calcul du target encoding.
+#'
+#' @return `list(2)` \cr
+#'   Une liste avec deux champs:
+#'   * "data": `H2OFrame`; les données préparées
+#'   * "preparation_map": `list(H2OFrame)`; la carte de target encoding
+prepare_test_frame_xgboost <- function(
+  data_to_prepare,
+  preparation_map,
+  training_fields,
+  outcome_field
+  ) {
+
+  holdout_type <- "none"
+  prior_sample_size <- 30
+  noise_level <- 0
+
+  if (length(preparation_map > 0)) {
+    target_encode_fields <- unique(preparation_map$group_variable)
+    cat(target_encode_fields)
+    prepared_data <- fte::target_encode_apply(
+      data = data_to_prepare,
+      group_variables =  target_encode_fields,
+      outcome_variable = outcome_field,
+      preparation_map = preparation_map,
+      holdout_type = holdout_type,
+      prior_sample_size = prior_sample_size,
+      noise_level = noise_level
+    )
+  } else {
+    prepared_data <- data_to_prepare
+  }
+
+  prepared_data <- prepared_data %>%
+    dplyr::select(dplyr::one_of(training_fields))
+
+  prepared_data <- as.matrix(prepared_data)
+  res  <- list(
+    data = prepared_data,
+    outcome = data_to_prepare[[outcome_field]]
+    )
+  return(res)
+}
+
+
+#' Préparation des données pour l'entraînement d'un modèle linéaire
+#'
+#' Prépare les données pour l'entraînement, avec du target encoding et la
+#' transformation en matrice pour alimenter xgboost.
+#'
+#' La carte de target encoding est retourné en paramètre de sortie afin de
+#' pouvoir l'utiliser sur d'autres échantillons de données.
+#'
+#' @inheritParams prepare.sf_task
+#' @param data_to_prepare `data.frame()` \cr Données à préparer
+#' @param target_encode_fields `character()` \cr Nom des champs sur lesquels
+#' effectuer du target encoding.
+#'
+#' @return `list(2)` \cr
+#'   Une liste avec deux champs:
+#'   * "data": `H2OFrame`; les données préparées
+#'   * "preparation_map": `list(H2OFrame)`; la carte de target encoding
+prepare_train_frame_linear <- function(
+  data_to_prepare,
+  training_fields,
+  outcome_field,
+  target_encode_fields
+  ) {
+
+  holdout_type <- "leave_one_out"
+  prior_sample_size <- 30
+  noise_level <- 0.02
+
+   target_encode_map <- fte::target_encode_create(
+     data_to_encode = data_to_prepare,
+     group_variables = target_encode_fields,
+     outcome_variable = outcome_field
+   )
+
+   prepared_data <- fte::target_encode_apply(
+     data = data_to_prepare,
+     group_variables =  target_encode_fields,
+     outcome_variable = outcome,
+     preparation_map = target_encode_map,
+     holdout_type = holdout_type,
+     prior_sample_size = prior_sample_size,
+     noise_level = noise_level
+   )
+
+  prepared_data <- prepared_data %>%
+    dplyr::select(dplyr::one_of(training_fields))
+
+  transformation_map <- transformation_map_create(
+    data_to_transform = prepared_data
+    )
+
+  prepared_data <- transformation_map_apply(
+    transformation_map,
+    data_to_transform = prepared_data
+  )
+
+
+  prepared_data <- as.matrix(prepared_data)
+
+  complete_cases <- stats::complete.cases(prepared_data)
+  prepared_data <- prepared_data[complete_cases, ]
+  outcome  <- data_to_prepare[[outcome_field]][complete_cases]
+
+  res <- list(
+    data = prepared_data,
+    outcome = outcome,
+    preparation_map = list(
+      target_encode_map = target_encode_map,
+      transformation_map = transformation_map
+    )
+  )
+  return(res)
+}
+
+#' Préparation des données pour la prédiction d'un modèle linéaire
 #'
 #' Inclut la conversion en H2O, et le target encoding.
 #' La map pour le target encoding peut être sauvegardé, afin de permettre de
@@ -208,58 +410,88 @@ prepare_train_frame <- function(
 #' Le target encoding se fait avec du bruit pour éviter le surapprentissage.
 #'
 #' @inheritParams prepare.sf_task
-#' @param data_to_prepare `data.frame()` \cr Données à préparer
-#' @param preparation_map `list(H2OFrame)`\cr Carte de calcul du target encoding. Utile
-#'   uniquement si `test_or_train` = "test", sinon elle est recalculée.
+#' @inheritParams prepare_train_frame_linear
+#' @param preparation_map `?` \cr Carte de calcul du target encoding.
 #'
 #' @return `list(2)` \cr
 #'   Une liste avec deux champs:
 #'   * "data": `H2OFrame`; les données préparées
 #'   * "preparation_map": `list(H2OFrame)`; la carte de target encoding
-prepare_test_frame <- function(
+prepare_test_frame_linear <- function(
   data_to_prepare,
   preparation_map,
-  training_fields
-  ){
+  training_fields,
+  outcome_field,
+  target_encode_fields
+  ) {
 
   holdout_type <- "none"
   prior_sample_size <- 30
   noise_level <- 0
-  outcome <- "outcome"
 
   prepared_data <- fte::target_encode_apply(
     data = data_to_prepare,
-    group_variables = list(
-      c("code_naf"),
-      c("code_ape_niveau2"),
-      c("code_ape_niveau3")
-      ),
-    outcome_variable = outcome,
-    preparation_map = preparation_map,
+    group_variables = target_encode_fields,
+    outcome_variable = outcome_field,
+    preparation_map = preparation_map[["target_encode_map"]],
     holdout_type = holdout_type,
     prior_sample_size = prior_sample_size,
     noise_level = noise_level
   )
 
-  prepared_data <- prepare_data_shape(
-    data_to_prepare = prepared_data,
-    training_fields = training_fields
-  )
+  prepared_data <- prepared_data %>%
+    dplyr::select(dplyr::one_of(training_fields))
 
-  return(prepared_data)
+  prepared_data <- transformation_map_apply(
+    preparation_map[["transformation_map"]],
+    prepared_data
+    )
+
+  prepared_data <- as.matrix(prepared_data)
+
+  complete_cases <- stats::complete.cases(prepared_data)
+  prepared_data <- prepared_data[complete_cases, ]
+  outcome  <- data_to_prepare[[outcome_field]][complete_cases]
+
+  res <- list(
+    data =  prepared_data,
+    outcome = outcome
+    )
+  return(res)
 }
 
-#' Convertit la forme des données pour l'adapter aux exigences de l'algorithme
+#' Normalise les données
 #'
-#' 1- Filtre les champs pour l'entraînement.
-#' 2- Convertit en matrice.
+#' Sélectionne des transformations pour que les données approchent de la
+#' normalité.
 #'
-#' @inheritParams prepare.sf_task
-#' @param data_to_prepare :: `data.frame` \cr Données à préparer
+#' @param data_to_transform `data.frame()` \cr Données à transformer.
 #'
-prepare_data_shape  <- function(data_to_prepare, training_fields){
-  prepared_data <- data_to_prepare %>%
-    dplyr::select(dplyr::one_of(training_fields))
-  prepared_data <- as.matrix(prepared_data)
-  return(prepared_data)
+transformation_map_create <- function(data_to_transform) {
+  if (requireNamespace("bestNormalize")) {
+    map <- purrr::map(
+      data_to_transform,
+      ~ bestNormalize::yeojohnson(
+        as.numeric(.),
+        standardize = FALSE
+      )
+    )
+    return(map)
+  }
+}
+
+#' Applies Box-cox transformation map to features
+#'
+#' @param transformation_map As outputed by transformation_map_create
+#' @param data_to_transform data to be transformed
+#'
+transformation_map_apply <- function(transformation_map, data_to_transform) {
+  if (requireNamespace("bestNormalize")) {
+    res <- purrr::map2_dfc(
+      transformation_map,
+      names(transformation_map),
+      ~ predict(.x, data_to_transform[[.y]])
+    )
+   return(res)
+  }
 }

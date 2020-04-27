@@ -4,8 +4,15 @@
 \alias{export_scores_to_mongodb}
 \title{Export des scores dans une collection mongodb}
 \usage{
-export_scores_to_mongodb(formatted_data, algo, batch, f_scores, database,
-  collection, mongodb_uri)
+export_scores_to_mongodb(
+  formatted_data,
+  algo,
+  batch,
+  f_scores,
+  database,
+  collection,
+  mongodb_uri
+)
 }
 \arguments{
 \item{formatted_data}{\code{data.frame()} \cr Données avec les champs "siret",

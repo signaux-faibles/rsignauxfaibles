@@ -4,8 +4,11 @@
 \alias{get_sirets_of_detected}
 \title{Get sirets of companies detected by SF}
 \usage{
-get_sirets_of_detected(database = "test_signauxfaibles",
-  collection = "Scores", mongodb_uri)
+get_sirets_of_detected(
+  database = "test_signauxfaibles",
+  collection = "Scores",
+  mongodb_uri
+)
 }
 \arguments{
 \item{database}{\code{character(1)} \cr Nom de la base de données vers laquelle

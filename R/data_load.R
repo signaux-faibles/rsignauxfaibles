@@ -15,7 +15,6 @@ NULL
 NULL
 
 
-
 #' Chargement de données historiques
 #'
 #' Charge les données historiques de signaux faibles et les stocke dans un
@@ -61,8 +60,9 @@ load_hist_data.sf_task <- function(
   min_effectif = 10L,
   siren = NULL,
   code_ape = NULL,
+  debug = FALSE,
   ...
-  ){
+  ) {
   set_verbose_level(task)
 
   logger::log_info("Chargement des donnees historiques.")
@@ -73,21 +73,23 @@ load_hist_data.sf_task <- function(
     mongodb_uri = mongodb_uri,
     batch,
     min_effectif = min_effectif,
-    siren = NULL,
+    siren = siren,
     date_inf = date_inf,
     date_sup = date_sup,
     fields = fields,
-    code_ape = NULL,
+    code_ape = code_ape,
     subsample = subsample,
-    verbose = attr(task, "verbose")
+    verbose = attr(task, "verbose"),
+    debug = debug
   )
 
   if (nrow(hist_data) > 1) {
     logger::log_info("Les donnees ont ete chargees avec succes.")
   } else {
-    log_warn("Aucune donnee n'a ete chargee. Veuillez verifier la requete.")
+    logger::log_warn("Aucune donnee n'a ete chargee. Veuillez verifier la
+      requete.")
   }
-  check_overwrites(task, "hist_data")
+  # check_overwrites(task, "hist_data")
   task[["hist_data"]] <- hist_data
   return(task)
 }
@@ -120,6 +122,7 @@ load_new_data.sf_task <- function(
   fields = get_fields(training = FALSE),
   min_effectif = 10L,
   rollback_months = 1L,
+  debug = FALSE,
   ...
   ){
 
@@ -134,7 +137,9 @@ load_new_data.sf_task <- function(
     date_inf = min(periods) %m-% months(rollback_months),
     date_sup = max(periods) %m+% months(1),
     min_effectif = min_effectif,
-    fields = fields
+    fields = fields,
+    verbose = attr(task, "verbose"),
+    debug = debug
   )
 
   if ("periode" %in% fields &&
@@ -147,7 +152,7 @@ load_new_data.sf_task <- function(
 #'
 #' `connect_to_database` permet de requêter des données mongoDB pour en
 #' faire un dataframe ou un Spark dataframe. \cr
-#' `factor_request` permet de fabriquer la requête d'aggrégation
+#' `factor_query` permet de fabriquer la requête d'aggrégation
 #' correspondante. \cr
 #'
 #' @inheritParams mongodb_connection
@@ -192,7 +197,11 @@ load_new_data.sf_task <- function(
 #'   montant_part_patronale_past_12 = 0,
 #'   montant_part_ouvriere_past_12  = 0,
 #'   apart_heures_consommees        = 0,
-#'   apart_heures_autorisees        = 0
+#'   apart_heures_autorisees        = 0,
+#'   apart_entreprise               = 0,
+#'   tag_default                    = FALSE,
+#'   tag_failure                    = FALSE,
+#'   tag_outcome                    = FALSE
 #'   )
 #'
 #' @return `data.frame()`
@@ -210,8 +219,9 @@ connect_to_database <- function(
   fields = NULL,
   code_ape = NULL,
   subsample = NULL,
-  verbose = TRUE,
-  replace_missing = NULL
+  verbose,
+  replace_missing = NULL,
+  debug
   ) {
 
   if (is.null(replace_missing)){
@@ -232,7 +242,11 @@ connect_to_database <- function(
       montant_part_patronale_past_12 = 0,
       montant_part_ouvriere_past_12  = 0,
       apart_heures_consommees        = 0,
-      apart_heures_autorisees        = 0
+      apart_heures_autorisees        = 0,
+      apart_entreprise               = 0,
+      tag_default                    = FALSE,
+      tag_failure                    = FALSE,
+      tag_outcome                    = FALSE
     )
   }
 
@@ -242,7 +256,7 @@ connect_to_database <- function(
   } else {
     logger::log_threshold(logger::WARN)
   }
-  requete <- factor_request(
+  requete <- factor_query(
     batch,
     siren,
     date_inf,
@@ -252,6 +266,10 @@ connect_to_database <- function(
     code_ape,
     subsample
   )
+
+  if (debug){
+    cat(requete)
+  }
 
   assertthat::assert_that(
     is.null(fields) || all(c("periode", "siret") %in% fields)
@@ -299,17 +317,6 @@ connect_to_database <- function(
 
   logger::log_info(" Fini.")
 
-  # Champs par defaut lorsque absent.
-
-  if (any(names(replace_missing) %in% colnames(table_wholesample))){
-    logger::log_info("Filling missing values with default values")
-  }
-  table_wholesample <- table_wholesample %>%
-    replace_na(
-      replacements_by_column = replace_missing,
-      fail_if_column_missing = FALSE
-    )
-
   # Champs manquants
   champs_manquants <- fields[!fields %in% tbl_vars(table_wholesample)]
   if (length(champs_manquants) >= 1) {
@@ -323,6 +330,23 @@ connect_to_database <- function(
     stats::setNames(champs_manquants)
   table_wholesample <- table_wholesample %>%
     mutate_(.dots = remplacement)
+  }
+
+  # Champs par defaut lorsque absent.
+  if (any(names(replace_missing) %in% colnames(table_wholesample))){
+    logger::log_info("Filling missing values with default values")
+  }
+  table_wholesample <- table_wholesample %>%
+    replace_na(
+      replacements_by_column = replace_missing,
+      fail_if_column_missing = FALSE
+    )
+
+
+  # Régions comme facteurs
+  if ("region" %in% fields){
+    table_wholesample <- table_wholesample %>%
+      mutate(region = factor(region))
   }
 
 
@@ -362,7 +386,7 @@ get_sirets_of_detected <- function(
 
 
 #' @rdname connect_to_database
-factor_request <- function(
+factor_query <- function(
   batch,
   siren,
   date_inf,
@@ -387,7 +411,7 @@ factor_request <- function(
   }
 
   ## Construction de la requete ##
-  match_id <- paste0('"info.batch":"', batch, '"')
+  match_id <- paste0('"_id.batch":"', batch, '"')
 
   # Filtrage siren
 
@@ -398,7 +422,7 @@ factor_request <- function(
     for (i in seq_along(siren)) {
       match_siren <- c(
         match_siren,
-        paste0('{"info.siren":"', siren[i], '"}')
+        paste0('{"_id.siret": {"$regex": "^', siren[i], '"}}')
       )
     }
 
@@ -455,7 +479,7 @@ if (is.null(min_effectif)) {
 if (is.null(date_inf)) {
   match_date_1 <- ""
 } else {
-  match_date_1 <- paste0('"info.periode":{
+  match_date_1 <- paste0('"_id.periode":{
     "$gte": {"$date":"', date_inf, 'T00:00:00Z"}}')
 }
 
@@ -464,7 +488,7 @@ if (is.null(date_sup)) {
   match_date_2 <- ""
 } else {
   match_date_2 <- paste0(
-    '"info.periode":{"$lt": {"$date":"',
+    '"_id.periode":{"$lt": {"$date":"',
     date_sup,
     'T00:00:00Z"}}'
   )
@@ -473,11 +497,11 @@ if (is.null(date_sup)) {
 match_req <- make_query(
   c(
     match_id,
-    match_siren,
     match_date_1,
     match_date_2,
-    match_APE,
-    match_eff
+    match_eff,
+    match_siren,
+    match_APE
   )
 )
 
@@ -488,7 +512,7 @@ if (is.null(fields)) {
 } else {
   assertthat::validate_that( # does not return an error if not verified
     all(c("periode", "siret") %in% fields),
-    msg = "Beware: siret and periode are not included in the request"
+    msg = "Beware: siret and periode are not included in the query"
   )
   projection_req <- paste0('"', fields, '":1')
   projection_req <- paste(projection_req, collapse = ",")
@@ -637,7 +661,7 @@ get_fields <- function(
     fields <- c(
       fields,
       "effectif",
-      "effectif_entreprise"
+      "effectif_ent"
       )
   }
   if (effectif >= 2) {

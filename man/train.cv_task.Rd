@@ -4,26 +4,33 @@
 \alias{train.cv_task}
 \title{Train a model on a cross-validated task}
 \usage{
-\method{train}{cv_task}(task, outcome = "outcome", parameters = NULL,
-  seed = 123, tracker = task[["tracker"]], train_fun = train_xgboost,
-  ...)
+\method{train}{cv_task}(
+  task,
+  outcome = "outcome",
+  parameters = NULL,
+  seed = 0,
+  tracker = task[["tracker"]],
+  train_fun = "xgboost",
+  ...
+)
 }
 \arguments{
-\item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{outcome}{\code{character()} \cr Nom de la colonne dans laquelle on trouve
 l'objectif d'apprentissage.}
 
 \item{parameters}{\code{list(any())} \cr Paramètres du modèle. Cf
-\code{[train_light_gradient_boosting]}. Si \code{NULL}, alors des paramètres par
+\verb{[train_light_gradient_boosting]}. Si \code{NULL}, alors des paramètres par
 défaut sont sélectionnés.}
 
 \item{seed}{\code{integer()}\cr Graîne pour que les calculs aléatoires soient
 reproductibles.}
 
-\item{tracker}{\code{[mllogr::Tracker]} \cr Logger of ML experiment}
+\item{tracker}{\verb{[mllogr::Tracker]} \cr Logger of ML experiment}
 
-\item{train_fun}{\code{training_data} \cr Training_function}
+\item{train_fun}{\code{training_data} \cr Training_function, or "xgboost" or
+"linear"}
 
 \item{...}{Not used}
 }

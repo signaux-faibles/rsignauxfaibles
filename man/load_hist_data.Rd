@@ -5,17 +5,27 @@
 \alias{load_hist_data}
 \title{Chargement de données historiques}
 \usage{
-\method{load_hist_data}{sf_task}(task, batch,
-  database = task[["database"]], collection = task[["collection"]],
-  mongodb_uri = task[["mongodb_uri"]], subsample = 200000L,
+\method{load_hist_data}{sf_task}(
+  task,
+  batch,
+  database = task[["database"]],
+  collection = task[["collection"]],
+  mongodb_uri = task[["mongodb_uri"]],
+  subsample = NULL,
   fields = get_fields(training = FALSE),
-  date_inf = as.Date("2015-01-01"), date_sup = as.Date("2017-01-01"),
-  min_effectif = 10L, siren = NULL, code_ape = NULL, ...)
+  date_inf = as.Date("2015-01-01"),
+  date_sup = as.Date("2017-01-01"),
+  min_effectif = 10L,
+  siren = NULL,
+  code_ape = NULL,
+  debug = FALSE,
+  ...
+)
 
 load_hist_data(task, ...)
 }
 \arguments{
-\item{task}{\code{[sf_task]} \cr Objet s3 de type sf_task}
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{batch}{\code{character(1)} \cr Batch auquel doit être importées les
 données. Les modifications opérées par les batchs ultérieurs sont
@@ -53,7 +63,7 @@ données.}
 \item{...}{Additional parameters depending on class of task}
 }
 \value{
-\code{[sf_task]} \cr
+\verb{[sf_task]} \cr
 L'objet \code{task} donné en entrée auquel le champs "hist_data" a été
 ajouté (ou écrasé), contenant un  data.frame() avec les colonnes incluses dans le paramètre d'entrée
 \code{fields}, et pour chaque ligne un couple unique siret x periode.
