@@ -10,6 +10,8 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     MLmetrics,
+    MLlogr,
+    MLsegmentr,
     PRROC,
     assertthat,
     dplyr,
@@ -28,8 +30,6 @@ Imports:
 Suggests:
     DiceKriging,
     Hmisc,
-    MLlogr,
-    MLsegmentr,
     ParamHelpers,
     corrplot,
     ggplot2,
@@ -43,11 +43,11 @@ Suggests:
     smoof,
     testthat (>= 2.1.0),
     xgboostExplainer
-Additional_repositories:
-    https://github.com/signaux-faibles/MLsegmentr
-    https://github.com/signaux-faibles/MLlogr
-    https://github.com/signaux-faibles/fte
-    https://github.com/AppliedDataSciencePartners/xgboostExplainer
+Remotes:
+    AppliedDataSciencePartners/xgboostExplainer,
+    signaux-faibles/MLlogr,
+    signaux-faibles/MLsegmentr,
+    signaux-faibles/fte
 RoxygenNote: 7.1.0
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/signaux-faibles/rsignauxfaibles
