@@ -1,50 +1,5 @@
 context("Check database connection and data import and cleaning")
 
-test_that("Les requêtes sont bien formées", {
-  test_grid <- expand.grid(
-    batch = "1812",
-    date_inf = c("2014-02-01", NA),
-    date_sup = c("2015-03-01", NA),
-    min_effectif = c(10, NA),
-    fields = c("siren", NA),
-    siren = c("0123456789", NA),
-    code_ape = c("A", NA),
-    subsample = c(10, NULL),
-    stringsAsFactors = FALSE
-    )
-
-  aux_null <- function(x) ifelse(is.na(x), return(NULL), return(x))
-  aux_test_function <- function(batch, date_inf, date_sup, min_effectif,
-    fields, siren, code_ape, subsample) {
-    req <- factor_query(
-      batch = batch,
-      date_inf = aux_null(date_inf),
-      date_sup = aux_null(date_sup),
-      min_effectif = aux_null(min_effectif),
-      fields = aux_null(fields),
-      siren = aux_null(siren),
-      code_ape = aux_null(code_ape),
-      subsample = subsample
-      )
-    expect_true(jsonlite::validate(req),
-      info = req
-      )
-  }
-
-  mapply(
-    aux_test_function,
-    test_grid$batch,
-    test_grid$date_inf,
-    test_grid$date_sup,
-    test_grid$min_effectif,
-    test_grid$fields,
-    test_grid$siren,
-    test_grid$code_ape,
-    test_grid$subsample
-    )
-})
-
-
 #
 # Test replace_missing_data
 #
