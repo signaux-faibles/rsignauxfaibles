@@ -36,9 +36,10 @@ Descriptions supplémentaires sur l'expérimentation en cours.}
 }
 \value{
 \verb{[rsignauxfaibles::sf_task]} \cr
-Un objet sf_task avec un attribut de type \code{logical} "verbose", qui
-définit le niveau de log, ainsi qu'un attribut "to_log" de type \code{list}
-dans lequel seront stockés des informations spécifiques pour le log.
+Un objet sf_task avec un attribut de type \code{logical} "verbose", qui définit le niveau de log,
+ainsi qu'un attribut "to_log" de type \code{list} dans lequel seront stockés des
+informations spécifiques pour le log.
+
 }
 \description{
 Un objet s3 de type sf_task est défini, dans lequel seront défini et

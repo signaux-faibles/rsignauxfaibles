@@ -33,7 +33,7 @@ NULL
 #'   données.
 #' @param min_effectif `integer(1)` \cr Limite basse du filtrage de l'effectif
 #'   (la limite est incluse)
-#' @param siren `character()` \cr Liste de sirens à exporter. Si égale à
+#' @param sirets `character()` \cr Liste de sirets à exporter. Si égale à
 #'   \code{NULL}, charge tous les sirens disponibles.
 #' @param code_ape `character()` \cr Liste de codes APE à exporter. Si égale à
 #'   \code{NULL}, charge tous les codes disponibles.
@@ -58,7 +58,7 @@ load_hist_data.sf_task <- function(
                                    date_inf = as.Date("2015-01-01"),
                                    date_sup = as.Date("2017-01-01"),
                                    min_effectif = 10L,
-                                   siren = NULL,
+                                   sirets = NULL,
                                    code_ape = NULL,
                                    debug = FALSE,
                                    ...) {
@@ -71,10 +71,10 @@ load_hist_data.sf_task <- function(
     mongodb_uri = mongodb_uri,
     batch,
     min_effectif = min_effectif,
-    siren = siren,
     date_inf = date_inf,
     date_sup = date_sup,
     fields = fields,
+    sirets = sirets,
     code_ape = code_ape,
     subsample = subsample,
     verbose = attr(task, "verbose"),
@@ -175,20 +175,19 @@ load_new_data.sf_task <- function(
 #' @param batch `character(1)` \cr Batch auquel doit être importées les
 #'   données. Les modifications opérées par les batchs ultérieurs sont
 #'   ignorées.
-#' @param siren `character()` \cr Liste de sirens à exporter. Si égale à
+#' @param sirets `character()` \cr Liste de sirens à exporter. Si égale à
 #'   \code{NULL}, charge tous les sirens disponibles.
 #' @param date_inf `Date(1)` \cr Limite inférieure de la période de temps
-#' requêtée @param date_sup `Date(1)` \cr Limite supérieure de la période de
-#' temps requêtée
+#' requêtée
+#' @param date_sup `Date(1)` \cr Limite supérieure de la période de temps requêtée
 #' @param min_effectif `integer(1)` \cr Limite basse du filtrage de l'effectif
 #'   (la limite est incluse)
 #' @param fields `character()` \cr Noms des champs à requêter dans la base de
 #'   données. Doit contenir "siret" et "periode". Si égal à `NULL`, alors
 #'   charge tous les champs disponibles.
 #' @param code_ape `character()` \cr Liste de code NAF ou APE (niveau 2 à 5) à
-#'   exporter. Si égale à
-#'   \code{NULL}, charge tous les codes disponibles. Il est permis de mélanger
-#'   des codes de différents niveaux.
+#'   exporter. Si égale à \code{NULL}, charge tous les codes disponibles. Il est
+#'   permis de mélanger des codes de différents niveaux.
 #' @param subsample `integer(1)` \cr Nombre d'objets (c'est-à-dire de couples
 #'   siret x periode) à échantillonner.
 #' @param verbose `logical(1)` \cr Faut-il afficher dans le terminal des
@@ -231,10 +230,10 @@ import_data <- function(
                         mongodb_uri,
                         batch,
                         min_effectif,
-                        siren = NULL,
                         date_inf = NULL,
                         date_sup = NULL,
                         fields = NULL,
+                        sirets = NULL,
                         code_ape = NULL,
                         subsample = NULL,
                         verbose = FALSE,
@@ -246,16 +245,42 @@ import_data <- function(
   } else {
     logger::log_threshold(logger::WARN)
   }
-  query <- factor_query(
-    batch,
-    siren,
-    date_inf,
-    date_sup,
-    min_effectif,
-    fields,
-    code_ape,
-    subsample
-  )
+
+  assertthat::assert_that(date_sup > date_inf)
+  if (is.null(sirets) && is.null(code_ape)) {
+    query <- build_standard_query(
+      batch = batch,
+      date_inf = date_inf,
+      date_sup = date_sup,
+      min_effectif = min_effectif,
+      subsample = subsample,
+      fields = fields
+    )
+  } else if (!is.null(sirets)) {
+    assertthat::assert_that(
+      is.null(subsample),
+      msg = "L'option subsample n'est pas valide si le paramètre 'sirets' est renseigné."
+      )
+    assertthat::assert_that(
+      is.null(sirets) || is.null(code_ape),
+      msg = "Les valeurs 'sirets' et 'code_ape' ne peuvent pas être requêtées en même temps"
+      )
+    query <- build_siret_query(
+      batch = batch,
+      date_inf = date_inf,
+      date_sup = date_sup,
+      sirets = sirets,
+      fields = fields
+    )
+  } else {
+    query <- build_sector_query(
+      batch = batch,
+      date_inf = date_inf,
+      date_sup = date_sup,
+      code_ape = code_ape,
+      fields = fields
+      )
+  }
 
   if (debug) {
     cat(query)
@@ -287,11 +312,7 @@ import_data <- function(
   )
 
   check_valid_data(df)
-
   logger::log_info(" Fini.")
-
-
-
 
   return(df)
 }
@@ -438,157 +459,234 @@ get_sirets_of_detected <- function(
 ###################################
 
 
-#' @rdname import_data
-factor_query <- function(
-                         batch,
-                         siren,
-                         date_inf,
-                         date_sup,
-                         min_effectif,
-                         fields,
-                         code_ape,
-                         subsample) {
-  # Util functions
-
-  make_query <- function(x) {
-    if (any(x != "")) {
-      return(paste0(
-        '{"$match":{
-             "$and":[{',
-        paste0(x[x != ""], collapse = "}, {"), "}]}}"
-      ))
-    } else {
-      return("")
-    }
-  }
-
-  ## Construction de la requete ##
-  match_id <- paste0('"_id.batch":"', batch, '"')
-
-  # Filtrage siren
-  if (is.null(siren)) {
-    match_siren <- ""
+query_or_null <- function(value_to_test, query) {
+  if (is.null(value_to_test)) {
+    return(NULL)
   } else {
-    match_siren <- c()
-    for (i in seq_along(siren)) {
-      match_siren <- c(
-        match_siren,
-        paste0('{"value.siren": "', siren[i], '"}')
+    return(query)
+  }
+}
+
+date_query <- function(date, gte_or_lt) {
+  assertthat::assert_that(gte_or_lt %in% c("gte", "lt"))
+  query <- query_or_null(
+      date,
+      list(
+        "_id.periode" = list()
+        )
       )
-    }
-
-    match_siren <- paste0('"$or":[', paste(match_siren, collapse = ","), "]")
+  if (!is.null(query)) {
+    query[["_id.periode"]][[paste0("$", gte_or_lt)]] <-
+      list("$date" = paste0(date, "T00:00:00Z"))
   }
+  return(query)
+}
 
-  # Sample
-  if (is.null(subsample)) {
-    sample_req <- '{"$sort": {"value.random_order": -1}}'
-  } else {
-    sample_req <- paste0(
-      '{"$sort": {"value.random_order": -1}}, {"$limit" :', subsample, "}"
-    )
-  }
 
-  # Filtrage code APE
+build_standard_query <- function(
+    batch,
+    date_inf,
+    date_sup,
+    min_effectif,
+    subsample,
+    fields
+) {
 
-  if (is.null(code_ape)) {
-    match_APE <- ""
-  } else {
-    niveau_code_ape <- nchar(code_ape)
-    if (any(niveau_code_ape >= 2)) {
-      ape_or_naf <- "code_ape"
-    } else {
-      ape_or_naf <- "code_naf"
-    }
-    match_APE <- c()
-    for (i in seq_along(code_ape)) {
-      match_APE <- c(
-        match_APE,
-        paste0('{"value.', ape_or_naf, '":
-          {"$regex":"^', code_ape[i], '", "$options":"i"}
-    }')
-      )
-    }
-    match_APE <- paste0('"$or":[', paste(match_APE, collapse = ","), "]")
-    # FIX ME: Requete nettement sous-optimale
-  }
+  match_stage <- build_standard_match_stage(
+    batch,
+    date_inf,
+    date_sup,
+    min_effectif
+  )
+  sort <- build_sort_stage()
+  limit <- build_limit_stage(subsample)
+  replace_root <- build_replace_root_stage()
+  projection <- build_projection_stage(fields)
 
-  # Filtrage effectif
+  query <- assemble_stages_to_query(
+    match_stage,
+    sort,
+    limit,
+    replace_root,
+    projection
+  )
+
+  return(query)
+}
+
+build_siret_query <- function(
+                              batch,
+                              date_inf,
+                              date_sup,
+                              sirets,
+                              fields
+                              ) {
+
+  match_stage <- build_siret_match_stage(
+    batch,
+    date_inf,
+    date_sup,
+    sirets
+  )
+  replace_root <- build_replace_root_stage()
+  projection <- build_projection_stage(fields)
+
+  query <- assemble_stages_to_query(
+    match_stage,
+    replace_root,
+    projection
+  )
+
+  return(query)
+}
+
+build_sector_query <- function(
+                               batch,
+                               date_inf,
+                               date_sup,
+                               code_ape,
+                               min_effectif,
+                               fields) {
+
+  match_ape <- build_sector_match_stage(batch, date_inf, date_sup, code_ape)
+  replace_root <- build_replace_root_stage()
+  projection <- build_projection_stage(fields)
+  query <- assemble_stages_to_query(
+    match_ape,
+    replace_root,
+    projection
+  )
+  return(query)
+}
+
+assemble_stages_to_query <- function(...) {
+    query <- list(...)  %>%
+    .[!purrr::map_lgl(., is.null)] %>%
+    jsonlite::toJSON(auto_unbox = TRUE)
+  return(query)
+}
+
+build_sort_stage <- function() {
+  sort_stage <- list("$sort" = list(value.random_order = -1))
+  return(sort_stage)
+}
+
+build_limit_stage <- function(subsample) {
+  limit_stage <- list("$limit" = subsample)
+  return(limit_stage)
+}
+
+build_replace_root_stage <- function() {
+  list("$replaceRoot" = list("newRoot" =  "$value"))
+}
+
+build_projection_stage <- function(fields) {
+  projection_stage <- list()
+  projection_stage[["$project"]] <- setNames(rep(list(1), length(fields)), fields)
+  projection_stage <- query_or_null(
+    fields,
+    projection_stage
+  )
+  return(projection_stage)
+}
+
+build_standard_match_stage <- function(
+  batch,
+  date_inf,
+  date_sup,
+  min_effectif
+  ) {
+    ## Construction de la requete ##
+  match_batch <- list("_id.batch"  = batch)
+  match_date_inf <- date_query(date_inf, "gte")
+  match_date_sup <- date_query(date_sup, "lt")
   if (is.null(min_effectif)) {
-    match_eff <- ""
-  } else {
-    match_eff <- paste0(
-      '"value.effectif":{"$gte":',
-      min_effectif, "}"
-    )
+    min_effectif = 1
   }
+  match_eff <- list(value.effectif = list("$gte" = min_effectif))
 
-  # Filtrage date
-  if (is.null(date_inf)) {
-    match_date_1 <- ""
-  } else {
-    match_date_1 <- paste0('"_id.periode":{
-    "$gte": {"$date":"', date_inf, 'T00:00:00Z"}}')
-  }
-
-  # Filtrage date
-  if (is.null(date_sup)) {
-    match_date_2 <- ""
-  } else {
-    match_date_2 <- paste0(
-      '"_id.periode":{"$lt": {"$date":"',
-      date_sup,
-      'T00:00:00Z"}}'
-    )
-  }
-
-  match_req <- make_query(
-    c(
-      match_id,
-      match_date_1,
-      match_date_2,
-      match_eff,
-      match_siren,
-      match_APE
+  match_stage <- list(
+    "$match" = list(
+      "$and" = c(
+        list(match_batch),
+        list(match_date_inf),
+        list(match_date_sup),
+        list(match_eff)
+      )
     )
   )
+  return(match_stage)
+}
 
-  # Construction de la projection
+build_siret_match_stage <- function(
+  batch,
+  date_inf,
+  date_sup,
+  sirets
+  ) {
 
-  if (is.null(fields)) {
-    projection_req <- ""
+
+  library(lubridate)
+  n_periods <- interval(date_inf, date_sup) %/% months(1)
+  if (n_periods == 0) {
+    discrete_periods <- date_inf
   } else {
-    assertthat::validate_that( # does not return an error if not verified
-      all(c("periode", "siret") %in% fields),
-      msg = "Beware: siret and periode are not included in the query"
-    )
-    projection_req <- paste0('"', fields, '":1')
-    projection_req <- paste(projection_req, collapse = ",")
-    projection_req <- paste0('{"$project":{', projection_req, "}}")
+    discrete_periods <- date_inf %m+%
+      ((seq_len(n_periods) - 1) * months(1))
   }
 
-  # Remplacement de la racine
 
-  new_root <- "{\"$replaceRoot\" : {\"newRoot\": \"$value\"}}"
+  make_id_objects <- function(siret) {
+    id_objects <- purrr::map(
+      discrete_periods,
+      ~ list(
+        batch = batch,
+        siret = siret,
+        periode = list("$date" =  paste0(., "T00:00:00Z"))
+      )
+    )
+    return(id_objects)
+  }
 
-  reqs <- c(
-    match_req,
-    sample_req,
-    new_root,
-    projection_req
+  all_id_objects <- purrr::map(sirets, make_id_objects) %>%
+    purrr::reduce(c)
+
+  match_query <- list(
+    "$match" = list(
+      "_id" = list(
+        "$in" = c(
+           I(all_id_objects)
+        )
+      )
+    )
   )
+  return(match_query)
+}
 
-  requete <- paste(
-    reqs[reqs != ""],
-    collapse = ", "
-  )
-  requete <- paste0(
-    "[",
-    requete,
-    "]"
-  )
 
-  return(requete)
+build_sector_match_stage <- function(
+  batch,
+  date_inf,
+  date_sup,
+  code_ape
+) {
+
+  match_batch <- list("_id.batch"  = batch)
+  match_date_inf <- date_query(date_inf, "gte")
+  match_date_sup <- date_query(date_sup, "lt")
+  match_ape <- list("value.code_ape" = list("$in" = I(code_ape)))
+
+  match_stage <- list(
+    "$match" = list(
+      "$and" = c(
+        list(match_batch),
+        list(match_date_inf),
+        list(match_date_sup),
+        list(match_ape)
+      )
+    )
+  )
+  return(match_stage)
 }
 
 
@@ -1041,58 +1139,60 @@ get_fields <- function(
 #'
 #' @export
 get_fields_training_light <- function() {
-  return(c(
-    "apart_heures_consommees",
-    "effectif_past_24",
-    "montant_part_ouvriere_past_12",
-    "montant_part_ouvriere_past_3",
-    "montant_part_ouvriere_past_2",
-    "montant_part_patronale_past_2",
-    "montant_part_ouvriere_past_1",
-    "montant_part_patronale_past_1",
-    "montant_part_patronale",
-    "ratio_dette",
-    "ratio_dette_moy12m",
-    "dette_fiscale_et_sociale_past_2",
-    "frais_de_RetD_past_2",
-    "independance_financiere_past_2",
-    "endettement_past_2",
-    "credit_client_past_2",
-    "capacite_autofinancement_past_2",
-    "exportation_past_2",
-    "productivite_capital_investi_past_2",
-    "rendement_capitaux_propres_past_2",
-    "rendement_ressources_durables_past_2",
-    "part_autofinancement_past_2",
-    "charge_personnel_past_2",
-    "frais_de_RetD_past_1",
-    "endettement_past_1",
-    "credit_client_past_1",
-    "capacite_autofinancement_past_1",
-    "exportation_past_1",
-    "rentabilite_economique_past_1",
-    "part_autofinancement_past_1",
-    "valeur_ajoutee_past_1",
-    "charge_personnel_past_1",
-    "effectif_consolide",
-    "frais_de_RetD",
-    "concours_bancaire_courant",
-    "endettement",
-    "autonomie_financiere",
-    "degre_immo_corporelle",
-    "rotation_stocks",
-    "credit_fournisseur",
-    "productivite_capital_investi",
-    "performance",
-    "benefice_ou_perte",
-    "taux_marge_past_2",
-    "concours_bancaire_courant_past_2",
-    "taux_marge_commerciale_past_2",
-    "taux_marge_commerciale_past_1",
-    "taux_marge_commerciale",
-    "TargetEncode_code_ape_niveau2",
-    "TargetEncode_code_ape_niveau3"
-  ))
+  return(
+    c(
+      "apart_heures_consommees",
+      "effectif_past_24",
+      "montant_part_ouvriere_past_12",
+      "montant_part_ouvriere_past_3",
+      "montant_part_ouvriere_past_2",
+      "montant_part_patronale_past_2",
+      "montant_part_ouvriere_past_1",
+      "montant_part_patronale_past_1",
+      "montant_part_patronale",
+      "ratio_dette",
+      "ratio_dette_moy12m",
+      "dette_fiscale_et_sociale_past_2",
+      "frais_de_RetD_past_2",
+      "independance_financiere_past_2",
+      "endettement_past_2",
+      "credit_client_past_2",
+      "capacite_autofinancement_past_2",
+      "exportation_past_2",
+      "productivite_capital_investi_past_2",
+      "rendement_capitaux_propres_past_2",
+      "rendement_ressources_durables_past_2",
+      "part_autofinancement_past_2",
+      "charge_personnel_past_2",
+      "frais_de_RetD_past_1",
+      "endettement_past_1",
+      "credit_client_past_1",
+      "capacite_autofinancement_past_1",
+      "exportation_past_1",
+      "rentabilite_economique_past_1",
+      "part_autofinancement_past_1",
+      "valeur_ajoutee_past_1",
+      "charge_personnel_past_1",
+      "effectif_consolide",
+      "frais_de_RetD",
+      "concours_bancaire_courant",
+      "endettement",
+      "autonomie_financiere",
+      "degre_immo_corporelle",
+      "rotation_stocks",
+      "credit_fournisseur",
+      "productivite_capital_investi",
+      "performance",
+      "benefice_ou_perte",
+      "taux_marge_past_2",
+      "concours_bancaire_courant_past_2",
+      "taux_marge_commerciale_past_2",
+      "taux_marge_commerciale_past_1",
+      "taux_marge_commerciale",
+      "TargetEncode_code_ape_niveau2",
+      "TargetEncode_code_ape_niveau3"
+    )
+  )
 }
 
 #' Récupère les dernières données disponibles pour un batch
