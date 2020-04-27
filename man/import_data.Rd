@@ -16,7 +16,7 @@ import_data(
   fields = NULL,
   code_ape = NULL,
   subsample = NULL,
-  verbose,
+  verbose ,
   replace_missing = NULL,
   debug
 )
@@ -40,15 +40,18 @@ ignorées.}
 \item{siren}{\code{character()} \cr Liste de sirens à exporter. Si égale à
 \code{NULL}, charge tous les sirens disponibles.}
 
+
 \item{date_inf}{\code{Date(1)} \cr Limite inférieure de la période de temps requêtée}
 
 \item{date_sup}{\code{Date(1)} \cr Limite supérieure de la période de temps requêtée}
+
 
 \item{fields}{\code{character()} \cr Noms des champs à requêter dans la base de
 données. Doit contenir "siret" et "periode". Si égal à \code{NULL}, alors
 charge tous les champs disponibles.}
 
 \item{code_ape}{\code{character()} \cr Liste de code NAF ou APE (niveau 2 à 5) à exporter. Si égale à
+
 \code{NULL}, charge tous les codes disponibles. Il est permis de mélanger
 des codes de différents niveaux.}
 

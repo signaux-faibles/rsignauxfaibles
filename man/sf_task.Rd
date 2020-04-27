@@ -9,8 +9,8 @@ sf_task(
   database = "test_signauxfaibles",
   collection = "Features",
   mongodb_uri,
-  experiment_name,
-  experiment_description,
+  experiment_name = "",
+  experiment_description = "",
   tracker = NULL
 )
 }
@@ -39,6 +39,7 @@ Descriptions supplémentaires sur l'expérimentation en cours.}
 Un objet sf_task avec un attribut de type \code{logical} "verbose", qui définit le niveau de log,
 ainsi qu'un attribut "to_log" de type \code{list} dans lequel seront stockés des
 informations spécifiques pour le log.
+
 }
 \description{
 Un objet s3 de type sf_task est défini, dans lequel seront défini et

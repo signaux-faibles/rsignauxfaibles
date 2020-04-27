@@ -1,10 +1,11 @@
 #' Scission des données en échantillon d'entraînement, de validation et de
 #' test.
 #'
-#' Scinde les données historiques en échantillon d'entraînement, de validation et de
-#' test, selon les proportions souhaitées. S'assure que deux établissements de la même entreprise ne soient pas
-#' à la fois dans deux échantillons différents pour éviter la fuite
-#' d'information d'un échantillon vers l'autre.
+#' Scinde les données historiques en échantillon d'entraînement, de validation
+#' et de test, selon les proportions souhaitées. S'assure que deux
+#' établissements de la même entreprise ne soient pas à la fois dans deux
+#' échantillons différents pour éviter la fuite d'information d'un échantillon
+#' vers l'autre.
 #'
 #'  La fraction de l'échantillon de test est calculée par
 #'  1 - frac_train - frac_val. (frac_train + frac_val) doit donc être inférieur
@@ -24,42 +25,47 @@
 #'
 #' @export
 split_data.sf_task <- function(
-  task,
-  fracs = c(0.6, 0.2, 0.2),
-  names = c("train", "validation", "test"),
-  tracker = task[["tracker"]],
-  ...
-  ){
-
+                               task,
+                               fracs = c(0.6, 0.2, 0.2),
+                               names = c("train", "validation", "test"),
+                               tracker = task[["tracker"]],
+                               ...) {
   set_verbose_level(task)
 
   logger::log_info("Les donnees historiques sont scindes en echantillons
     d'entrainement, de test et de validation")
 
   assertthat::assert_that("hist_data" %in% names(task),
-    msg = "Please load historical data before holding out test data")
+    msg = "Please load historical data before holding out test data"
+  )
 
-  if ( (length(fracs) == 1 && fracs == 1) || identical(fracs, c(1, 0, 0))) {
+  if ((length(fracs) == 1 && fracs == 1) || identical(fracs, c(1, 0, 0))) {
     task[["train_data"]] <- task[["hist_data"]]
   } else {
-
     res <- split_snapshot_rdm_month(
       data_sample = task[["hist_data"]],
       fracs = fracs,
       names = names
-      )
+    )
 
-    for (name in names){
+    for (name in names) {
       task[[paste0(name, "_data")]] <- task[["hist_data"]] %>%
         semi_join(res[[name]], by = c("siret", "periode"))
     }
   }
 
 
-  if (!is.null(tracker)){
+  if (!is.null(tracker)) {
     names(fracs) <- names
     tracker$set(resampling_strategy = "holdout", train_val_test_shares = fracs)
   }
+
+  # mlr3
+  resampling <- mlr3::rsmp("holdout")
+  resampling$param_set$values <- list(ratio = 0.6)
+  resampling$instantiate(task[["mlr3task"]])
+  task[["mlr3rsmp"]] <- resampling
+
   return(task)
 }
 
@@ -77,16 +83,15 @@ split_data.sf_task <- function(
 #'  tasks, one for each fold.
 #' @export
 split_n_folds <- function(
-  task,
-  n_folds = 4,
-  frac_test = 0.2,
-  tracker = task[["tracker"]]
-){
+                          task,
+                          n_folds = 4,
+                          frac_test = 0.2,
+                          tracker = task[["tracker"]]) {
   requireNamespace("purrr")
 
   assertthat::assert_that(frac_test >= 0 && frac_test < 1)
   frac_cv <- (1 - frac_test) / n_folds
-  cv_names  <- paste0("cv_", 1:n_folds)
+  cv_names <- paste0("cv_", 1:n_folds)
   task <- split_data(
     task,
     fracs = c(rep(frac_cv, n_folds), frac_test),
@@ -96,33 +101,33 @@ split_n_folds <- function(
   cv_chunks <- task[cv_names]
   task[cv_names] <- NULL
 
-  create_cv_task <- function(cv_number, cv_chunks){
-    cv_task  <- sf_task(
-        verbose = TRUE,
-        database = task[["database"]],
-        collection = task[["collection"]],
-        mongodb_uri = task[["mongodb_uri"]],
-        experiment_name = paste0(
-          #TODO change in special field
-          task[["tracker"]]$values[["experiment_name"]],
-          "_cv",
-          cv_number
-        ),
+  create_cv_task <- function(cv_number, cv_chunks) {
+    cv_task <- sf_task(
+      verbose = TRUE,
+      database = task[["database"]],
+      collection = task[["collection"]],
+      mongodb_uri = task[["mongodb_uri"]],
+      experiment_name = paste0(
+        # TODO change in special field
+        task[["tracker"]]$values[["experiment_name"]],
+        "_cv",
+        cv_number
+      ),
       experiment_description =
         task[["tracker"]]$values[["experiment_description"]]
-      )
+    )
     cv_task[["validation_data"]] <- cv_chunks[[cv_number]]
     cv_task[["train_data"]] <- dplyr::bind_rows(cv_chunks[-cv_number])
 
-    if (!is.null(tracker)){
+    if (!is.null(tracker)) {
       suppressWarnings(
         tracker$set(
           resampling_strategy = paste0(
             n_folds,
             "-folds cross validation"
-            )
           )
         )
+      )
     }
 
     return(cv_task)
@@ -134,7 +139,7 @@ split_n_folds <- function(
     cv_chunks = cv_chunks
   )
 
-  if (!"cv_task" %in% class(task)){
+  if (!"cv_task" %in% class(task)) {
     class(task) <- c("cv_task", class(task))
   }
 
@@ -168,25 +173,24 @@ split_n_folds <- function(
 #' avec les couples (siret x periode) des trois échantillons calculés.
 #' @export
 split_snapshot_rdm_month <- function(
-  data_sample,
-  fracs,
-  names,
-  seed = 1234
-  ) {
-
+                                     data_sample,
+                                     fracs,
+                                     names,
+                                     seed = 1234) {
   assertthat::assert_that(
     sum(fracs) == 1,
     msg = "Sum of fractions should be equal to 1"
-    )
+  )
   assertthat::assert_that(
     all(fracs > 0),
     msg = "All fractions should be strictly positivie"
-    )
+  )
   assertthat::assert_that(
     length(names) == length(fracs) ||
       length(names) == 1,
     msg = "Les noms specifies doivent etre de meme longueur que les fractions,
-    ou de longueur 1")
+    ou de longueur 1"
+  )
 
 
   data_sample <- data_sample %>%
@@ -210,7 +214,7 @@ split_snapshot_rdm_month <- function(
     left_join(y = sirens, by = "siren") %>%
     select(siret, periode, ss)
 
-  if (length(names) == 1 && length(fracs) > 1){
+  if (length(names) == 1 && length(fracs) > 1) {
     names <- paste0(names, "_", 1:length(fracs))
   }
   result <- stats::setNames(

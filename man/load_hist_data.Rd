@@ -65,8 +65,9 @@ données.}
 \value{
 \verb{[sf_task]} \cr
 L'objet \code{task} donné en entrée auquel le champs "hist_data" a été
-ajouté (ou écrasé), contenant un  data.frame() avec les colonnes incluses dans le paramètre d'entrée
-\code{fields}, et pour chaque ligne un couple unique siret x periode.
+ajouté (ou écrasé), contenant un  data.frame() avec les colonnes incluses
+dans le paramètre d'entrée \code{fields}, et pour chaque ligne un couple
+unique siret x periode.
 }
 \description{
 Charge les données historiques de signaux faibles et les stocke dans un
