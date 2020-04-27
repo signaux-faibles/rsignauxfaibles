@@ -86,8 +86,12 @@ load_hist_data.sf_task <- function(
   if (nrow(hist_data) > 1) {
     logger::log_info("Les donnees ont ete chargees avec succes.")
   } else {
+<<<<<<< HEAD
     logger::log_warn("Aucune donnee n'a ete chargee. Veuillez verifier la
       requete.")
+=======
+    logger::log_warn("Aucune donnee n'a ete chargee. Veuillez verifier la requete.")
+>>>>>>> 3a15b92fdc0fe31aa035f87e421c28434bf66cbb
   }
   # check_overwrites(task, "hist_data")
   task[["hist_data"]] <- hist_data
