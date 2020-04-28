@@ -4,12 +4,6 @@ test_database <- "unittest_signauxfaibles"
 test_collection <- "Scores_for_tests"
 test_mongodb_uri  <-  "mongodb://localhost:27017"
 
-dbconnection <- mongolite::mongo(
-  collection = test_collection,
-  db = test_database,
-  verbose = TRUE,
-  url = test_mongodb_uri
-)
 
 f_scores <- c(F2 = 0.2, F1 = 0.4)
 
@@ -37,6 +31,13 @@ scores_3 <- runif(n = nrow(siret_df))
 # -------- Export to mongodb ---------------------------------------------------
 # ------------------------------------------------------------------------------
 test_that("Test inputs for export_scores function to mongodb", {
+  testthat::skip_on_ci()
+  dbconnection <- mongolite::mongo(
+    collection = test_collection,
+    db = test_database,
+    verbose = TRUE,
+    url = test_mongodb_uri
+  )
   expect_error(export_scores_to_mongodb(
     formatted_data = cbind(siret_df, score = scores_1),
     batch = 123,
@@ -67,6 +68,13 @@ test_that("Test inputs for export_scores function to mongodb", {
 })
 
 test_that("Scores are well exported with export_scores_to_mongodb function", {
+  testthat::skip_on_ci()
+  dbconnection <- mongolite::mongo(
+    collection = test_collection,
+    db = test_database,
+    verbose = TRUE,
+    url = test_mongodb_uri
+  )
   dbconnection$remove(query = "{}")
   expect_error(
     export_scores_to_mongodb(
@@ -123,6 +131,7 @@ test_that("Scores are well exported with export_scores_to_mongodb function", {
 # -------- Import back to R ----------------------------------------------------
 # ------------------------------------------------------------------------------
 test_that("Input checking for get_scores", {
+  testthat::skip_on_ci()
   # wrong inputs
   expect_error(get_scores(
     database = 123,
@@ -163,6 +172,7 @@ test_that("Input checking for get_scores", {
 })
 
 test_that("Get_scores works with 'historical' method", {
+  testthat::skip_on_ci()
   timestamp <- Sys.time()
   Sys.sleep(1)
   export_scores_to_mongodb(

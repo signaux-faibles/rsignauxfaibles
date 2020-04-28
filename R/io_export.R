@@ -631,7 +631,7 @@ export_fiche_visite <- function(
       collection = collection,
       mongodb_uri = mongodb_uri,
       batch = batch,
-      siren = substr(sirets[i], 1, 9),
+      sirets = sirets[i],
       fields = c("siret", "raison_sociale", "periode", "code_ape_niveau3"),
       min_effectif = 0
     ) %>%
