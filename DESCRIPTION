@@ -9,14 +9,13 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
-    MLmetrics,
     MLlogr,
     MLsegmentr,
-    PRROC,
     assertthat,
     dplyr,
     fte,
     here,
+    jsonlite,
     logger,
     lubridate,
     mongolite,
@@ -25,21 +24,16 @@ Imports:
     stringr,
     tibble,
     tidyr,
-    uuid,
     xgboost
 Suggests:
     DiceKriging,
-    Hmisc,
     ParamHelpers,
     corrplot,
     ggplot2,
-    jsonlite,
     lhs,
     mlr,
     mlrMBO,
-    moments,
     rgenoud,
-    rmarkdown,
     smoof,
     testthat (>= 2.1.0),
     xgboostExplainer

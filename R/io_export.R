@@ -466,7 +466,7 @@ get_scores <- function(
   algo = NULL,
   batchs = NULL,
   sirets = NULL
-  ){
+  ) {
 
   assertthat::assert_that(is.character(database) && length(database) == 1,
     msg = "Database name should be a length 1 string"
@@ -597,60 +597,4 @@ get_scores <- function(
   if (nrow(query) >= 1) result <- query
 
   return(result)
-}
-
-
-#' Export d'une fiche visite
-#'
-#' @param sirets Vecteur de sirets des établissements dont il faut exporter la
-#' fiche
-#' @inheritParams mongodb_connection
-#' @param batch `character(1)` Choix du batch pour lequel se fait l'export
-#' @param with_urssaf `logical(1)`\cr Si TRUE, les informations du montant des
-#'  dettes URSSAF sont incluses à la fiche.
-#' @param absolute_path `character(1)` \cr Chemin d'accès absolu au dossier
-#' d'export.
-#'
-#' @return `NULL`
-#'   Exporte la ou les fiches visites sous le nom
-#'   "Fiche_visite_{raison_sociale}.pdf"
-#' @export
-#'
-export_fiche_visite <- function(
-  sirets,
-  database = "test_signauxfaibles",
-  collection = "Features",
-  mongodb_uri,
-  batch,
-  with_urssaf = FALSE,
-  absolute_path){
-
-  for (i in seq_along(sirets)) {
-    elementary_info <- import_data(
-      database = database,
-      collection = collection,
-      mongodb_uri = mongodb_uri,
-      batch = batch,
-      sirets = sirets[i],
-      fields = c("siret", "raison_sociale", "periode", "code_ape_niveau3"),
-      min_effectif = 0
-    ) %>%
-      filter(siret == sirets[i]) %>%
-      utils::head(n = 1)
-
-    raison_sociale <- elementary_info %>%
-      .$raison_sociale
-
-    rmarkdown::render(here::here("R", "post_fiche_visite.Rmd"),
-      params = list(
-        siret = sirets[i],
-        batch = batch,
-        database = database,
-        collection = collection,
-        with_urssaf = with_urssaf
-      ),
-      output_file =  file.path(absolute_path, paste0("Fiche_visite_", stringr::str_replace_all(raison_sociale, "[^[:alnum:]]", "_"), ".pdf")),
-      clean = TRUE
-    )
-  }
 }
