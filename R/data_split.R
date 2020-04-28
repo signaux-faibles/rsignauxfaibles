@@ -60,12 +60,6 @@ split_data.sf_task <- function(
     tracker$set(resampling_strategy = "holdout", train_val_test_shares = fracs)
   }
 
-  # mlr3
-  resampling <- mlr3::rsmp("holdout")
-  resampling$param_set$values <- list(ratio = 0.6)
-  resampling$instantiate(task[["mlr3task"]])
-  task[["mlr3rsmp"]] <- resampling
-
   return(task)
 }
 

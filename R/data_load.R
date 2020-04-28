@@ -90,23 +90,6 @@ load_hist_data.sf_task <- function(
   check_overwrites(task, "hist_data")
   task[["hist_data"]] <- hist_data
 
-  # Create mlr3 task
-  hist_data <- hist_data %>%
-    mutate_if(~ inherits(., "Date"), as.POSIXct)
-  hist_data$outcome <- as.factor(hist_data$outcome)
-  mlr3t <- mlr3::TaskClassif$new(
-    id = "signaux-faibles",
-    backend = hist_data,
-    target = "outcome"
-  )
-  mlr3t$col_roles$name <- c("siret")
-  mlr3t$col_roles$group <- c("siren")
-  mlr3t$col_roles$feature <- setdiff(
-    task$col_roles$feature,
-    c("siret", "siren")
-  )
-  task[["mlr3task"]] <- mlr3t
-
   return(task)
 }
 
