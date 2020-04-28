@@ -309,17 +309,20 @@ import_test_data <- function(
 
 test_that(
   "une requête vide renvoie un dataframe vide avec une requête standard", {
-  empty_data <- import_test_data(
-    "wrong_batch",
-    fields = c("siret", "periode"),
-    sirets = NULL,
-    code_ape = NULL
-  )
-  expect_equal(dim(empty_data), c(0, 2))
-})
+    testthat::skip_on_ci()
+    empty_data <- import_test_data(
+      "wrong_batch",
+      fields = c("siret", "periode"),
+      sirets = NULL,
+      code_ape = NULL
+    )
+    expect_equal(dim(empty_data), c(0, 2))
+  })
 
 test_that(
   "On arrive à récupérer les éléments de la base avec une requête standard", {
+
+  testthat::skip_on_ci()
   fields <- c("siret", "periode")
   test_object <- import_test_data(
     "test_batch_1",
@@ -331,8 +334,10 @@ test_that(
   expect_equal(test_object$siret, "01234567891011")
   expect_equal(test_object$periode, as.Date("2014-01-01"))
 })
+
 test_that(
   "une requête vide renvoie un dataframe vide avec une requête par siret", {
+  testthat::skip_on_ci()
   empty_data <- import_test_data(
     "test_batch_1",
     fields = c("siret", "periode"),
@@ -344,6 +349,7 @@ test_that(
 
 test_that(
   "On arrive à récupérer les éléments de la base avec une requête par siret", {
+  testthat::skip_on_ci()
   fields <- c("siret", "periode")
   test_object <- import_test_data(
     "test_batch_1",
@@ -356,9 +362,9 @@ test_that(
   expect_equal(test_object$periode, as.Date("2014-01-01"))
 })
 
-
 test_that(
-  "On arrive à récupérer les éléments de la base avec une requête par siret", {
+  "On arrive à récupérer les éléments de la base avec une requête par code ape", {
+  testthat::skip_on_ci()
   fields <- c("siret", "periode")
   test_object <- import_test_data(
     "test_batch_1",
@@ -370,5 +376,3 @@ test_that(
   expect_equal(test_object$siret, "01234567891011")
   expect_equal(test_object$periode, as.Date("2014-01-01"))
 })
-# TODO: wrong database or collection should throw an error, not returning
-# empty dataframe.
