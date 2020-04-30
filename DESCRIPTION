@@ -9,7 +9,6 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
-    MLlogr,
     MLsegmentr,
     assertthat,
     dplyr,
@@ -31,6 +30,7 @@ Suggests:
     corrplot,
     ggplot2,
     lhs,
+    mlflow,
     mlr,
     mlrMBO,
     rgenoud,
