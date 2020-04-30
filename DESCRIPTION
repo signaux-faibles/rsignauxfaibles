@@ -39,7 +39,6 @@ Suggests:
     xgboostExplainer
 Remotes:
     AppliedDataSciencePartners/xgboostExplainer,
-    signaux-faibles/MLlogr,
     signaux-faibles/MLsegmentr,
     signaux-faibles/fte
 RoxygenNote: 7.1.0
