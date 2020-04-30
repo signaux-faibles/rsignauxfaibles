@@ -16,7 +16,6 @@
   shape_frame_function = shape_for_xgboost,
   shape_frame_options = list(),
   outcome_field = "outcome",
-  tracker = NULL,
   preprocessing_strategy = NULL,
   training_fields = get_fields(training = TRUE),
   ...
@@ -27,8 +26,6 @@
 
 \item{data_names}{\code{character()} \cr Vecteur de noms des données à préparer.
 Doivent-être des noms de champs valides de \code{task}.}
-
-\item{tracker}{\verb{[mllogr::Tracker]} \cr Logger of ML experiment}
 
 \item{preprocessing_strategy}{character() \cr
 Description en langage naturel de la stratégie de préparation des données

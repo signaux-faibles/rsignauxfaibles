@@ -53,7 +53,6 @@ prepare.sf_task <- function( #nolint
     ),
   shape_frame_function = shape_for_xgboost,
   shape_frame_options = list(),
-  tracker = NULL,
   preprocessing_strategy = NULL,
   ...
   ) {
@@ -62,9 +61,6 @@ prepare.sf_task <- function( #nolint
   data_names <- subset_data_names_in_task(data_names, task)
 
   ## Defaults ##
-  if (is.null(tracker)) {
-    tracker  <- task[["tracker"]]
-  }
   if (is.null(preprocessing_strategy)) {
     preprocessing_strategy <- "Target encoding with fte"
   }
@@ -88,8 +84,8 @@ prepare.sf_task <- function( #nolint
     .init = task,
   )
 
-  if (!is.null(tracker)) {
-    tracker$set(preprocessing_strategy = preprocessing_strategy)
+  if (!is.null(task[["tracker"]]) && requireNamespace("mlflow")) {
+    mlflow::mlflow_log_param("preprocessing_strategy", preprocessing_strategy)
   }
   return(task)
 }
@@ -497,7 +493,6 @@ prepare.cv_task <- function( #nolint
   shape_frame_function = shape_for_xgboost,
   shape_frame_options = list(),
   outcome_field = "outcome",
-  tracker = NULL,
   preprocessing_strategy = NULL,
   training_fields =  get_fields(training = TRUE),
   ...

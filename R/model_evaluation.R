@@ -3,7 +3,6 @@
 #' Evalue les prédictions d'un ou plusieurs tasks.
 #' Stocke le résultat dans le premier task.
 #'
-#' @inheritParams generic_task
 #' @param ... `tasks` \cr Tasks to be evaluated.
 #' @param eval_function `MLsegmentr::eval_function()` \cr Objet s3
 #' d'évaluation.
@@ -35,8 +34,7 @@ evaluate <- function(
   prediction_names = NULL,
   target_names = "outcome",
   segment_names = NULL,
-  remove_strong_signals = TRUE,
-  tracker = task[["tracker"]]
+  remove_strong_signals = TRUE
   ){
   tasks <- list(...)
   assertthat::assert_that(length(tasks) >= 1)
@@ -98,10 +96,8 @@ evaluate <- function(
     task[["model_performance"]] <- perf
   }
 
-  if (!is.null(tracker)){
-    tracker$set(
-      model_performance = task[["model_performance"]]
-    )
+  if (!is.null(task[["tracker"]]) && requireNamespace("mlflow")) {
+    mlflow::mlflow_log_metric("model_performance", task[["model_performance"]])
   }
   return(task)
   ## Log model performance.

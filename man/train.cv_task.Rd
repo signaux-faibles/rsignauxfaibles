@@ -9,7 +9,6 @@
   outcome = "outcome",
   parameters = NULL,
   seed = 0,
-  tracker = task[["tracker"]],
   train_fun = "xgboost",
   ...
 )
@@ -26,8 +25,6 @@ défaut sont sélectionnés.}
 
 \item{seed}{\code{integer()}\cr Graîne pour que les calculs aléatoires soient
 reproductibles.}
-
-\item{tracker}{\verb{[mllogr::Tracker]} \cr Logger of ML experiment}
 
 \item{train_fun}{\code{training_data} \cr Training_function, or "xgboost" or
 "linear"}

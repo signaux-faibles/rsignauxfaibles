@@ -26,7 +26,6 @@ train.sf_task <- function(
   outcome = "outcome",
   parameters = NULL,
   seed = 0,
-  tracker = task[["tracker"]],
   train_fun = "xgboost",
   ...
   ){
@@ -84,14 +83,10 @@ train.sf_task <- function(
   logger::log_info("Model trained_successfully")
   task[["model"]] <- model
 
-  if (!is.null(tracker)){
-    #TODO: Why does it print "model"?
-    # e51f22ca-ed0d-434b-be1e-d57547092a22
-     tracker$set(
-       model_name  = "light gradient boosting",
-       model  = "model",
-       model_target  = "18 mois, defaut et defaillance"
-       )
+  if (!is.null(task[["tracker"]]) && requireNamespace("mlflow")) {
+     mlflow::mlflow_log_param(model_name,  "light gradient boosting")
+     mlflow::mlflow_log_param(model,  "model")
+     mlflow::mlflow_log_param(model_target,  "18 mois, defaut et defaillance")
   }
 
   return(invisible(task))
@@ -110,7 +105,6 @@ train.cv_task  <- function(
   outcome = "outcome",
   parameters = NULL,
   seed = 0,
-  tracker = task[["tracker"]],
   train_fun = "xgboost",
   ...
   ){

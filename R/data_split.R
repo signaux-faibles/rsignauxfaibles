@@ -28,7 +28,6 @@ split_data.sf_task <- function(
                                task,
                                fracs = c(0.6, 0.2, 0.2),
                                names = c("train", "validation", "test"),
-                               tracker = task[["tracker"]],
                                ...) {
   set_verbose_level(task)
 
@@ -55,9 +54,10 @@ split_data.sf_task <- function(
   }
 
 
-  if (!is.null(tracker)) {
+  if (!is.null(task[["tracker"]]) && requireNamespace("mlflow")) {
     names(fracs) <- names
-    tracker$set(resampling_strategy = "holdout", train_val_test_shares = fracs)
+    mlflow::mlflow_log_param("resampling_strategy", "holdout")
+    mlflow::mlflow_log_param("train_val_test_shares", fracs)
   }
 
   return(task)
@@ -79,8 +79,7 @@ split_data.sf_task <- function(
 split_n_folds <- function(
                           task,
                           n_folds = 4,
-                          frac_test = 0.2,
-                          tracker = task[["tracker"]]) {
+                          frac_test = 0.2) {
   requireNamespace("purrr")
 
   assertthat::assert_that(frac_test >= 0 && frac_test < 1)
@@ -101,26 +100,15 @@ split_n_folds <- function(
       database = task[["database"]],
       collection = task[["collection"]],
       mongodb_uri = task[["mongodb_uri"]],
-      experiment_name = paste0(
-        # TODO change in special field
-        task[["tracker"]]$values[["experiment_name"]],
-        "_cv",
-        cv_number
-      ),
-      experiment_description =
-        task[["tracker"]]$values[["experiment_description"]]
+      tracker = task[["tracker"]]
     )
     cv_task[["validation_data"]] <- cv_chunks[[cv_number]]
     cv_task[["train_data"]] <- dplyr::bind_rows(cv_chunks[-cv_number])
 
-    if (!is.null(tracker)) {
-      suppressWarnings(
-        tracker$set(
-          resampling_strategy = paste0(
-            n_folds,
-            "-folds cross validation"
-          )
-        )
+    if (!is.null(task[["tracker"]]) && requireNamespace("mlflow")) {
+      mlflow::mlflow_log_param(
+        "resampling_strategy",
+        paste0(n_folds, "-folds cross validation")
       )
     }
 
