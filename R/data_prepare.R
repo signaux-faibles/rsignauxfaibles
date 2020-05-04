@@ -84,9 +84,8 @@ prepare.sf_task <- function( #nolint
     .init = task,
   )
 
-  if (!is.null(task[["tracker"]]) && requireNamespace("mlflow")) {
-    mlflow::mlflow_log_param("preprocessing_strategy", preprocessing_strategy)
-  }
+  log_param("preprocessing_strategy", preprocessing_strategy)
+
   return(task)
 }
 
