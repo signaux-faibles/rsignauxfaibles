@@ -56,8 +56,8 @@ split_data.sf_task <- function(
 
   if (!is.null(task[["tracker"]]) && requireNamespace("mlflow")) {
     names(fracs) <- names
-    mlflow::mlflow_log_param("resampling_strategy", "holdout")
-    mlflow::mlflow_log_param("train_val_test_shares", fracs)
+    log_param("resampling_strategy", "holdout")
+    log_param("train_val_test_shares", fracs)
   }
 
   return(task)
@@ -106,7 +106,7 @@ split_n_folds <- function(
     cv_task[["train_data"]] <- dplyr::bind_rows(cv_chunks[-cv_number])
 
     if (!is.null(task[["tracker"]]) && requireNamespace("mlflow")) {
-      mlflow::mlflow_log_param(
+      log_param(
         "resampling_strategy",
         paste0(n_folds, "-folds cross validation")
       )
