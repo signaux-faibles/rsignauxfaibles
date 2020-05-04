@@ -94,16 +94,14 @@ get_cv_test_task <- function() {
   return(cv_task)
 }
 
-# If a list ".testlog" exists in parent environment, write tests to this list.
-mock_log_param <- function(key, value, ...) {
-  if (exists(".testlog") && inherits(.testlog, "list")) {
-    .testlog[[key]] <<- value
-  }
+# Pass an environment to client and it will assign new variables in it.
+mock_log_param <- function(key, value, client, ...) {
+  assertthat::assert_that(inherits(client, "environment"))
+  assign(key, value, envir = client)
 }
 
-# If a list ".testlog" exists in parent environment, write tests to this list.
-mock_log_metric <- function(key, value, ...) {
-  if (exists(".testlog") && inherits(.testlog, "list")) {
-    .testlog[[key]] <<- value
-  }
+# Pass an environment to client and it will assign new variables in it.
+mock_log_metric <- function(key, value, client, ...) {
+  assertthat::assert_that(inherits(client, "environment"))
+  assign(key, value, envir = client)
 }
