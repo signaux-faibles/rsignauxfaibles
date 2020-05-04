@@ -4,8 +4,8 @@ log_param <- function(task, key, value, ...) {
   }
 }
 
-log_metric <- function(key, value, client = NULL, ...) {
+log_metric <- function(task, key, value, ...) {
   if (!is.null(task[["tracker"]]) && requireNamespace("mlflow")) {
-    mlflow::mlflow_log_metric(key, value, client = client, ...)
+    mlflow::mlflow_log_metric(key, value, client = task[["tracker"]], ...)
   }
 }

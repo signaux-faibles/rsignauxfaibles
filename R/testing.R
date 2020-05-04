@@ -95,13 +95,13 @@ get_cv_test_task <- function() {
 }
 
 # Pass an environment to client and it will assign new variables in it.
-mock_log_param <- function(key, value, client, ...) {
-  assertthat::assert_that(inherits(client, "environment"))
-  assign(key, value, envir = client)
+mock_log_param <- function(task, key, value, ...) {
+  assertthat::assert_that(inherits(task[["tracker"]], "environment"))
+  assign(key, value, envir = task[["tracker"]])
 }
 
 # Pass an environment to client and it will assign new variables in it.
-mock_log_metric <- function(key, value, client, ...) {
-  assertthat::assert_that(inherits(client, "environment"))
-  assign(key, value, envir = client)
+mock_log_metric <- function(task, key, value, ...) {
+  assertthat::assert_that(inherits(task[["tracker"]], "environment"))
+  assign(key, value, envir = task[["tracker"]])
 }
