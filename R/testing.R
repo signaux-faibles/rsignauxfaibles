@@ -97,13 +97,13 @@ get_cv_test_task <- function() {
 # If a list ".testlog" exists in parent environment, write tests to this list.
 mock_log_param <- function(key, value, ...) {
   if (exists(".testlog") && inherits(.testlog, "list")) {
-    .testlog[[key]] <- value
+    .testlog[[key]] <<- value
   }
 }
 
 # If a list ".testlog" exists in parent environment, write tests to this list.
 mock_log_metric <- function(key, value, ...) {
   if (exists(".testlog") && inherits(.testlog, "list")) {
-    .testlog[[key]] <- value
+    .testlog[[key]] <<- value
   }
 }
