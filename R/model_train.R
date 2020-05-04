@@ -83,9 +83,8 @@ train.sf_task <- function(
   logger::log_info("Model trained_successfully")
   task[["model"]] <- model
 
-  log_param(task, model_name,  "light gradient boosting")
-  log_param(task, model,  "model")
-  log_param(task, model_target,  "18 mois, defaut et defaillance")
+  log_param(task, "model_name",  "light gradient boosting")
+  log_param(task, "model_target",  "18 mois, defaut et defaillance")
 
   return(invisible(task))
 }
