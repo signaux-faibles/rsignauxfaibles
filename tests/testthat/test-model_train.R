@@ -41,3 +41,33 @@ test_that("train.cv works as expected", {
     3
   )
 })
+
+test_that(
+  "Les logs de la fonction 'prepare_data' fonctionnent correctement", {
+    task <- get_test_task()
+    task[["model_parameters"]] <- parameters
+    task[["tracker"]] <- new.env()
+    with_mock(
+      train(task, outcome = "target", train_fun = test_train_function),
+      log_param = mock_log_param,
+      log_metric = mock_log_metric
+    )
+    expect_true(length(ls(task[["tracker"]])) > 0)
+    expect_setequal(
+      names(task[["tracker"]]),
+      c("model_name", "model_target", "model_parameters")
+    )
+    expect_equal(
+      get("model_name", envir = task[["tracker"]]),
+      "light gradient boosting"
+    )
+    expect_equal(
+      get("model_target", envir = task[["tracker"]]),
+      "18 mois, defaut et defaillance"
+    )
+    expect_equal(
+      get("model_parameters", envir = task[["tracker"]]),
+      parameters
+      )
+  }
+)
