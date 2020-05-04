@@ -123,6 +123,7 @@ create_fte_test_task <- function() {
   )
   return(test_task)
 }
+
 create_prepared_fte_test_task <- function() {
   fte_test_task <- create_fte_test_task()
 
@@ -156,3 +157,25 @@ test_that("map creation works as expected", {
         NULL, c("target", "score", "target_encode_ab", "target_encode_cd")))
   )
   })
+
+test_that(
+  "Les logs de la fonction 'prepare_data' fonctionnent correctement", {
+    task <- get_test_task()
+    task[["tracker"]] <- new.env()
+    with_mock(
+      create_prepared_task(task),
+      log_param = mock_log_param,
+      log_metric = mock_log_metric
+    )
+    expect_true(length(ls(task[["tracker"]])) > 0)
+    expect_setequal(
+      names(task[["tracker"]]),
+      c("preprocessing_strategy")
+    )
+    expect_equal(
+      get("preprocessing_strategy", envir = task[["tracker"]]),
+      "Target encoding with fte"
+    )
+    task[["tracker"]] <- NULL
+  }
+)
