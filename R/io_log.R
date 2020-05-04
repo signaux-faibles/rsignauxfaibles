@@ -10,7 +10,7 @@
 #' @export
 log_param <- function(task, key, value, ...) {
   if (!is.null(task[["tracker"]]) && requireNamespace("mlflow")) {
-    mlflow::mlflow_log_param(key, value, client = task[["tracker"]])
+    mlflow::mlflow_log_param(key, value, run_id = task[["tracker"]]$run_id, ...)
   }
 }
 
@@ -25,7 +25,8 @@ log_param <- function(task, key, value, ...) {
 #'
 #' @export
 log_metric <- function(task, key, value, ...) {
+  assertthat::assert_that(is.numeric(value))
   if (!is.null(task[["tracker"]]) && requireNamespace("mlflow")) {
-    mlflow::mlflow_log_metric(key, value, client = task[["tracker"]], ...)
+    mlflow::mlflow_log_metric(key, value, run_id =  task[["tracker"]]$run_id, ...)
   }
 }
