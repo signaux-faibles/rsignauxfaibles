@@ -92,7 +92,7 @@ test_that("Prepare task works with options as expected", {
     no_offset_task[["prepared_train_data"]]$target,
     no_offset_task[["train_data"]]$target
   )
-  expect_equal(class(matrix_task[["prepared_test_data"]]), "matrix")
+  expect_true(inherits(matrix_task[["prepared_test_data"]], "matrix"))
   })
 
 create_fte_test_task <- function() {
