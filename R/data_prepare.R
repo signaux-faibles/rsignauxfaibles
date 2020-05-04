@@ -60,10 +60,6 @@ prepare.sf_task <- function( #nolint
   set_verbose_level(task)
   data_names <- subset_data_names_in_task(data_names, task)
 
-  ## Defaults ##
-  if (is.null(preprocessing_strategy)) {
-    preprocessing_strategy <- "Target encoding with fte"
-  }
 
   ## Core ##
   task[["training_fields"]] <- training_fields
@@ -84,7 +80,11 @@ prepare.sf_task <- function( #nolint
     .init = task,
   )
 
-  log_param("preprocessing_strategy", preprocessing_strategy)
+  if (is.null(preprocessing_strategy)) {
+    ## Default value
+    preprocessing_strategy <- "Target encoding with fte"
+  }
+  log_param(task, "preprocessing_strategy", preprocessing_strategy)
 
   return(task)
 }
