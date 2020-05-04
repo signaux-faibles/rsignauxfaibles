@@ -83,11 +83,9 @@ train.sf_task <- function(
   logger::log_info("Model trained_successfully")
   task[["model"]] <- model
 
-  if (!is.null(task[["tracker"]]) && requireNamespace("mlflow")) {
-     mlflow::mlflow_log_param(model_name,  "light gradient boosting")
-     mlflow::mlflow_log_param(model,  "model")
-     mlflow::mlflow_log_param(model_target,  "18 mois, defaut et defaillance")
-  }
+  log_param(task, model_name,  "light gradient boosting")
+  log_param(task, model,  "model")
+  log_param(task, model_target,  "18 mois, defaut et defaillance")
 
   return(invisible(task))
 }

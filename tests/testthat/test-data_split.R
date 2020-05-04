@@ -142,3 +142,29 @@ test_that(
   expect_equal(split_1[["test"]], split_2[["test"]])
 }
 )
+
+test_that(
+  "Les logs de la fonction 'split_data' fonctionnent correctement", {
+    task <- get_test_task()
+    task[["tracker"]] <- new.env()
+    with_mock(
+      split_data(task, c(0.75, 0.20, 0.05)),
+      log_param = mock_log_param,
+      log_metric = mock_log_metric
+    )
+    expect_true(length(ls(task[["tracker"]])) > 0)
+    expect_setequal(
+      names(task[["tracker"]]),
+      c("resampling_strategy", "train_val_test_shares")
+    )
+    expect_equal(
+      get("resampling_strategy", envir = task[["tracker"]]),
+      "holdout"
+    )
+    expect_equal(
+      get("train_val_test_shares", envir = task[["tracker"]]),
+      c(train = 0.75, validation = 0.2, test = 0.05)
+    )
+    task[["tracker"]] <- NULL
+  }
+)

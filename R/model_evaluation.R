@@ -96,9 +96,7 @@ evaluate <- function(
     task[["model_performance"]] <- perf
   }
 
-  if (!is.null(task[["tracker"]]) && requireNamespace("mlflow")) {
-    mlflow::mlflow_log_metric("model_performance", task[["model_performance"]])
-  }
+  log_metric(task, "model_performance", task[["model_performance"]])
   return(task)
   ## Log model performance.
 }
