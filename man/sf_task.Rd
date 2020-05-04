@@ -9,8 +9,6 @@ sf_task(
   database = "test_signauxfaibles",
   collection = "Features",
   mongodb_uri,
-  experiment_name = "",
-  experiment_description = "",
   tracker = NULL
 )
 }
@@ -26,13 +24,14 @@ exporter. Par défaut, celle stockée dans \code{task}.}
 
 \item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri format.}
 
+\item{tracker}{\code{mlflow::mlflow_run} \cr
+Un mlflow_run pour tracker les modèles et expériences.}
+
 \item{experiment_name}{\code{character()} \cr
 Quel est l'objet de cette tâche ?}
 
 \item{experiment_description}{\code{character()} \cr
 Descriptions supplémentaires sur l'expérimentation en cours.}
-
-\item{tracker}{\verb{[mllogr::Tracker]} \cr Logger of ML experiment}
 }
 \value{
 \verb{[rsignauxfaibles::sf_task]} \cr
@@ -43,7 +42,4 @@ dans lequel seront stockés des informations spécifiques pour le log.
 \description{
 Un objet s3 de type sf_task est défini, dans lequel seront défini et
 stockés les tâches intermédiaires et les résultats de l'apprentissage.
-}
-\details{
-Si \code{tracker} est \code{NULL}, alors un nouveau Tracker est créé
 }

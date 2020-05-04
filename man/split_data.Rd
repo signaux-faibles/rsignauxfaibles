@@ -10,7 +10,6 @@ test.}
   task,
   fracs = c(0.6, 0.2, 0.2),
   names = c("train", "validation", "test"),
-  tracker = task[["tracker"]],
   ...
 )
 
@@ -26,8 +25,6 @@ Toutes les fractions doivent être dans ]0,1] et leur somme doit être égale
 \item{names}{\code{character()} \cr Vecteur de noms des sous-échantillons, qui doit être de même
 longueur que les fractions, ou de longueur 1. Si de longueur 1, alors un
 préfixe "_X", avec X la numérotation des échantillons, est automatiquement ajouté.}
-
-\item{tracker}{\verb{[mllogr::Tracker]} \cr Logger of ML experiment}
 
 \item{...}{Not used}
 }

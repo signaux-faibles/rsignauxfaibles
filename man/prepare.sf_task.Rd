@@ -17,7 +17,6 @@
     "code_ape_niveau3")),
   shape_frame_function = shape_for_xgboost,
   shape_frame_options = list(),
-  tracker = NULL,
   preprocessing_strategy = NULL,
   ...
 )
@@ -31,8 +30,6 @@ Doivent-être des noms de champs valides de \code{task}.}
 \item{training_fields}{\code{character()} \cr Les champs qui doivent être
 conservées pour l'entraînement, après toutes les phases de préparation,
 notamment le target encoding.}
-
-\item{tracker}{\verb{[mllogr::Tracker]} \cr Logger of ML experiment}
 
 \item{preprocessing_strategy}{character() \cr
 Description en langage naturel de la stratégie de préparation des données

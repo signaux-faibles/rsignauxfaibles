@@ -3,7 +3,7 @@
 #' Documentation tâche générique
 #'
 #' @param task `[sf_task]` \cr Objet s3 de type sf_task
-#' @param tracker `[mllogr::Tracker]` \cr Logger of ML experiment
+#' @param tracker `[mlflow::mlflow_run]` \cr Logger of ML experiment
 #' @param ... Not used
 #' @name generic_task
 NULL
@@ -13,8 +13,6 @@ NULL
 #' Un objet s3 de type sf_task est défini, dans lequel seront défini et
 #' stockés les tâches intermédiaires et les résultats de l'apprentissage.
 #'
-#' Si `tracker` est `NULL`, alors un nouveau Tracker est créé
-#'
 #' @param verbose `logical(1)` \cr
 #'   Active ou désactive le log des actions ultérieures.
 #' @inheritParams mongodb_connection
@@ -23,6 +21,8 @@ NULL
 #'   Quel est l'objet de cette tâche ?
 #' @param experiment_description `character()` \cr
 #'   Descriptions supplémentaires sur l'expérimentation en cours.
+#' @param tracker `mlflow::mlflow_run` \cr
+#'   Un mlflow_run pour tracker les modèles et expériences.
 #'
 #' @return `[rsignauxfaibles::sf_task]` \cr
 #'   Un objet sf_task avec un attribut de type `logical` "verbose", qui
@@ -35,31 +35,15 @@ sf_task <- function(
                     database = "test_signauxfaibles",
                     collection = "Features",
                     mongodb_uri,
-                    experiment_name = "",
-                    experiment_description = "",
                     tracker = NULL) {
   res <- list(
     database = database,
-
     collection = collection,
-    mongodb_uri = mongodb_uri
+    mongodb_uri = mongodb_uri,
+    tracker = tracker
   )
   class(res) <- "sf_task"
   attr(res, "verbose") <- verbose
-  if (is.null(tracker) && requireNamespace("MLlogr")) {
-    res[["tracker"]] <- MLlogr::Tracker$new(
-      # TODO: Mieux gérer la base de logging
-      # f4737679-916d-4aeb-84ba-958046f4ca31
-      database = database,
-      collection = collection,
-      control = list(id_columns = c("siret", "periode"))
-    )
-    res[["name"]] <- experiment_name
-    res[["tracker"]]$set(
-      experiment_name = experiment_name,
-      experiment_description = experiment_description
-    )
-  }
   return(res)
 }
 
@@ -99,11 +83,9 @@ print.sf_task <- function(x, ...) {
   purrr::walk2(names(x), x, aux_fun)
 
   cat("-- INFO --\n")
-  purrr::walk2(
-    names(x[["tracker"]]$values),
-    x[["tracker"]]$values,
-    aux_fun
-  )
+  if (!is.null(x[["tracker"]])) {
+    print(x[["tracker"]])
+  }
   return(invisible(x))
 }
 
@@ -200,14 +182,6 @@ save.default <- function(task, ...) {
 #' @export
 export <- function(task, ...) {
   UseMethod("export", task)
-}
-
-#' Log a machine learning experiment
-#'
-#' @inheritParams load_hist_data
-#' @export
-log_experiment <- function(task, ...) {
-  UseMethod("log_experiment", task)
 }
 
 #' Explains model results
