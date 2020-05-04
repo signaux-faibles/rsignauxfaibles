@@ -69,27 +69,41 @@
  }
 
 
- get_cv_test_task <- function() {
-   sf_task <- get_test_task()
+get_cv_test_task <- function() {
+  sf_task <- get_test_task()
 
-   cv_task <-  sf_task[c(
-     "name",
-     "database",
-     "collection",
-     "mongodb_uri",
-     "tracker",
-     "hist_data",
-     "new_data"
-     )]
+  cv_task <-  sf_task[c(
+    "name",
+    "database",
+    "collection",
+    "mongodb_uri",
+    "tracker",
+    "hist_data",
+    "new_data"
+    )]
 
-   class(cv_task) <- c("cv_task", "sf_task")
-   cv_task[["cross_validation"]] <- rep(list(get_test_task()), 4)
-   cv_task[["cross_validation"]] <- purrr::map2(
-     cv_task[["cross_validation"]],
-     1:4,
-     function(task, holdout){
-       task[["train_data"]] <- task[["train_data"]][-holdout, ]
-       return(task)
-     })
-   return(cv_task)
- }
+  class(cv_task) <- c("cv_task", "sf_task")
+  cv_task[["cross_validation"]] <- rep(list(get_test_task()), 4)
+  cv_task[["cross_validation"]] <- purrr::map2(
+    cv_task[["cross_validation"]],
+    1:4,
+    function(task, holdout){
+      task[["train_data"]] <- task[["train_data"]][-holdout, ]
+      return(task)
+    })
+  return(cv_task)
+}
+
+# If a list ".testlog" exists in parent environment, write tests to this list.
+mock_log_param <- function(key, value, ...) {
+  if (exists(".testlog") && inherits(.testlog, "list")) {
+    .testlog[[key]] <- value
+  }
+}
+
+# If a list ".testlog" exists in parent environment, write tests to this list.
+mock_log_metric <- function(key, value, ...) {
+  if (exists(".testlog") && inherits(.testlog, "list")) {
+    .testlog[[key]] <- value
+  }
+}
