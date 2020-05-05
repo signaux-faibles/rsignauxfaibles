@@ -22,7 +22,8 @@ NULL
 #' @param experiment_description `character()` \cr
 #'   Descriptions supplémentaires sur l'expérimentation en cours.
 #' @param tracker `mlflow::mlflow_run` \cr
-#'   Un mlflow_run pour tracker les modèles et expériences.
+#'   Un mlflow_run pour tracker les modèles et expériences. Les logs
+#'   utiliseront la propriété `tracker$run_id`.
 #'
 #' @return `[rsignauxfaibles::sf_task]` \cr
 #'   Un objet sf_task avec un attribut de type `logical` "verbose", qui
