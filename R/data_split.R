@@ -27,39 +27,77 @@
 split_data.sf_task <- function(
   task,
   fracs = c(0.6, 0.2, 0.2),
-  names = c("train", "validation", "test"),
-  ...) {
+  ...
+  ) {
+
   set_verbose_level(task)
 
-  logger::log_info("Les donnees historiques sont scindes en echantillons
-    d'entrainement, de test et de validation")
+  logger::log_info(paste0("Les donnees historiques sont scindes en ",
+      "echantillons d'entrainement, de test et de validation"))
 
-    assertthat::assert_that("hist_data" %in% names(task),
-      msg = "Please load historical data before holding out test data"
+  assertthat::assert_that("hist_data" %in% names(task),
+    msg = "Please load historical data before holding out test data"
+  )
+
+  names <- c("train", "validation", "test")
+
+  if ((length(fracs) == 1 && fracs == 1) || identical(fracs, c(1, 0, 0))) {
+    task[["train_data"]] <- task[["hist_data"]]
+  } else {
+    res <- split_snapshot_rdm_month(
+      data_sample = task[["hist_data"]],
+      fracs = fracs,
+      names = names
     )
 
-    if ((length(fracs) == 1 && fracs == 1) || identical(fracs, c(1, 0, 0))) {
-      task[["train_data"]] <- task[["hist_data"]]
-    } else {
-      res <- split_snapshot_rdm_month(
-        data_sample = task[["hist_data"]],
-        fracs = fracs,
-        names = names
-      )
-
-      for (name in names) {
-        task[[paste0(name, "_data")]] <- task[["hist_data"]] %>%
-          semi_join(res[[name]], by = c("siret", "periode"))
-      }
+    for (name in names) {
+      task[[paste0(name, "_data")]] <- task[["hist_data"]] %>%
+        semi_join(res[[name]], by = c("siret", "periode"))
     }
+  }
 
+  # creating mlr3task
+   hist_data <- task[["hist_data"]]
+   hist_data <- hist_data %>%
+     mutate_if(~ inherits(., "Date"), as.POSIXct)
 
-    names(fracs) <- names
-    log_param(task, "resampling_strategy", "holdout")
-    log_param(task, "train_val_test_shares", fracs)
+   if (!"siren" %in% names(hist_data)) {
+     hist_data$siren <- substr(hist_data$siret, 0, 9)
+   }
 
-    return(task)
+   hist_data$siren <- factor(hist_data$siren)
+
+   hist_data[[task[["target"]]]] <- as.factor(hist_data[[task[["target"]]]])
+
+  mlr3task <- mlr3::TaskClassif$new(
+    id = "signaux-faibles",
+    backend = hist_data,
+    target = task[["target"]]
+  )
+
+  mlr3task$col_roles$name <- c("siret")
+  mlr3task$col_roles$group <- c("siren")
+  mlr3task$col_roles$feature <- setdiff(
+    mlr3task$col_roles$feature,
+    c("siret", "siren")
+  )
+
+  task[["mlr3task"]] <- mlr3task
+
+  # resampling <- mlr3::rsmp("holdout")
+  # resampling$param_set$values <- list(ratio = 0.6)
+  # resampling$instantiate(task[["mlr3task"]])
+  # task[["mlr3rsmp"]] <- resampling
+
+  names(fracs) <- names
+  log_param(task, "resampling_strategy", "holdout")
+  log_param(task, "train_val_test_shares", fracs)
+
+  return(task)
 }
+
+
+
 
 #' Prepare cross-validation
 #'
