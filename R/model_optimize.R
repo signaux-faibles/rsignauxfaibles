@@ -30,14 +30,14 @@ optimize_hyperparameters.sf_task <- function( #nolint
   train_pipe = NULL,
   optim_bounds = NULL,
   ...
-){
+  ) {
 
   requireNamespace("DiceKriging") #nolint
   requireNamespace("rgenoud")
   requireNamespace("mlrMBO") #nolint
   requireNamespace("ParamHelpers") #nolint
 
-  if (is.null(optim_bounds)){
+  if (is.null(optim_bounds)) {
     optim_bounds <- ParamHelpers::makeParamSet(
       ParamHelpers::makeNumericParam("learn_rate",  lower = 0.003, upper = 0.2),
       ParamHelpers::makeIntegerParam("max_depth", lower = 2L, upper = 12L),
@@ -47,22 +47,22 @@ optimize_hyperparameters.sf_task <- function( #nolint
         lower = 1L,
         upper = 9L
       )
-      )
+    )
   }
 
-  if (is.null(train_pipe)){
+  if (is.null(train_pipe)) {
     #1 Objective function
     train_pipe <- smoof::makeSingleObjectiveFunction(
       name = "lgb_pipe",
       fn = function(
         x
-        ){
+        ) {
 
         new_task <- train(
           task,
           parameters = as.list(x),
           fields = fields
-          )
+        )
         new_task <- predict(new_task, data_names = c("validation_data"))
         new_task <- evaluate(
           new_task,
@@ -77,12 +77,12 @@ optimize_hyperparameters.sf_task <- function( #nolint
       },
       par.set = optim_bounds,
       minimize = FALSE
-      )
+    )
   }
 
-    set.seed(159)
+  set.seed(159)
   #2 Initial design
-  if (!is.null(n_init)){
+  if (!is.null(n_init)) {
     des <- ParamHelpers::generateDesign(n = n_init,
       par.set = ParamHelpers::getParamSet(train_pipe),
       fun = lhs::randomLHS)
@@ -118,7 +118,7 @@ optimize_hyperparameters.sf_task <- function( #nolint
   task[["model_parameters"]] <- as.list(run$x)
 
   all_res <- run$opt.path$env$path
-  if (is.null(n_init)){
+  if (is.null(n_init)) {
     n_init  <- 4 * smoof::getNumberOfParameters(train_pipe)
   }
   run$opt.path$env$path  %>%

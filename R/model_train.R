@@ -28,33 +28,33 @@ train.sf_task <- function(
   seed = 0,
   train_fun = "xgboost",
   ...
-  ){
+  ) {
 
   admissible_train_types <- c("xgboost", "linear")
-  if (is.character(train_fun)){
+  if (is.character(train_fun)) {
     assertthat::assert_that(
       length(train_fun) == 1 &&
-      train_fun %in% admissible_train_types
+        train_fun %in% admissible_train_types
     )
     train_fun <- switch(
       train_fun,
       xgboost = train_xgboost,
       linear = train_linear
-      )
+    )
   }
 
   assertthat::assert_that(
     "prepared_train_data" %in% names(task),
     msg = "task does not contain prepared train data."
-    )
+  )
 
-  if (is.null(parameters)){
+  if (is.null(parameters)) {
     parameters <- task[["model_parameters"]]
   }
 
   assertthat::assert_that(
     is.list(parameters)
-    )
+  )
 
   set_verbose_level(task)
 
@@ -78,7 +78,7 @@ train.sf_task <- function(
     ntrees = parameters[["ntrees"]],
     min_child_weight = parameters[["min_child_weight"]],
     seed = seed
-    )
+  )
 
   logger::log_info("Model trained_successfully")
   task[["model"]] <- model
@@ -105,10 +105,10 @@ train.cv_task  <- function(
   seed = 0,
   train_fun = "xgboost",
   ...
-  ){
+  ) {
 
   requireNamespace("purrr")
-  if (is.null(parameters) && "model_parameters" %in% names(task)){
+  if (is.null(parameters) && "model_parameters" %in% names(task)) {
     parameters <- task[["model_parameters"]]
   }
 
@@ -120,7 +120,7 @@ train.cv_task  <- function(
     tracker = tracker,
     train_fun = train_fun,
     seed = seed
-    )
+  )
 
   return(task)
 }
@@ -129,8 +129,10 @@ train.cv_task  <- function(
 #'
 #' Trains a light gradient boosting model on training data.
 #'
-#' @param train_data `data.frame` \cr données d'entraînement, sous la forme d'un H2OFrame
-#' @param validation_data `H2OFrame` \cr Données d'évaluation, sous la forme d'un H2OFrame
+#' @param train_data `data.frame` \cr données d'entraînement, sous la forme
+#'   d'un H2OFrame
+#' @param validation_data `H2OFrame` \cr Données d'évaluation, sous la forme
+#'   d'un H2OFrame
 #' @param outcome `character(1)` \cr Nom de la variable qui sert de cible
 #'   d'apprentissage
 #' @param parameters `list()` \cr list of parameters with fields "learn_rate",
@@ -173,8 +175,10 @@ train_xgboost <- function(
 #'
 #' Trains a linear regularized model.
 #'
-#' @param train_data `data.frame` \cr données d'entraînement, sous la forme d'un H2OFrame
-#' @param validation_data `H2OFrame` \cr Données d'évaluation, sous la forme d'un H2OFrame
+#' @param train_data `data.frame` \cr données d'entraînement, sous la forme
+#'   d'un H2OFrame
+#' @param validation_data `H2OFrame` \cr Données d'évaluation, sous la forme
+#'   d'un H2OFrame
 #' @param outcome `character(1)` \cr Nom de la variable qui sert de cible
 #'   d'apprentissage
 #' @param parameters `list()` \cr Paramètres de la régression logistique.

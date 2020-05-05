@@ -64,7 +64,7 @@ sf_pal <- function(palette = "main", reverse = FALSE, ...) {
 #' @param discrete Boolean indicating whether color aesthetic is discrete or not
 #' @param reverse Boolean indicating whether the palette should be reversed
 #' @param ... Additional arguments passed to discrete_scale() or
-#'            scale_color_gradientn(), used respectively when discrete is TRUE or FALSE
+#'   scale_color_gradientn(), used respectively when discrete is TRUE or FALSE
 #'
 #' @export
 scale_color_sf <- function(palette = "main", discrete = TRUE, reverse = FALSE, ...) {

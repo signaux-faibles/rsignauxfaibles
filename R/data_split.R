@@ -25,40 +25,40 @@
 #'
 #' @export
 split_data.sf_task <- function(
-                               task,
-                               fracs = c(0.6, 0.2, 0.2),
-                               names = c("train", "validation", "test"),
-                               ...) {
+  task,
+  fracs = c(0.6, 0.2, 0.2),
+  names = c("train", "validation", "test"),
+  ...) {
   set_verbose_level(task)
 
   logger::log_info("Les donnees historiques sont scindes en echantillons
     d'entrainement, de test et de validation")
 
-  assertthat::assert_that("hist_data" %in% names(task),
-    msg = "Please load historical data before holding out test data"
-  )
-
-  if ((length(fracs) == 1 && fracs == 1) || identical(fracs, c(1, 0, 0))) {
-    task[["train_data"]] <- task[["hist_data"]]
-  } else {
-    res <- split_snapshot_rdm_month(
-      data_sample = task[["hist_data"]],
-      fracs = fracs,
-      names = names
+    assertthat::assert_that("hist_data" %in% names(task),
+      msg = "Please load historical data before holding out test data"
     )
 
-    for (name in names) {
-      task[[paste0(name, "_data")]] <- task[["hist_data"]] %>%
-        semi_join(res[[name]], by = c("siret", "periode"))
+    if ((length(fracs) == 1 && fracs == 1) || identical(fracs, c(1, 0, 0))) {
+      task[["train_data"]] <- task[["hist_data"]]
+    } else {
+      res <- split_snapshot_rdm_month(
+        data_sample = task[["hist_data"]],
+        fracs = fracs,
+        names = names
+      )
+
+      for (name in names) {
+        task[[paste0(name, "_data")]] <- task[["hist_data"]] %>%
+          semi_join(res[[name]], by = c("siret", "periode"))
+      }
     }
-  }
 
 
-  names(fracs) <- names
-  log_param(task, "resampling_strategy", "holdout")
-  log_param(task, "train_val_test_shares", fracs)
+    names(fracs) <- names
+    log_param(task, "resampling_strategy", "holdout")
+    log_param(task, "train_val_test_shares", fracs)
 
-  return(task)
+    return(task)
 }
 
 #' Prepare cross-validation
@@ -75,9 +75,9 @@ split_data.sf_task <- function(
 #'  tasks, one for each fold.
 #' @export
 split_n_folds <- function(
-                          task,
-                          n_folds = 4,
-                          frac_test = 0.2) {
+  task,
+  n_folds = 4,
+  frac_test = 0.2) {
   requireNamespace("purrr")
 
   assertthat::assert_that(frac_test >= 0 && frac_test < 1)
@@ -152,10 +152,10 @@ split_n_folds <- function(
 #' avec les couples (siret x periode) des trois échantillons calculés.
 #' @export
 split_snapshot_rdm_month <- function(
-                                     data_sample,
-                                     fracs,
-                                     names,
-                                     seed = 1234) {
+  data_sample,
+  fracs,
+  names,
+  seed = 1234) {
   assertthat::assert_that(
     sum(fracs) == 1,
     msg = "Sum of fractions should be equal to 1"
@@ -187,14 +187,14 @@ split_snapshot_rdm_month <- function(
   random_cats <- .bincode(random_vec, breaks = c(0, cumsum(fracs)), TRUE, TRUE)
   sirens <- sirens %>%
     mutate(ss = random_cats) %>%
-    mutate(ss = factor(ss, levels = 1:length(fracs)))
+    mutate(ss = factor(ss, levels = seq_along(fracs)))
 
   data_sample <- data_sample %>%
     left_join(y = sirens, by = "siren") %>%
     select(siret, periode, ss)
 
   if (length(names) == 1 && length(fracs) > 1) {
-    names <- paste0(names, "_", 1:length(fracs))
+    names <- paste0(names, "_", seq_along(fracs))
   }
   result <- stats::setNames(
     base::split(data_sample %>% select(-ss), data_sample %>% select(ss)),
