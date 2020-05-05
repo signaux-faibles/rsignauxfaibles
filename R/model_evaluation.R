@@ -16,11 +16,11 @@
 #'   l'objectif d'apprentissage.
 #' @param segment_names :: character() \cr Nom de la colonne qui permet de
 #'   segmenter l'évaluation.
-#' @param remove_strong_signals :: `logical(1)`\cr
-#'   Faut-il retirer des échantillons de test ou de
-#'   validation les entrerprises qui présentent des signaux forts, c'est-à-dire 3 mois de défaut, ou une
-#'   procédure collective en cours ? Nécessite que les données contenues dans
-#'   \code{task[["hist_data"]]} possèdent le champs "time_til_outcome".
+#' @param remove_strong_signals :: `logical(1)`\cr Faut-il retirer des
+#' échantillons de test ou de validation les entrerprises qui présentent des
+#' signaux forts, c'est-à-dire 3 mois de défaut, ou une procédure collective
+#' en cours ? Nécessite que les données contenues dans
+#' \code{task[["hist_data"]]} possèdent le champs "time_til_outcome".
 #'
 #' @return `task` donnée en entrée à laquelle s'est ajoutée (ou a été
 #' remplacé) un champs "model_performance", avec le résultat de la fonction
@@ -35,15 +35,15 @@ evaluate <- function(
   target_names = "outcome",
   segment_names = NULL,
   remove_strong_signals = TRUE
-  ){
+  ) {
   tasks <- list(...)
   assertthat::assert_that(length(tasks) >= 1)
   assertthat::assert_that(
     length(data_name) == 1,
     msg = "Evaluation can only be made on a single data.frame at once"
-    )
+  )
 
-  if (is.null(eval_function)){
+  if (is.null(eval_function)) {
     default_eval_fun <- TRUE
     eval_function <- MLsegmentr::eval_precision_recall()
   } else {
@@ -52,7 +52,7 @@ evaluate <- function(
 
   evaluation_data  <- purrr::invoke(consolidate, tasks, data_name = data_name)
 
-  if (is.null(prediction_names)){
+  if (is.null(prediction_names)) {
     model_names <- make.names(purrr::map(tasks, "name"))
     prediction_names <- grep(
       paste0("^", model_names, collapse = "|"),
@@ -61,23 +61,23 @@ evaluate <- function(
     )
   }
 
-  if (remove_strong_signals){
+  if (remove_strong_signals) {
     logger::log_info("Les 'signaux forts' sont retires des donnees
       d'evaluation (test, validation)")
-    # TODO add to log
-    # task a7368366-ad3c-4dcb-b8d9-2e23de616bf0
-    assertthat::assert_that("time_til_outcome" %in% names(evaluation_data))
-    evaluation_data  <- evaluation_data %>%
-      dplyr::filter(is.na(time_til_outcome) | time_til_outcome > 0)
+      # TODO add to log
+      # task a7368366-ad3c-4dcb-b8d9-2e23de616bf0
+      assertthat::assert_that("time_til_outcome" %in% names(evaluation_data))
+      evaluation_data  <- evaluation_data %>%
+        dplyr::filter(is.na(time_til_outcome) | time_til_outcome > 0)
   }
 
   requireNamespace("MLsegmentr")
   assesser <- MLsegmentr::Assesser$new(
     evaluation_data
-    )
+  )
   assesser$set_predictions(prediction_names)
   assesser$set_targets(target_names)
-  if (!is.null(segment_names)){
+  if (!is.null(segment_names)) {
     assesser$set_segments(segment_names)
   }
   assesser$evaluation_funs <- eval_function
@@ -89,7 +89,7 @@ evaluate <- function(
   perf  <- aux[["performance_frame"]]
   task[["plot"]] <- aux[["plot"]]
 
-  if (default_eval_fun){
+  if (default_eval_fun) {
     task[["model_performance"]] <- perf %>%
       filter(evaluation_name != "prcurve")
   } else {
@@ -107,24 +107,24 @@ evaluate <- function(
 #' @param data_name `character()` \cr Name of the type of data to consolidate
 #' ("train_data", "validation_data", "test_data")
 #'
-consolidate <- function(..., data_name){
+consolidate <- function(..., data_name) {
   postfix <- ".cv"
   tasks <- list(...)
   assertthat::assert_that(length(tasks) >= 1)
-  if (length(tasks) == 1){
+  if (length(tasks) == 1) {
     task <- tasks[[1]]
     name <- make.names(task[["name"]])
-    if (inherits(task, "cv_task")){
+    if (inherits(task, "cv_task")) {
       # Recursively consolidate cross_validated tasks.
       names <- paste0(
         name,
         postfix,
-        1:length(task[["cross_validation"]])
+        seq_along(task[["cross_validation"]])
       )
       task[["cross_validation"]] <- purrr::map2(
         task[["cross_validation"]],
         names,
-        function(my_task, my_name){
+        function(my_task, my_name) {
           my_task[["name"]] <- my_name
           return(my_task)
         }
@@ -134,7 +134,7 @@ consolidate <- function(..., data_name){
         task[["cross_validation"]],
         data_name = data_name
       )
-    } else if (inherits(task, "sf_task")){
+    } else if (inherits(task, "sf_task")) {
       consolidated_frame <- task[[data_name]] %>%
         rename(!!name := score)
     } else {
@@ -146,7 +146,7 @@ consolidate <- function(..., data_name){
     tasks <- purrr::map2(
       tasks,
       names,
-      function(my_task, my_name){
+      function(my_task, my_name) {
         my_task[["name"]] <- my_name
         return(my_task)
       }
@@ -177,7 +177,7 @@ consolidate <- function(..., data_name){
 #' @return `data.frame` \cr Joined frame
 join_frames <- function(
   ...
-){
+  ) {
   list_data <- list(...)
   assertthat::assert_that(length(list_data) >= 1)
 

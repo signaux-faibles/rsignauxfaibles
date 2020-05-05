@@ -4,25 +4,25 @@
 #' binned to the lower alert level)
 #'
 #' @param prediction Vector, list of predictions between 0 and 1.
-#' @param F1 `Double(1)`. F1 threshold
-#' @param F2 `Double(1)`. F2 threshold
+#' @param f1 `Double(1)`. F1 threshold
+#' @param f2 `Double(1)`. F2 threshold
 #'
 #' @return A factor vector with alert levels.
 #' @export
 #'
-alert_levels <- function(prediction, F1, F2) {
-  assertthat::assert_that(F2 <= F1,
+alert_levels <- function(prediction, f1, f2) {
+  assertthat::assert_that(f2 <= f1,
     msg = "F2 threshold cannot be greater than F1 threshold Could you have
     inverted the F scores ?"
   )
   alert <- .bincode(
     x = prediction,
-    breaks = c(-1e-4, F2, F1, 1 + 1e-4),
-  ) %>%
-    factor(
-      levels = 1:3,
-      labels = c("Pas d'alerte", "Alerte seuil F2", "Alerte seuil F1")
-    )
+    breaks = c(-1e-4, f2, f1, 1 + 1e-4),
+    ) %>%
+  factor(
+    levels = 1:3,
+    labels = c("Pas d'alerte", "Alerte seuil F2", "Alerte seuil F1")
+  )
 }
 
 
@@ -66,27 +66,27 @@ name_file <- function(
     paste0(
       "^", Sys.Date(), "_v[0-9]*_",
       file_detail, "\\.", file_extension, "$"
-    ),
+      ),
     file_list
-  ) %>%
-    sum()
+    ) %>%
+  sum()
 
 
-  file_name <- paste0(
-    Sys.Date(),
-    "_v",
-    n_different + 1,
-    "_",
-    file_detail,
-    ".",
-    file_extension
-  )
+file_name <- paste0(
+  Sys.Date(),
+  "_v",
+  n_different + 1,
+  "_",
+  file_detail,
+  ".",
+  file_extension
+)
 
-  if (full_path) {
-    full_file_path <- file.path(full_dir_path, file_name)
+if (full_path) {
+  full_file_path <- file.path(full_dir_path, file_name)
 
-    return(full_file_path)
-  } else {
-    return(file_name)
-  }
+  return(full_file_path)
+} else {
+  return(file_name)
+}
 }

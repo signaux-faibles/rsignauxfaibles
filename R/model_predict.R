@@ -23,7 +23,7 @@ predict.sf_task <- function(
     ),
   predict_fun = predict_model,
   ...
-  ){
+  ) {
 
   task  <- object
   set_verbose_level(task)
@@ -32,10 +32,10 @@ predict.sf_task <- function(
     msg = "Task should have a model to predict on new
     data")
 
-    predict_on_given_data <- function(data_name, task){
+    predict_on_given_data <- function(data_name, task) {
 
       prepared_data_name <- paste0("prepared_", data_name)
-      if (!prepared_data_name %in% names(task)){
+      if (!prepared_data_name %in% names(task)) {
         logger::log_warn("{data_name} is missing or has not been prepared yet")
         return(task)
       }
@@ -45,9 +45,9 @@ predict.sf_task <- function(
       prediction <- predict_fun(
         model = task[["model"]],
         new_data = task[[prepared_data_name]]
-        )
+      )
 
-      if (is.data.frame(prediction)){
+      if (is.data.frame(prediction)) {
         dup_names <- intersect(names(prediction %>%
             dplyr::select(-siret, -periode)),
           names(task[[data_name]]))
@@ -63,7 +63,7 @@ predict.sf_task <- function(
       return(task)
     }
 
-    for (name in data_names){
+    for (name in data_names) {
       task  <- predict_on_given_data(name, task)
     }
 
@@ -87,7 +87,7 @@ predict.cv_task <- function(
     ),
   predict_fun = predict_model,
   ...
-  ){
+  ) {
 
   requireNamespace("purrr")
   task <- object
@@ -96,7 +96,7 @@ predict.cv_task <- function(
     predict.sf_task,
     data_names = data_names,
     predict_fun = predict_fun
-    )
+  )
   return(task)
 }
 

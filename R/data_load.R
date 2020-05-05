@@ -6,9 +6,10 @@ NULL
 
 #' Documentation des informations de connection à mongodb
 #'
-#' @param mongodb_uri `character(1)` \cr url to the database in mongodb uri format.
+#' @param mongodb_uri `character(1)` \cr url to the database in mongodb uri
+#' format.
 #' @param database `character(1)` \cr Nom de la base de données vers laquelle
-#'   param exporter. Par défaut, celle stockée dans \code{task}.
+#' param exporter. Par défaut, celle stockée dans \code{task}.
 #' @param collection `character(1)` \cr Nom de la collection vers laquelle
 #'   exporter. Par défaut, celle stockée dans \code{task}.
 #' @name mongodb_connection
@@ -48,20 +49,20 @@ NULL
 #'
 #' @export
 load_hist_data.sf_task <- function(
-                                   task,
-                                   batch,
-                                   database = task[["database"]],
-                                   collection = task[["collection"]],
-                                   mongodb_uri = task[["mongodb_uri"]],
-                                   subsample = NULL,
-                                   fields = get_fields(training = FALSE),
-                                   date_inf = as.Date("2015-01-01"),
-                                   date_sup = as.Date("2017-01-01"),
-                                   min_effectif = 10L,
-                                   sirets = NULL,
-                                   code_ape = NULL,
-                                   debug = FALSE,
-                                   ...) {
+  task,
+  batch,
+  database = task[["database"]],
+  collection = task[["collection"]],
+  mongodb_uri = task[["mongodb_uri"]],
+  subsample = NULL,
+  fields = get_fields(training = FALSE),
+  date_inf = as.Date("2015-01-01"),
+  date_sup = as.Date("2017-01-01"),
+  min_effectif = 10L,
+  sirets = NULL,
+  code_ape = NULL,
+  debug = FALSE,
+  ...) {
   set_verbose_level(task)
   logger::log_info("Chargement des données historiques.")
 
@@ -113,17 +114,17 @@ load_hist_data.sf_task <- function(
 #'   unique siret x periode.
 #' @export
 load_new_data.sf_task <- function(
-                                  task,
-                                  periods,
-                                  batch,
-                                  database = task[["database"]],
-                                  collection = task[["collection"]],
-                                  mongodb_uri = task[["mongodb_uri"]],
-                                  fields = get_fields(training = FALSE),
-                                  min_effectif = 10L,
-                                  rollback_months = 1L,
-                                  debug = FALSE,
-                                  ...) {
+  task,
+  periods,
+  batch,
+  database = task[["database"]],
+  collection = task[["collection"]],
+  mongodb_uri = task[["mongodb_uri"]],
+  fields = get_fields(training = FALSE),
+  min_effectif = 10L,
+  rollback_months = 1L,
+  debug = FALSE,
+  ...) {
   set_verbose_level(task)
 
   logger::log_info("Loading data from last batch")
@@ -208,20 +209,20 @@ load_new_data.sf_task <- function(
 #'
 #' @export
 import_data <- function(
-                        database,
-                        collection,
-                        mongodb_uri,
-                        batch,
-                        min_effectif,
-                        date_inf = NULL,
-                        date_sup = NULL,
-                        fields = NULL,
-                        sirets = NULL,
-                        code_ape = NULL,
-                        subsample = NULL,
-                        verbose = FALSE,
-                        replace_missing = NULL,
-                        debug = FALSE) {
+  database,
+  collection,
+  mongodb_uri,
+  batch,
+  min_effectif,
+  date_inf = NULL,
+  date_sup = NULL,
+  fields = NULL,
+  sirets = NULL,
+  code_ape = NULL,
+  subsample = NULL,
+  verbose = FALSE,
+  replace_missing = NULL,
+  debug = FALSE) {
   requireNamespace("logger")
   if (verbose) {
     logger::log_threshold(logger::TRACE)
@@ -243,11 +244,11 @@ import_data <- function(
     assertthat::assert_that(
       is.null(subsample),
       msg = "L'option subsample n'est pas valide si le paramètre 'sirets' est renseigné."
-      )
+    )
     assertthat::assert_that(
       is.null(sirets) || is.null(code_ape),
       msg = "Les valeurs 'sirets' et 'code_ape' ne peuvent pas être requêtées en même temps"
-      )
+    )
     query <- build_siret_query(
       batch = batch,
       date_inf = date_inf,
@@ -262,7 +263,7 @@ import_data <- function(
       date_sup = date_sup,
       code_ape = code_ape,
       fields = fields
-      )
+    )
   }
 
   if (debug) {
@@ -301,11 +302,11 @@ import_data <- function(
 }
 
 query_database <- function(
-                           query,
-                           database,
-                           collection,
-                           mongodb_uri,
-                           verbose) {
+  query,
+  database,
+  collection,
+  mongodb_uri,
+  verbose) {
   dbconnection <- mongolite::mongo(
     collection = collection,
     db = database,
@@ -318,9 +319,9 @@ query_database <- function(
 }
 
 replace_missing_data <- function(
-                                 df,
-                                 fields,
-                                 replace_missing) {
+  df,
+  fields,
+  replace_missing) {
   df <- add_missing_fields(
     df = df,
     fields = fields
@@ -366,11 +367,11 @@ replace_missing_data <- function(
 
 
 add_missing_fields <- function(
-                               df,
-                               fields) {
+  df,
+  fields) {
   missing_fields <- fields[
     !fields %in% names(df)
-  ]
+    ]
 
   if (length(missing_fields) >= 1) {
     logger::log_info("Champ(s) manquant(s): {missing_fields}")
@@ -385,7 +386,7 @@ add_missing_fields <- function(
 
 
 update_types <- function(
-                         df) {
+  df) {
 
   # Dates de type Date
   df <- df %>%
@@ -400,7 +401,7 @@ update_types <- function(
 }
 
 check_valid_data <- function(
-                             df) {
+  df) {
   assertthat::assert_that(
     all(c("periode", "siret") %in% names(df)),
     msg = "Les données importées ne contiennent pas la clé (siret x période)"
@@ -421,9 +422,9 @@ check_valid_data <- function(
 #' @return vector of unique sirets
 #' @export
 get_sirets_of_detected <- function(
-                                   database = "test_signauxfaibles",
-                                   collection = "Scores",
-                                   mongodb_uri) {
+  database = "test_signauxfaibles",
+  collection = "Scores",
+  mongodb_uri) {
   dbconnection <- mongolite::mongo(
     collection = collection,
     db = database,
@@ -453,11 +454,11 @@ query_or_null <- function(value_to_test, query) {
 date_query <- function(date, gte_or_lt) {
   assertthat::assert_that(gte_or_lt %in% c("gte", "lt"))
   query <- query_or_null(
-      date,
-      list(
-        "_id.periode" = list()
-        )
-      )
+    date,
+    list(
+      "_id.periode" = list()
+    )
+  )
   if (!is.null(query)) {
     query[["_id.periode"]][[paste0("$", gte_or_lt)]] <-
       list("$date" = paste0(date, "T00:00:00Z"))
@@ -467,13 +468,13 @@ date_query <- function(date, gte_or_lt) {
 
 
 build_standard_query <- function(
-    batch,
-    date_inf,
-    date_sup,
-    min_effectif,
-    subsample,
-    fields
-) {
+  batch,
+  date_inf,
+  date_sup,
+  min_effectif,
+  subsample,
+  fields
+  ) {
 
   match_stage <- build_standard_match_stage(
     batch,
@@ -498,12 +499,12 @@ build_standard_query <- function(
 }
 
 build_siret_query <- function(
-                              batch,
-                              date_inf,
-                              date_sup,
-                              sirets,
-                              fields
-                              ) {
+  batch,
+  date_inf,
+  date_sup,
+  sirets,
+  fields
+  ) {
 
   match_stage <- build_siret_match_stage(
     batch,
@@ -524,12 +525,12 @@ build_siret_query <- function(
 }
 
 build_sector_query <- function(
-                               batch,
-                               date_inf,
-                               date_sup,
-                               code_ape,
-                               min_effectif,
-                               fields) {
+  batch,
+  date_inf,
+  date_sup,
+  code_ape,
+  min_effectif,
+  fields) {
 
   match_ape <- build_sector_match_stage(batch, date_inf, date_sup, code_ape)
   replace_root <- build_replace_root_stage()
@@ -543,7 +544,7 @@ build_sector_query <- function(
 }
 
 assemble_stages_to_query <- function(...) {
-    query <- list(...)  %>%
+  query <- list(...)  %>%
     .[!purrr::map_lgl(., is.null)] %>%
     jsonlite::toJSON(auto_unbox = TRUE)
   return(query)
@@ -565,7 +566,10 @@ build_replace_root_stage <- function() {
 
 build_projection_stage <- function(fields) {
   projection_stage <- list()
-  projection_stage[["$project"]] <- setNames(rep(list(1), length(fields)), fields)
+  projection_stage[["$project"]] <- setNames(
+    rep(list(1), length(fields)),
+    fields
+  )
   projection_stage <- query_or_null(
     fields,
     projection_stage
@@ -579,12 +583,12 @@ build_standard_match_stage <- function(
   date_sup,
   min_effectif
   ) {
-    ## Construction de la requete ##
+  ## Construction de la requete ##
   match_batch <- list("_id.batch"  = batch)
   match_date_inf <- date_query(date_inf, "gte")
   match_date_sup <- date_query(date_sup, "lt")
   if (is.null(min_effectif)) {
-    min_effectif = 1
+    min_effectif <- 1
   }
   match_eff <- list(value.effectif = list("$gte" = min_effectif))
 
@@ -638,7 +642,7 @@ build_siret_match_stage <- function(
     "$match" = list(
       "_id" = list(
         "$in" = c(
-           I(all_id_objects)
+          I(all_id_objects)
         )
       )
     )
@@ -652,7 +656,7 @@ build_sector_match_stage <- function(
   date_inf,
   date_sup,
   code_ape
-) {
+  ) {
 
   match_batch <- list("_id.batch"  = batch)
   match_date_inf <- date_query(date_inf, "gte")
@@ -676,69 +680,63 @@ build_sector_match_stage <- function(
 #' Get a list of field names
 #'
 #' Fonction utilitaire pour récupérer rapidement une liste de noms de
-#' variables (champs mongodb).
-#' Utilitary function to quickly get a field name list. Put training = TRUE to
-#' get only fields used for training. Put an input to 0 to remove the related
-#' fields, to 1 to keep basic fields, and to 2 to include all fields.
+#' variables (champs mongodb).  Utilitary function to quickly get a field name
+#' list. Put training = TRUE to get only fields used for training. Put an
+#' input to 0 to remove the related fields, to 1 to keep basic fields, and to
+#' 2 to include all fields.
 #'
-#' @param training `logical()` \cr Si `TRUE`, uniquement des champs
-#'   utilisés pour l'entraînement sont retournés.
-#' @param siren `0 | 1 | 2` \cr Niveau de détail des données Sirene. cf Détails.
-#' @param urssaf `0 | 1 | 2` \cr Niveau de détail des données urssaf. cf Détails.
-#' @param delai `0 | 1 | 2` \cr Niveau de détail des données delai. cf Détails.
-#' @param effectif `0 | 1 | 2` \cr Niveau de détail des données effectif. cf Détails.
-#' @param diane `0 | 1 | 2` \cr Niveau de détail des données diane. cf Détails.
+#' @param training `logical()` \cr Si `TRUE`, uniquement des champs utilisés
+#' pour l'entraînement sont retournés.
+#' @param siren `0 | 1 | 2` \cr Niveau de
+#' détail des données Sirene. cf Détails.
+#' @param urssaf `0 | 1 | 2` \cr Niveau de détail des données urssaf. cf
+#' Détails.
+#' @param delai `0 | 1 | 2` \cr Niveau de détail des données delai. cf
+#' Détails.
+#' @param effectif `0 | 1 | 2` \cr Niveau de détail des données effectif. cf
+#' Détails.
+#' @param diane `0 | 1 | 2` \cr Niveau de détail des données diane. cf
+#' Détails.
 #' @param bdf `0 | 1 | 2` \cr Niveau de détail des données bdf. cf Détails.
-#' @param apart `0 | 1 | 2` \cr Niveau de détail des données apart. cf Détails.
-#' @param procol `0 | 1 | 2` \cr Niveau de détail des données procol. cf Détails.
-#' @param interim `0 | 1 | 2` \cr Niveau de détail des données interim. cf Détails.
+#' @param apart `0 | 1 | 2` \cr Niveau de détail des données apart. cf
+#' Détails.
+#' @param procol `0 | 1 | 2` \cr Niveau de détail des données procol. cf
+#' Détails.
+#'
+#' @param interim `0 | 1 | 2` \cr Niveau de détail des données interim. cf
+#' Détails.
 #' @param target_encode `0 | 1 | 2` \cr Target encoding. Uniquement
 #' disponibles si `training`= `TRUE`.
-#' @param info `0 | 1 | 2`\cr Année des exercices Diane & Bdf
+#' @param info `0 | 1 | 2`\cr Année des
+#' exercices Diane & Bdf
 #'
-#' @section Details:
-#'   Chaque type de données a 3 niveaux. Le niveau 0 correspond à aucune
-#'   données. Le niveau 1 aux données élémentaires, et le niveau 2 toutes les
-#'   données retravaillées.
+#' @section Details: Chaque type de données a 3 niveaux. Le niveau 0
+#' correspond à aucune données. Le niveau 1 aux données élémentaires, et le
+#' niveau 2 toutes les données retravaillées.
 #'
-#' @return `character()` \cr Vecteur de noms de variables
-#' @export
+#' @return `character()` \cr Vecteur de noms de variables @export
 get_fields <- function(
-                       training,
-                       siren = 2,
-                       urssaf = 2,
-                       delai = 2,
-                       effectif = 2,
-                       diane = 2,
-                       bdf = 2,
-                       apart = 2,
-                       procol = 2,
-                       interim = 0,
-                       target_encode = 2,
-                       info = 0) {
-  # TODO change this into data-frame !
+  training,
+  siren = 2,
+  urssaf = 2,
+  delai = 2,
+  effectif =2,
+  diane = 2,
+  bdf = 2,
+  apart = 2,
+  procol = 2,
+  interim = 0,
+  target_encode =2,
+  info = 0
+) {
+
   fields <- c()
   if (siren >= 1 && !training) {
-    fields <- c(
-      fields,
-      "siret",
-      "siren",
-      "periode",
-      "code_ape",
-      "code_ape_niveau2",
-      "code_ape_niveau3",
-      "code_naf",
-      "libelle_naf",
-      "libelle_ape5",
-      "departement"
-    )
-  }
+    fields <- c( fields, "siret",
+    "siren", "periode", "code_ape", "code_ape_niveau2", "code_ape_niveau3",
+    "code_naf", "libelle_naf", "libelle_ape5", "departement") }
   if (siren >= 1) {
-    fields <- c(
-      fields,
-      "age_entreprise",
-      "region"
-    )
+    fields <- c( fields, "age_entreprise", "region")
   }
 
   if (urssaf >= 1) {
@@ -1204,14 +1202,14 @@ get_fields_training_light <- function() {
 #' définies par `periods` et `rollback_months`
 #' @export
 get_last_batch <- function(
-                           last_batch,
-                           periods,
-                           database,
-                           collection,
-                           mongodb_uri,
-                           fields,
-                           min_effectif,
-                           rollback_months) {
+  last_batch,
+  periods,
+  database,
+  collection,
+  mongodb_uri,
+  fields,
+  min_effectif,
+  rollback_months) {
   current_data <- import_data(
     database,
     collection,

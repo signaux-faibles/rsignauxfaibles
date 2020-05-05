@@ -20,7 +20,7 @@ explain.sf_task <- function(
   data_to_explain = NULL,
   plot_waterfall = FALSE,
   ...
-) {
+  ) {
   assertthat::assert_that(type %in% c("global", "local"))
   assertthat::assert_that(
     !plot_waterfall || type == "local",
@@ -44,7 +44,7 @@ explain.sf_task <- function(
   )
 
   logger::log_info("Prediction breakdown completed.")
-  if (!plot_waterfall){
+  if (!plot_waterfall) {
     return(res)
   } else {
     return(plot_waterfall(res))
@@ -70,7 +70,7 @@ xgboost_global_explainer <- function(
   aggregation_matrix,
   group_name,
   ...
-) {
+  ) {
   imp <- xgboost::xgb.importance(task[["features"]], task[["model"]])
   if (!is.null(aggregation_matrix)) {
     imp <- aggregate_importance_frame(imp, aggregation_matrix, group_name)
@@ -132,19 +132,19 @@ aggregate_importance_frame <- function(
   frame,
   aggregation_matrix,
   group_name
-) {
-    merged <- dplyr::left_join(
-      frame,
-      aggregation_matrix,
-      by = c("Feature" = "variable")
+  ) {
+  merged <- dplyr::left_join(
+    frame,
+    aggregation_matrix,
+    by = c("Feature" = "variable")
+  )
+  merged[, group_name][is.na(merged[, group_name])] <- "Autre"
+  merged <- merged %>%
+    dplyr::group_by_at(group_name) %>%
+    dplyr::summarize_at(
+      c("Gain", "Cover", "Frequency"),
+      sum
     )
-    merged[, group_name][is.na(merged[, group_name])] <- "Autre"
-    merged <- merged %>%
-      dplyr::group_by_at(group_name) %>%
-      dplyr::summarize_at(
-        c("Gain", "Cover", "Frequency"),
-        sum
-      )
     colnames(merged)[1]  <- "Feature"
     return(merged)
 }
@@ -158,7 +158,7 @@ aggregate_local_explainer <- function(
   dt_frame,
   aggregation_matrix,
   group_name
-) {
+  ) {
   t_frame <- as.data.frame(t(dt_frame))
   colnames(t_frame) <- paste0("Value", seq_len(nrow(dt_frame)))
   t_frame <- t_frame %>%
@@ -170,7 +170,7 @@ aggregate_local_explainer <- function(
   aggregation_matrix <- rbind(
     aggregation_matrix,
     c("intercept", "intercept")
-    )
+  )
 
   merged <- dplyr::left_join(
     t_frame,
@@ -184,19 +184,19 @@ aggregate_local_explainer <- function(
       dplyr::vars(dplyr::starts_with("Value")),
       sum
     )
-  colnames(merged)[1] <- "Feature"
-  intercept_position <- which(merged$Feature == "intercept")
-  new_order <- unique(c(
-    intercept_position,
-    order(abs(merged$Value1))
-  ))
-  merged <- merged[new_order, ]
-  aggregated_frame <- data.table::data.table(t(as.matrix(
-    merged %>% dplyr::select(dplyr::starts_with("Value"))
-  )))
-  names(aggregated_frame) <- merged$Feature
+    colnames(merged)[1] <- "Feature"
+    intercept_position <- which(merged$Feature == "intercept")
+    new_order <- unique(c(
+        intercept_position,
+        order(abs(merged$Value1))
+        ))
+    merged <- merged[new_order, ]
+    aggregated_frame <- data.table::data.table(t(as.matrix(
+          merged %>% dplyr::select(dplyr::starts_with("Value"))
+          )))
+    names(aggregated_frame) <- merged$Feature
 
-  return(aggregated_frame)
+    return(aggregated_frame)
 }
 
 #' Lecture d'un fichier d'agrégation
@@ -204,7 +204,7 @@ aggregate_local_explainer <- function(
 #' @param filepath   `character()`\cr
 #'   Chemin d'accès du fichier d'agrégation à lire.
 #' @export
-read_aggregation_matrix <- function(filepath){
+read_aggregation_matrix <- function(filepath) {
   aggregation <- read.csv(
     file = filepath,
     header = TRUE,
@@ -243,12 +243,12 @@ plot_waterfall <- function(frame) {
 
   # order ?
   factor_levels <- breakdown_summary$factor[
-      order(abs(breakdown_summary$weight), decreasing = TRUE)
+    order(abs(breakdown_summary$weight), decreasing = TRUE)
     ]
   factor_levels <- unlist(list(
-    factor_levels[factor_levels == "intercept"],
-    factor_levels[factor_levels != "intercept"]
-  ))
+      factor_levels[factor_levels == "intercept"],
+      factor_levels[factor_levels != "intercept"]
+      ))
 
   breakdown_summary$factor <- factor(
     breakdown_summary$factor,
@@ -263,9 +263,9 @@ plot_waterfall <- function(frame) {
       cumulated_proba = 1 / (1 + exp(-cumulated_weight))
     )
 
-  p <- ggplot2::ggplot(
-    breakdown_summary,
-    ggplot2::aes(x = factor, y = cumulated_proba, fill = is_negative)) +
+    p <- ggplot2::ggplot(
+      breakdown_summary,
+      ggplot2::aes(x = factor, y = cumulated_proba, fill = is_negative)) +
     ggplot2::geom_bar(stat = "identity")
   return(p)
 }
@@ -281,8 +281,8 @@ plot_waterfall <- function(frame) {
 #'  affichée.
 #'
 #' @export
-plot_correlation <- function(task, fields){
-  if (requireNamespace("corrplot")){
+plot_correlation <- function(task, fields) {
+  if (requireNamespace("corrplot")) {
     data <- task[["hist_data"]] %>%
       select(fields)
     corrplot::corrplot(cor(data, use = "pairwise"), method = "color", type = "upper")

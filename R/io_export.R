@@ -38,10 +38,10 @@ export.sf_task <- function(
   collection_scores = "Scores",
   algo_name = "algo",
   ...
-){
+) {
 
   requireNamespace("purrr")
-  if (is.null(export_fields)){
+  if (is.null(export_fields)) {
     export_fields <- c(
       "siret",
       "periode",
@@ -107,7 +107,7 @@ export.sf_task <- function(
     )
     purrr::walk(
       .x = export_type,
-      .f = function(x, ...){
+      .f = function(x, ...) {
         if (x == "csv") {
           export_scores_to_csv(
             ...,
@@ -237,7 +237,7 @@ format_for_export <- function(
   # Report des dernieres infos financieres connues
 
   # TODO couper nom / chemin du dossier
-  if (!is.null(known_sirens_full_path)){
+  if (!is.null(known_sirens_full_path)) {
     donnees <- donnees %>%
       mark_known_sirets(
         full_paths = unique(dirname(known_sirens_full_path))
@@ -299,7 +299,7 @@ export_scores_to_mongodb <- function(
   database,
   collection,
   mongodb_uri
-  ){
+  ) {
 
   exported_columns <- c("siret", "periode", "score", "score_diff")
   assertthat::assert_that(
@@ -367,7 +367,7 @@ export_scores_to_csv  <- function(
   algo,
   batch,
   absolute_path
-  ){
+  ) {
 
   assertthat::assert_that(is.character(batch) && length(batch) == 1,
     msg = "Batch shoud be a length 1 character vector"
@@ -393,12 +393,6 @@ export_scores_to_csv  <- function(
     )
 
   return(TRUE)
-}
-
-export_company_card  <- function(formatted_data){
-
-  # TODO
-
 }
 
 #' Marks sirets from files as "known"

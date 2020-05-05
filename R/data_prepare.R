@@ -76,7 +76,7 @@ prepare.sf_task <- function( #nolint
       prepare_options,
       shape_frame_function,
       shape_frame_options
-    ),
+      ),
     .init = task,
   )
 
@@ -92,12 +92,12 @@ prepare.sf_task <- function( #nolint
 #' Keeps only the data_names that are indeed present in the task, warns if some
 #' are missing.
 subset_data_names_in_task <- function(data_names, task) {
-    data_name_is_missing <- ! (data_names %in% names(task))
-    if (any(data_name_is_missing)) {
-      missing_data_names <- data_names[data_name_is_missing]
-      logger::log_warn("There is no {missing_data_names} in current task")
-    }
-    return(data_names[!data_name_is_missing])
+  data_name_is_missing <- ! (data_names %in% names(task))
+  if (any(data_name_is_missing)) {
+    missing_data_names <- data_names[data_name_is_missing]
+    logger::log_warn("There is no {missing_data_names} in current task")
+  }
+  return(data_names[!data_name_is_missing])
 }
 
 
@@ -142,8 +142,8 @@ prepare_one_data_name <- function(
         TRAINING_FIELDS = task[["training_fields"]],
         OUTCOME_FIELD = task[["outcome_field"]]
       )
-      )
     )
+  )
 
   filtered_data <- prepared_data %>%
     dplyr::select(dplyr::one_of(training_fields))
@@ -287,8 +287,8 @@ assert_only_valid_columns <- function(data_to_shape) {
     all(class_is_correct),
     msg = paste0("Column ", wrong_column_names, " is of unsupported type
       factor or character")
-      )
-  return()
+    )
+    return()
 }
 
 
@@ -321,28 +321,28 @@ prepare_train_frame_linear <- function(
   prior_sample_size <- 30
   noise_level <- 0.02
 
-   target_encode_map <- fte::target_encode_create(
-     data_to_encode = data_to_prepare,
-     group_variables = target_encode_fields,
-     outcome_variable = outcome_field
-   )
+  target_encode_map <- fte::target_encode_create(
+    data_to_encode = data_to_prepare,
+    group_variables = target_encode_fields,
+    outcome_variable = outcome_field
+  )
 
-   prepared_data <- fte::target_encode_apply(
-     data = data_to_prepare,
-     group_variables =  target_encode_fields,
-     outcome_variable = outcome,
-     preparation_map = target_encode_map,
-     holdout_type = holdout_type,
-     prior_sample_size = prior_sample_size,
-     noise_level = noise_level
-   )
+  prepared_data <- fte::target_encode_apply(
+    data = data_to_prepare,
+    group_variables =  target_encode_fields,
+    outcome_variable = outcome,
+    preparation_map = target_encode_map,
+    holdout_type = holdout_type,
+    prior_sample_size = prior_sample_size,
+    noise_level = noise_level
+  )
 
   prepared_data <- prepared_data %>%
     dplyr::select(dplyr::one_of(training_fields))
 
   transformation_map <- transformation_map_create(
     data_to_transform = prepared_data
-    )
+  )
 
   prepared_data <- transformation_map_apply(
     transformation_map,
@@ -411,7 +411,7 @@ prepare_test_frame_linear <- function(
   prepared_data <- transformation_map_apply(
     preparation_map[["transformation_map"]],
     prepared_data
-    )
+  )
 
   prepared_data <- as.matrix(prepared_data)
 
@@ -422,7 +422,7 @@ prepare_test_frame_linear <- function(
   res <- list(
     data =  prepared_data,
     outcome = outcome
-    )
+  )
   return(res)
 }
 
@@ -460,7 +460,7 @@ transformation_map_apply <- function(transformation_map, data_to_transform) {
       names(transformation_map),
       ~ predict(.x, data_to_transform[[.y]])
     )
-   return(res)
+    return(res)
   }
 }
 
