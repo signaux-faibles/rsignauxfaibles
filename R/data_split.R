@@ -57,6 +57,9 @@ split_data.sf_task <- function(
   }
 
   # creating mlr3task
+  # TODO: column specifications must directly be made when importing data.
+  # TODO: unit test that data that should be a factor is a factor.
+
    hist_data <- task[["hist_data"]]
    hist_data <- hist_data %>%
      mutate_if(~ inherits(., "Date"), as.POSIXct)
@@ -69,31 +72,31 @@ split_data.sf_task <- function(
 
    hist_data[[task[["target"]]]] <- as.factor(hist_data[[task[["target"]]]])
 
-  mlr3task <- mlr3::TaskClassif$new(
-    id = "signaux-faibles",
-    backend = hist_data,
-    target = task[["target"]]
-  )
+   mlr3task <- mlr3::TaskClassif$new(
+     id = "signaux-faibles",
+     backend = hist_data,
+     target = task[["target"]]
+   )
 
-  mlr3task$col_roles$name <- c("siret")
-  mlr3task$col_roles$group <- c("siren")
-  mlr3task$col_roles$feature <- setdiff(
-    mlr3task$col_roles$feature,
-    c("siret", "siren")
-  )
+   mlr3task$col_roles$name <- c("siret")
+   mlr3task$col_roles$group <- c("siren")
+   mlr3task$col_roles$feature <- setdiff(
+     mlr3task$col_roles$feature,
+     c("siret", "siren")
+   )
 
-  task[["mlr3task"]] <- mlr3task
+   task[["mlr3task"]] <- mlr3task
 
-  # resampling <- mlr3::rsmp("holdout")
-  # resampling$param_set$values <- list(ratio = 0.6)
-  # resampling$instantiate(task[["mlr3task"]])
-  # task[["mlr3rsmp"]] <- resampling
+   resampling <- mlr3::rsmp("holdout")
+   resampling$param_set$values <- list(ratio = 0.6)
+   # resampling$instantiate(task[["mlr3task"]])
+   # task[["mlr3rsmp"]] <- resampling
 
-  names(fracs) <- names
-  log_param(task, "resampling_strategy", "holdout")
-  log_param(task, "train_val_test_shares", fracs)
+   names(fracs) <- names
+   log_param(task, "resampling_strategy", "holdout")
+   log_param(task, "train_val_test_shares", fracs)
 
-  return(task)
+   return(task)
 }
 
 

@@ -96,9 +96,9 @@ test_that("Prepare task works with options as expected", {
   })
 
 create_fte_test_task <- function() {
-  set.seed(1)
   test_task <- get_test_task()
 
+  set.seed(1)
   test_task[["prepared_train_data"]] <- NULL
   test_task[["prepared_test_data"]] <- NULL
   test_task[["prepared_validation_data"]] <- NULL
@@ -114,7 +114,6 @@ create_fte_test_task <- function() {
       replace = TRUE
     )
   )
-  set.seed(234)
   test_task[["train_data"]] <- cbind(test_task[["train_data"]],
     ab = sample(c("a", "b"), nrow(test_task[["train_data"]]), replace = TRUE),
     cd = sample(c("c", "d"), nrow(test_task[["train_data"]]), replace =
