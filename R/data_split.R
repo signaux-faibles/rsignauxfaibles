@@ -94,11 +94,13 @@ split_n_folds <- function(
 
   create_cv_task <- function(cv_number, cv_chunks) {
     cv_task <- sf_task(
-      verbose = TRUE,
+      mongodb_uri = task[["mongodb_uri"]],
       database = task[["database"]],
       collection = task[["collection"]],
-      mongodb_uri = task[["mongodb_uri"]],
-      tracker = task[["tracker"]]
+      id = task[["id"]],
+      target = task[["target"]],
+      tracker = task[["tracker"]],
+      verbose = TRUE
     )
     cv_task[["validation_data"]] <- cv_chunks[[cv_number]]
     cv_task[["train_data"]] <- dplyr::bind_rows(cv_chunks[-cv_number])

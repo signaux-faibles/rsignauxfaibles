@@ -32,15 +32,20 @@ NULL
 #'
 #' @export
 sf_task <- function(
-  verbose,
+  mongodb_uri,
   database = "test_signauxfaibles",
   collection = "Features",
-  mongodb_uri,
-  tracker = NULL) {
+  id = "Signaux-faibles",
+  target = "outcome",
+  tracker = NULL,
+  verbose
+  ) {
   res <- list(
+    mongodb_uri = mongodb_uri,
     database = database,
     collection = collection,
-    mongodb_uri = mongodb_uri,
+    id = id,
+    target = target,
     tracker = tracker
   )
   class(res) <- "sf_task"

@@ -1,10 +1,12 @@
 get_test_task <- function(seed = 1793) {
 
   task <- sf_task(
-    verbose = FALSE,
     mongodb_uri = "fake_uri",
     database = "fake_database",
-    collection = "fake_collection"
+    collection = "fake_collection",
+    id = "Fake task",
+    target = "target",
+    verbose = FALSE
   )
   set.seed(seed)
   task[["hist_data"]] <-  data.frame(
@@ -36,12 +38,12 @@ get_test_task <- function(seed = 1793) {
 get_test_task_2 <- function() {
 
   task <- sf_task(
-    verbose = FALSE,
     mongodb_uri = "fake_uri",
     database = "fake_database",
     collection = "fake_collection",
-    experiment_name = "Fake task",
-    experiment_description = "I am a fake task"
+    id = "Fake task",
+    target = "target",
+    verbose = FALSE
   )
 
   task[["hist_data"]] <- readr::read_csv("testing.csv")

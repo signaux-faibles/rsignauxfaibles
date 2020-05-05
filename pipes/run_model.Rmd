@@ -27,11 +27,10 @@ connect_to_h2o()
 
 ```{r}
 task <- sf_task(
-  verbose = TRUE,
   database,
   collection,
-  experiment_name = "Reference evaluation canvas",
-  experiment_description = "This experiment fixes the conditions for the evaluation of a new algorithm compared to former versions"
+  id = "Reference evaluation canvas",
+  verbose = TRUE
 )
 
 task <- load_new_data(
