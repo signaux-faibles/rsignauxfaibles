@@ -10,15 +10,16 @@ import_data(
   mongodb_uri,
   batch,
   min_effectif,
-  date_inf = NULL,
-  date_sup = NULL,
-  fields = NULL,
-  sirets = NULL,
-  code_ape = NULL,
-  subsample = NULL,
-  verbose = FALSE,
-  replace_missing = NULL,
-  debug = FALSE
+  date_inf,
+  date_sup,
+  fields,
+  sirets,
+  code_ape,
+  subsample,
+  verbose,
+  replace_missing,
+  database_query_fun,
+  debug
 )
 }
 \arguments{

@@ -15,6 +15,7 @@
   fields = get_fields(training = FALSE),
   min_effectif = 10L,
   rollback_months = 1L,
+  database_query_fun = query_database,
   debug = FALSE,
   ...
 )

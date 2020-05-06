@@ -8,22 +8,26 @@ get_test_task <- function(seed = 1793) {
     target = "target",
     verbose = FALSE
   )
-  testthat::with_mock(
-    query_database = function(...) {
-      fake_df <- data.frame(
-        siret = as.character(1:10),
-        periode = as.POSIXct(
-          seq(
-            from = as.Date("2014-01-01"),
-            to = as.Date("2014-10-01"),
-            length.out = 10
-          )
-          ),
-        target = rep(c(T, F), length.out = 10),
-        feature = stats::runif(10)
-      )
-    },
-    task <-  load_hist_data(task, batch = "0000", fields = c("siret", "periode", "target", "feature"))
+  mock_query_database <- function(...) {
+    fake_df <- data.frame(
+      siret = as.character(1:10),
+      periode = as.POSIXct(
+        seq(
+          from = as.Date("2014-01-01"),
+          to = as.Date("2014-10-01"),
+          length.out = 10
+        )
+        ),
+      target = rep(c(T, F), length.out = 10),
+      feature = stats::runif(10)
+    )
+  }
+
+  task <-  load_hist_data(
+    task,
+    batch = "0000",
+    fields = c("siret", "periode", "target", "feature"),
+    database_query_fun = mock_query_database
   )
 
   task  <- split_data(task)

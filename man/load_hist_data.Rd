@@ -18,6 +18,7 @@
   min_effectif = 10L,
   sirets = NULL,
   code_ape = NULL,
+  database_query_fun = query_database,
   debug = FALSE,
   ...
 )
