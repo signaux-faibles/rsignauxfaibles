@@ -11,10 +11,12 @@ get_test_task <- function(seed = 1793) {
   set.seed(seed)
   task[["hist_data"]] <-  data.frame(
     siret = as.character(1:10),
-    periode = seq(
-      from = as.Date("2014-01-01"),
-      to = as.Date("2014-10-01"),
-      length.out = 10
+    periode = as.character(
+      seq(
+        from = as.Date("2014-01-01"),
+        to = as.Date("2014-10-01"),
+        length.out = 10
+        )
       ),
     target = stats::runif(10),
     score = stats::runif(10)

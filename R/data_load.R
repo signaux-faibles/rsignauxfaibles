@@ -389,6 +389,10 @@ update_types <- function(
   df
   ) {
 
+  # Dates de type Date
+  df <- df %>%
+    mutate_if(lubridate::is.POSIXct, ~ as.character(as.Date(.)))
+
   # Régions de type facteurs
   if ("region" %in% names(df)) {
     df <- df %>%

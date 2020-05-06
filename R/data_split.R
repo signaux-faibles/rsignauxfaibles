@@ -75,9 +75,6 @@ split_data.sf_task <- function(
     semi_join(task[["validation_data"]]["siret"], by = c("siret")) %>%
     .$no
 
-  mlr3_data <- mlr3_data %>%
-    mutate_if(~ inherits(., "Date"), as.POSIXct)
-
   if (!"siren" %in% names(mlr3_data)) {
     mlr3_data$siren <- substr(mlr3_data$siret, 0, 9)
   }
