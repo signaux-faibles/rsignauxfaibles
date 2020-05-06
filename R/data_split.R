@@ -32,8 +32,6 @@ split_data.sf_task <- function(
 
   set_verbose_level(task)
 
-
-
   logger::log_info(paste0("Les donnees historiques sont scindes en ",
       "echantillons d'entrainement, de test et de validation"))
 

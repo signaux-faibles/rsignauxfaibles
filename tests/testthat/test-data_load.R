@@ -302,7 +302,7 @@ import_test_data <- function(
     sirets = sirets,
     code_ape = code_ape,
     verbose = FALSE,
-    debug = TRUE
+    debug = FALSE
   )
   return(data_import)
 }
@@ -332,7 +332,7 @@ test_that(
   )
   expect_equal(names(test_object), fields)
   expect_equal(test_object$siret, "01234567891011")
-  expect_equal(test_object$periode, as.Date("2014-01-01"))
+  expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
 })
 
 test_that(
@@ -359,7 +359,7 @@ test_that(
   )
   expect_equal(names(test_object), fields)
   expect_equal(test_object$siret, "01234567891011")
-  expect_equal(test_object$periode, as.Date("2014-01-01"))
+  expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
 })
 
 test_that(
@@ -374,5 +374,5 @@ test_that(
   )
   expect_equal(names(test_object), fields)
   expect_equal(test_object$siret, "01234567891011")
-  expect_equal(test_object$periode, as.Date("2014-01-01"))
+  expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
 })

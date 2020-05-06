@@ -386,11 +386,8 @@ add_missing_fields <- function(
 
 
 update_types <- function(
-  df) {
-
-  # Dates de type Date
-  df <- df %>%
-    mutate_if(lubridate::is.POSIXct, as.Date)
+  df
+  ) {
 
   # Régions de type facteurs
   if ("region" %in% names(df)) {
