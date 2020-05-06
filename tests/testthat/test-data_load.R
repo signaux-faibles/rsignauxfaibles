@@ -67,6 +67,8 @@ purrr::pwalk(
   .f = test_replace_missing_data
 )
 
+## Testing query stages
+
 test_that("build_sort_stage builds a valid sort stage", {
    expect_equal(
      jsonlite::toJSON(build_sort_stage(), auto_unbox = TRUE) %>% toString(),
@@ -271,9 +273,8 @@ test_that("build_siret_match_stage builds a valid match stage", {
   )
 })
 
-
 #
-# End-to-end: import_data
+# import_data
 #
 
 import_test_data <- function(

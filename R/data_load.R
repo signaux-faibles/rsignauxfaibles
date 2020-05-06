@@ -1217,7 +1217,9 @@ get_last_batch <- function(
   mongodb_uri,
   fields,
   min_effectif,
-  rollback_months) {
+  rollback_months
+  ) {
+
   current_data <- import_data(
     database,
     collection,

@@ -75,12 +75,6 @@ split_data.sf_task <- function(
     semi_join(task[["validation_data"]]["siret"], by = c("siret")) %>%
     .$no
 
-  if (!"siren" %in% names(mlr3_data)) {
-    mlr3_data$siren <- substr(mlr3_data$siret, 0, 9)
-  }
-
-  mlr3_data$siren <- factor(mlr3_data$siren)
-
   mlr3_data[[task[["target"]]]] <- as.factor(mlr3_data[[task[["target"]]]])
   ############################################################
 

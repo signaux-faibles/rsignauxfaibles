@@ -10,7 +10,7 @@ get_test_task <- function(seed = 1793) {
   )
   set.seed(seed)
   task[["hist_data"]] <-  data.frame(
-    siret = as.character(1:10),
+    siret = as.factor(1:10),
     periode = as.character(
       seq(
         from = as.Date("2014-01-01"),
