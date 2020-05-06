@@ -27,39 +27,87 @@
 split_data.sf_task <- function(
   task,
   fracs = c(0.6, 0.2, 0.2),
-  names = c("train", "validation", "test"),
-  ...) {
+  ...
+  ) {
+
   set_verbose_level(task)
 
-  logger::log_info("Les donnees historiques sont scindes en echantillons
-    d'entrainement, de test et de validation")
+  logger::log_info(paste0("Les donnees historiques sont scindes en ",
+      "echantillons d'entrainement, de test et de validation"))
 
-    assertthat::assert_that("hist_data" %in% names(task),
-      msg = "Please load historical data before holding out test data"
+  assertthat::assert_that("hist_data" %in% names(task),
+    msg = "Please load historical data before holding out test data"
+  )
+
+  names <- c("train", "validation", "test")
+
+  if ((length(fracs) == 1 && fracs == 1) || identical(fracs, c(1, 0, 0))) {
+    task[["train_data"]] <- task[["hist_data"]]
+  } else {
+
+    res <- split_snapshot_rdm_month(
+      data_sample = task[["hist_data"]],
+      fracs = fracs,
+      names = names
     )
 
-    if ((length(fracs) == 1 && fracs == 1) || identical(fracs, c(1, 0, 0))) {
-      task[["train_data"]] <- task[["hist_data"]]
-    } else {
-      res <- split_snapshot_rdm_month(
-        data_sample = task[["hist_data"]],
-        fracs = fracs,
-        names = names
-      )
-
-      for (name in names) {
-        task[[paste0(name, "_data")]] <- task[["hist_data"]] %>%
-          semi_join(res[[name]], by = c("siret", "periode"))
-      }
+    for (name in names) {
+      task[[paste0(name, "_data")]] <- task[["hist_data"]] %>%
+        semi_join(res[[name]], by = c("siret", "periode"))
     }
+  }
 
+  # creating mlr3task
 
-    names(fracs) <- names
-    log_param(task, "resampling_strategy", "holdout")
-    log_param(task, "train_val_test_shares", fracs)
+  # ###########################################################
+  # TODO: column specifications must directly be made when importing data.
+  # TODO: unit test that data that should be a factor is a factor.
 
-    return(task)
+  mlr3_data <- rbind(task[["train_data"]], task[["validation_data"]])
+
+  mlr3_train_index <- mlr3_data %>%
+    mutate(no = 1:n()) %>%
+    semi_join(task[["train_data"]]["siret"], by = c("siret")) %>%
+    .$no
+
+  mlr3_validation_index <- mlr3_data %>%
+    mutate(no = 1:n()) %>%
+    semi_join(task[["validation_data"]]["siret"], by = c("siret")) %>%
+    .$no
+
+  mlr3_data[[task[["target"]]]] <- as.factor(mlr3_data[[task[["target"]]]])
+  ############################################################
+
+  mlr3task <- mlr3::TaskClassif$new(
+    id = "signaux-faibles",
+    backend = mlr3_data,
+    target = task[["target"]]
+  )
+
+  mlr3task$col_roles$name <- c("siret")
+  mlr3task$col_roles$feature <- setdiff(
+    mlr3task$col_roles$feature,
+    c("siret")
+  )
+
+  task[["mlr3task"]] <- mlr3task
+
+  resampling <- mlr3::rsmp("custom")
+  resampling$instantiate(task[["mlr3task"]],
+    train = list(mlr3_train_index),
+    test = list(mlr3_validation_index)
+  )
+  task[["mlr3rsmp"]] <- resampling
+
+  names(fracs) <- names
+  log_param(task, "resampling_strategy", "holdout")
+  log_param(task, "train_val_test_shares", fracs)
+
+  return(task)
 }
+
+
+
 
 #' Prepare cross-validation
 #'
@@ -94,11 +142,13 @@ split_n_folds <- function(
 
   create_cv_task <- function(cv_number, cv_chunks) {
     cv_task <- sf_task(
-      verbose = TRUE,
+      mongodb_uri = task[["mongodb_uri"]],
       database = task[["database"]],
       collection = task[["collection"]],
-      mongodb_uri = task[["mongodb_uri"]],
-      tracker = task[["tracker"]]
+      id = task[["id"]],
+      target = task[["target"]],
+      tracker = task[["tracker"]],
+      verbose = TRUE
     )
     cv_task[["validation_data"]] <- cv_chunks[[cv_number]]
     cv_task[["train_data"]] <- dplyr::bind_rows(cv_chunks[-cv_number])

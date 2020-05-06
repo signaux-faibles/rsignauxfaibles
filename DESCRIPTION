@@ -17,6 +17,7 @@ Imports:
     jsonlite,
     logger,
     lubridate,
+    mlr3,
     mongolite,
     purrr,
     rlang,

@@ -222,7 +222,9 @@ import_data <- function(
   subsample = NULL,
   verbose = FALSE,
   replace_missing = NULL,
-  debug = FALSE) {
+  debug = FALSE
+  ) {
+
   requireNamespace("logger")
   if (verbose) {
     logger::log_threshold(logger::TRACE)
@@ -306,7 +308,9 @@ query_database <- function(
   database,
   collection,
   mongodb_uri,
-  verbose) {
+  verbose
+  ) {
+
   dbconnection <- mongolite::mongo(
     collection = collection,
     db = database,
@@ -321,7 +325,9 @@ query_database <- function(
 replace_missing_data <- function(
   df,
   fields,
-  replace_missing) {
+  replace_missing
+  ) {
+
   df <- add_missing_fields(
     df = df,
     fields = fields
@@ -368,7 +374,8 @@ replace_missing_data <- function(
 
 add_missing_fields <- function(
   df,
-  fields) {
+  fields
+  ) {
   missing_fields <- fields[
     !fields %in% names(df)
     ]
@@ -386,17 +393,18 @@ add_missing_fields <- function(
 
 
 update_types <- function(
-  df) {
+  df
+  ) {
 
   # Dates de type Date
   df <- df %>%
-    mutate_if(lubridate::is.POSIXct, as.Date)
+    mutate_if(lubridate::is.POSIXct, ~ as.character(as.Date(.)))
 
-  # Régions de type facteurs
-  if ("region" %in% names(df)) {
-    df <- df %>%
-      mutate(region = factor(region))
-  }
+  # colonnes de type facteurs
+  factor_columns <- intersect(c("region", "siret", "siren"), names(df))
+  df <- df %>%
+    mutate_at(vars(one_of(factor_columns)),factor)
+
   return(df)
 }
 
@@ -1209,7 +1217,9 @@ get_last_batch <- function(
   mongodb_uri,
   fields,
   min_effectif,
-  rollback_months) {
+  rollback_months
+  ) {
+
   current_data <- import_data(
     database,
     collection,

@@ -96,9 +96,9 @@ test_that("Prepare task works with options as expected", {
   })
 
 create_fte_test_task <- function() {
-  set.seed(1)
   test_task <- get_test_task()
 
+  set.seed(1)
   test_task[["prepared_train_data"]] <- NULL
   test_task[["prepared_test_data"]] <- NULL
   test_task[["prepared_validation_data"]] <- NULL
@@ -125,6 +125,7 @@ create_fte_test_task <- function() {
 }
 
 create_prepared_fte_test_task <- function() {
+
   fte_test_task <- create_fte_test_task()
 
   prepared_task <- prepare(
@@ -146,15 +147,10 @@ create_prepared_fte_test_task <- function() {
 
 test_that("map creation works as expected", {
   prep_task <- create_prepared_fte_test_task()
-  expect_equal(
+  expect_known_value(
     prep_task[["prepared_validation_data"]],
-    structure(c(0.415763281518593, 0.0886256091762334, 0.0203380864113569,
-        0.784198996145278, 0.010076787089929, 0.425349598750472,
-        0.738037971779704, 0.626527328975499, 0.0963920175563544,
-        0.794141964288428, 0.742424242424242, 0.742424242424242,
-        0.742424242424242, 0.758064516129032, 0.742424242424242, 0.734375,
-        0.734375, 0.765625, 0.734375, 0.734375), .Dim = 5:4, .Dimnames = list(
-        NULL, c("target", "score", "target_encode_ab", "target_encode_cd")))
+    file = "./map_golden.log",
+    update = FALSE
   )
   })
 

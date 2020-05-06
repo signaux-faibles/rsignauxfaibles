@@ -67,6 +67,8 @@ purrr::pwalk(
   .f = test_replace_missing_data
 )
 
+## Testing query stages
+
 test_that("build_sort_stage builds a valid sort stage", {
    expect_equal(
      jsonlite::toJSON(build_sort_stage(), auto_unbox = TRUE) %>% toString(),
@@ -271,9 +273,8 @@ test_that("build_siret_match_stage builds a valid match stage", {
   )
 })
 
-
 #
-# End-to-end: import_data
+# import_data
 #
 
 import_test_data <- function(
@@ -302,7 +303,7 @@ import_test_data <- function(
     sirets = sirets,
     code_ape = code_ape,
     verbose = FALSE,
-    debug = TRUE
+    debug = FALSE
   )
   return(data_import)
 }
@@ -331,8 +332,8 @@ test_that(
     code_ape = NULL
   )
   expect_equal(names(test_object), fields)
-  expect_equal(test_object$siret, "01234567891011")
-  expect_equal(test_object$periode, as.Date("2014-01-01"))
+  expect_equal(as.character(test_object$siret), "01234567891011")
+  expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
 })
 
 test_that(
@@ -358,8 +359,8 @@ test_that(
     code_ape = NULL
   )
   expect_equal(names(test_object), fields)
-  expect_equal(test_object$siret, "01234567891011")
-  expect_equal(test_object$periode, as.Date("2014-01-01"))
+  expect_equal(as.character(test_object$siret), "01234567891011")
+  expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
 })
 
 test_that(
@@ -373,6 +374,6 @@ test_that(
     code_ape = "1234B"
   )
   expect_equal(names(test_object), fields)
-  expect_equal(test_object$siret, "01234567891011")
-  expect_equal(test_object$periode, as.Date("2014-01-01"))
+  expect_equal(as.character(test_object$siret), "01234567891011")
+  expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
 })
