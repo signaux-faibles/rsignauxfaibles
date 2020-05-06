@@ -331,7 +331,7 @@ test_that(
     code_ape = NULL
   )
   expect_equal(names(test_object), fields)
-  expect_equal(test_object$siret, "01234567891011")
+  expect_equal(as.character(test_object$siret), "01234567891011")
   expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
 })
 
@@ -358,7 +358,7 @@ test_that(
     code_ape = NULL
   )
   expect_equal(names(test_object), fields)
-  expect_equal(test_object$siret, "01234567891011")
+  expect_equal(as.character(test_object$siret), "01234567891011")
   expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
 })
 
@@ -373,6 +373,6 @@ test_that(
     code_ape = "1234B"
   )
   expect_equal(names(test_object), fields)
-  expect_equal(test_object$siret, "01234567891011")
+  expect_equal(as.character(test_object$siret), "01234567891011")
   expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
 })

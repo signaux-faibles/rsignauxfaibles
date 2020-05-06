@@ -400,11 +400,11 @@ update_types <- function(
   df <- df %>%
     mutate_if(lubridate::is.POSIXct, ~ as.character(as.Date(.)))
 
-  # Régions de type facteurs
-  if ("region" %in% names(df)) {
-    df <- df %>%
-      mutate(region = factor(region))
-  }
+  # colonnes de type facteurs
+  factor_columns <- intersect(c("region", "siret", "siren"), names(df))
+  df <- df %>%
+    mutate_at(vars(one_of(factor_columns)),factor)
+
   return(df)
 }
 
