@@ -6,8 +6,6 @@ test_predict_fun <- function(model, new_data) {
 
 test_that("predict.sf_task works as expected", {
   test_task <- get_test_task()
-  test_task[["validation_data"]] <- test_task[["validation_data"]] %>%
-    dplyr::select(-score)
   test_task[["model"]] <- list()
   predicted_task <- predict(
     test_task,
@@ -22,8 +20,6 @@ test_that("predict.cv_task works as expected", {
   test_task[["cross_validation"]] <- purrr::map(
     test_task[["cross_validation"]],
     function(x) {
-      x[["validation_data"]] <- x[["validation_data"]] %>%
-        dplyr::select(-score)
       x[["model"]] <- list()
       return(x)
     }

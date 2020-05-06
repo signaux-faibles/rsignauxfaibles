@@ -16,12 +16,14 @@ train_xgboost(
 )
 }
 \arguments{
-\item{train_data}{\code{data.frame} \cr données d'entraînement, sous la forme d'un H2OFrame}
+\item{train_data}{\code{data.frame} \cr données d'entraînement, sous la forme
+d'un H2OFrame}
 
 \item{outcome}{\code{character(1)} \cr Nom de la variable qui sert de cible
 d'apprentissage}
 
-\item{validation_data}{\code{H2OFrame} \cr Données d'évaluation, sous la forme d'un H2OFrame}
+\item{validation_data}{\code{H2OFrame} \cr Données d'évaluation, sous la forme
+d'un H2OFrame}
 
 \item{seed}{\code{integer(1)} \cr Graine aléatoire pour que les opérations
 aléatoires soient reproductibles.}

@@ -36,10 +36,10 @@ l'objectif d'apprentissage.}
 \item{segment_names}{:: character() \cr Nom de la colonne qui permet de
 segmenter l'évaluation.}
 
-\item{remove_strong_signals}{:: \code{logical(1)}\cr
-Faut-il retirer des échantillons de test ou de
-validation les entrerprises qui présentent des signaux forts, c'est-à-dire 3 mois de défaut, ou une
-procédure collective en cours ? Nécessite que les données contenues dans
+\item{remove_strong_signals}{:: \code{logical(1)}\cr Faut-il retirer des
+échantillons de test ou de validation les entrerprises qui présentent des
+signaux forts, c'est-à-dire 3 mois de défaut, ou une procédure collective
+en cours ? Nécessite que les données contenues dans
 \code{task[["hist_data"]]} possèdent le champs "time_til_outcome".}
 }
 \value{

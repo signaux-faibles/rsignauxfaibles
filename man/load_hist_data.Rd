@@ -37,7 +37,8 @@ param exporter. Par défaut, celle stockée dans \code{task}.}
 \item{collection}{\code{character(1)} \cr Nom de la collection vers laquelle
 exporter. Par défaut, celle stockée dans \code{task}.}
 
-\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri format.}
+\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri
+format.}
 
 \item{subsample}{\code{integer(1)} \cr Nombre d'objets (c'est-à-dire de couples
 siret x periode) à échantillonner.}
