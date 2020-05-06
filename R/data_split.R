@@ -32,6 +32,8 @@ split_data.sf_task <- function(
 
   set_verbose_level(task)
 
+
+
   logger::log_info(paste0("Les donnees historiques sont scindes en ",
       "echantillons d'entrainement, de test et de validation"))
 
@@ -44,6 +46,7 @@ split_data.sf_task <- function(
   if ((length(fracs) == 1 && fracs == 1) || identical(fracs, c(1, 0, 0))) {
     task[["train_data"]] <- task[["hist_data"]]
   } else {
+
     res <- split_snapshot_rdm_month(
       data_sample = task[["hist_data"]],
       fracs = fracs,
@@ -57,46 +60,62 @@ split_data.sf_task <- function(
   }
 
   # creating mlr3task
+
+  # ###########################################################
   # TODO: column specifications must directly be made when importing data.
   # TODO: unit test that data that should be a factor is a factor.
 
-   hist_data <- task[["hist_data"]]
-   hist_data <- hist_data %>%
-     mutate_if(~ inherits(., "Date"), as.POSIXct)
+  mlr3_data <- rbind(task[["train_data"]], task[["validation_data"]])
 
-   if (!"siren" %in% names(hist_data)) {
-     hist_data$siren <- substr(hist_data$siret, 0, 9)
-   }
+  mlr3_train_index <- mlr3_data %>%
+    mutate(no = 1:n()) %>%
+    semi_join(task[["train_data"]]["siret"], by = c("siret")) %>%
+    .$no
 
-   hist_data$siren <- factor(hist_data$siren)
+  mlr3_validation_index <- mlr3_data %>%
+    mutate(no = 1:n()) %>%
+    semi_join(task[["validation_data"]]["siret"], by = c("siret")) %>%
+    .$no
 
-   hist_data[[task[["target"]]]] <- as.factor(hist_data[[task[["target"]]]])
+  mlr3_data <- mlr3_data %>%
+    mutate_if(~ inherits(., "Date"), as.POSIXct)
 
-   mlr3task <- mlr3::TaskClassif$new(
-     id = "signaux-faibles",
-     backend = hist_data,
-     target = task[["target"]]
-   )
+  if (!"siren" %in% names(mlr3_data)) {
+    mlr3_data$siren <- substr(mlr3_data$siret, 0, 9)
+  }
 
-   mlr3task$col_roles$name <- c("siret")
-   mlr3task$col_roles$group <- c("siren")
-   mlr3task$col_roles$feature <- setdiff(
-     mlr3task$col_roles$feature,
-     c("siret", "siren")
-   )
+  mlr3_data$siren <- factor(mlr3_data$siren)
 
-   task[["mlr3task"]] <- mlr3task
+  mlr3_data[[task[["target"]]]] <- as.factor(mlr3_data[[task[["target"]]]])
+  ############################################################
 
-   resampling <- mlr3::rsmp("holdout")
-   resampling$param_set$values <- list(ratio = 0.6)
-   # resampling$instantiate(task[["mlr3task"]])
-   # task[["mlr3rsmp"]] <- resampling
+  mlr3task <- mlr3::TaskClassif$new(
+    id = "signaux-faibles",
+    backend = mlr3_data,
+    target = task[["target"]]
+  )
 
-   names(fracs) <- names
-   log_param(task, "resampling_strategy", "holdout")
-   log_param(task, "train_val_test_shares", fracs)
+  mlr3task$col_roles$name <- c("siret")
+  mlr3task$col_roles$group <- c("siren")
+  mlr3task$col_roles$feature <- setdiff(
+    mlr3task$col_roles$feature,
+    c("siret", "siren")
+  )
 
-   return(task)
+  task[["mlr3task"]] <- mlr3task
+
+  resampling <- mlr3::rsmp("custom")
+  resampling$instantiate(task[["mlr3task"]],
+    train = list(mlr3_train_index),
+    test = list(mlr3_validation_index)
+  )
+  task[["mlr3rsmp"]] <- resampling
+
+  names(fracs) <- names
+  log_param(task, "resampling_strategy", "holdout")
+  log_param(task, "train_val_test_shares", fracs)
+
+  return(task)
 }
 
 
