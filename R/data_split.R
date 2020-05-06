@@ -91,10 +91,9 @@ split_data.sf_task <- function(
   )
 
   mlr3task$col_roles$name <- c("siret")
-  mlr3task$col_roles$group <- c("siren")
   mlr3task$col_roles$feature <- setdiff(
     mlr3task$col_roles$feature,
-    c("siret", "siren")
+    c("siret")
   )
 
   task[["mlr3task"]] <- mlr3task

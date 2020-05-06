@@ -222,7 +222,9 @@ import_data <- function(
   subsample = NULL,
   verbose = FALSE,
   replace_missing = NULL,
-  debug = FALSE) {
+  debug = FALSE
+  ) {
+
   requireNamespace("logger")
   if (verbose) {
     logger::log_threshold(logger::TRACE)
@@ -306,7 +308,9 @@ query_database <- function(
   database,
   collection,
   mongodb_uri,
-  verbose) {
+  verbose
+  ) {
+
   dbconnection <- mongolite::mongo(
     collection = collection,
     db = database,
@@ -321,7 +325,9 @@ query_database <- function(
 replace_missing_data <- function(
   df,
   fields,
-  replace_missing) {
+  replace_missing
+  ) {
+
   df <- add_missing_fields(
     df = df,
     fields = fields
@@ -368,7 +374,8 @@ replace_missing_data <- function(
 
 add_missing_fields <- function(
   df,
-  fields) {
+  fields
+  ) {
   missing_fields <- fields[
     !fields %in% names(df)
     ]
