@@ -18,15 +18,6 @@ dplyr::mutate(siren = substr(siret, 1, 9)) %>%
 tibble::as_tibble()
 
 
-test_that("split_snapshot_rdm_month renvoie des indexs", {
-  splits <- split_snapshot_rdm_month(
-    my_test_frame,
-    fracs = c(0.60, 0.25, 0.15),
-    names = c("train", "validation", "test")
-  )
-  all_indexes <- do.call(c, splits)
-  expect_true(sort(all_indexes) == seq_len(nrow(my_test_frame)))
-})
 
 # train <- res[["train"]] %>%
 #   mutate(siren = substr(siret, 1, 9))
