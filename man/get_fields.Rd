@@ -20,46 +20,54 @@ get_fields(
 )
 }
 \arguments{
-\item{training}{\code{logical()} \cr Si \code{TRUE}, uniquement des champs
-utilisés pour l'entraînement sont retournés.}
+\item{training}{\code{logical()} \cr Si \code{TRUE}, uniquement des champs utilisés
+pour l'entraînement sont retournés.}
 
-\item{siren}{\code{0 | 1 | 2} \cr Niveau de détail des données Sirene. cf Détails.}
+\item{siren}{\code{0 | 1 | 2} \cr Niveau de
+détail des données Sirene. cf Détails.}
 
-\item{urssaf}{\code{0 | 1 | 2} \cr Niveau de détail des données urssaf. cf Détails.}
+\item{urssaf}{\code{0 | 1 | 2} \cr Niveau de détail des données urssaf. cf
+Détails.}
 
-\item{delai}{\code{0 | 1 | 2} \cr Niveau de détail des données delai. cf Détails.}
+\item{delai}{\code{0 | 1 | 2} \cr Niveau de détail des données delai. cf
+Détails.}
 
-\item{effectif}{\code{0 | 1 | 2} \cr Niveau de détail des données effectif. cf Détails.}
+\item{effectif}{\code{0 | 1 | 2} \cr Niveau de détail des données effectif. cf
+Détails.}
 
-\item{diane}{\code{0 | 1 | 2} \cr Niveau de détail des données diane. cf Détails.}
+\item{diane}{\code{0 | 1 | 2} \cr Niveau de détail des données diane. cf
+Détails.}
 
 \item{bdf}{\code{0 | 1 | 2} \cr Niveau de détail des données bdf. cf Détails.}
 
-\item{apart}{\code{0 | 1 | 2} \cr Niveau de détail des données apart. cf Détails.}
+\item{apart}{\code{0 | 1 | 2} \cr Niveau de détail des données apart. cf
+Détails.}
 
-\item{procol}{\code{0 | 1 | 2} \cr Niveau de détail des données procol. cf Détails.}
+\item{procol}{\code{0 | 1 | 2} \cr Niveau de détail des données procol. cf
+Détails.}
 
-\item{interim}{\code{0 | 1 | 2} \cr Niveau de détail des données interim. cf Détails.}
+\item{interim}{\code{0 | 1 | 2} \cr Niveau de détail des données interim. cf
+Détails.}
 
 \item{target_encode}{\code{0 | 1 | 2} \cr Target encoding. Uniquement
 disponibles si \code{training}= \code{TRUE}.}
 
-\item{info}{\code{0 | 1 | 2}\cr Année des exercices Diane & Bdf}
+\item{info}{\code{0 | 1 | 2}\cr Année des
+exercices Diane & Bdf}
 }
 \value{
-\code{character()} \cr Vecteur de noms de variables
+\code{character()} \cr Vecteur de noms de variables @export
 }
 \description{
 Fonction utilitaire pour récupérer rapidement une liste de noms de
-variables (champs mongodb).
-Utilitary function to quickly get a field name list. Put training = TRUE to
-get only fields used for training. Put an input to 0 to remove the related
-fields, to 1 to keep basic fields, and to 2 to include all fields.
+variables (champs mongodb).  Utilitary function to quickly get a field name
+list. Put training = TRUE to get only fields used for training. Put an
+input to 0 to remove the related fields, to 1 to keep basic fields, and to
+2 to include all fields.
 }
 \section{Details}{
-
-Chaque type de données a 3 niveaux. Le niveau 0 correspond à aucune
-données. Le niveau 1 aux données élémentaires, et le niveau 2 toutes les
-données retravaillées.
+ Chaque type de données a 3 niveaux. Le niveau 0
+correspond à aucune données. Le niveau 1 aux données élémentaires, et le
+niveau 2 toutes les données retravaillées.
 }
 

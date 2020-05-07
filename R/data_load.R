@@ -61,8 +61,11 @@ load_hist_data.sf_task <- function(
   min_effectif = 10L,
   sirets = NULL,
   code_ape = NULL,
+  database_query_fun = query_database,
   debug = FALSE,
-  ...) {
+  ...
+  ) {
+
   set_verbose_level(task)
   logger::log_info("Chargement des données historiques.")
 
@@ -79,6 +82,7 @@ load_hist_data.sf_task <- function(
     code_ape = code_ape,
     subsample = subsample,
     verbose = attr(task, "verbose"),
+    database_query_fun = database_query_fun,
     debug = debug
   )
 
@@ -123,6 +127,7 @@ load_new_data.sf_task <- function(
   fields = get_fields(training = FALSE),
   min_effectif = 10L,
   rollback_months = 1L,
+  database_query_fun = query_database,
   debug = FALSE,
   ...) {
   set_verbose_level(task)
@@ -138,6 +143,7 @@ load_new_data.sf_task <- function(
     min_effectif = min_effectif,
     fields = fields,
     verbose = attr(task, "verbose"),
+    database_query_fun = database_query_fun,
     debug = debug
   )
 
@@ -222,7 +228,8 @@ import_data <- function(
   subsample = NULL,
   verbose = FALSE,
   replace_missing = NULL,
-  debug = FALSE
+  database_query_fun = query_database,
+  debug
   ) {
 
   requireNamespace("logger")
@@ -277,7 +284,7 @@ import_data <- function(
   )
 
   logger::log_info("Connexion a la collection mongodb {collection} ...")
-  df <- query_database(query, database, collection, mongodb_uri, verbose)
+  df <- database_query_fun(query, database, collection, mongodb_uri, verbose)
   logger::log_info("Import fini.")
 
 
@@ -1182,57 +1189,4 @@ get_fields_training_light <- function() {
       "TargetEncode_code_ape_niveau3"
     )
   )
-}
-
-#' Récupère les dernières données disponibles pour un batch
-#'
-#' Cette fonction permet d'accéder rapidement aux dernières données
-#' disponibles.
-#'
-#' @param last_batch `character(1)` \cr Batch auquel doit être importées les
-#'   données. Les modifications opérées par les batchs ultérieurs sont
-#'   ignorées.
-#' @param periods `[Date()]` \cr Périodes d'intérêt, auquels charger les
-#'   données. Des périodes supplémentairs peuvent être chargées selon la
-#'   valeur de rollback_months.
-#' @inheritParams mongodb_connection
-#' @param fields `character()` \cr Noms des champs à requêter dans la base de
-#'   données. Doit contenir "siret" et "periode". Si égal à \code{NULL}, alors
-#'   charge tous les champs disponibles.
-#' @param min_effectif `integer(1)` \cr Limite basse du filtrage de l'effectif
-#'   (la limite est incluse)
-#' @param rollback_months `integer(1)`\cr Nombre de mois précédant le premier mois de
-#'   `periods` à charger. Permet d'effectuer des calculs de différences ou de
-#'   moyennes glissantes pour les périodes d'intérêt.
-#'
-#' @return `data.frame()` \cr
-#' Données avec les colonnes décrites dans `fields`, pour les périodes
-#' définies par `periods` et `rollback_months`
-#' @export
-get_last_batch <- function(
-  last_batch,
-  periods,
-  database,
-  collection,
-  mongodb_uri,
-  fields,
-  min_effectif,
-  rollback_months
-  ) {
-
-  current_data <- import_data(
-    database,
-    collection,
-    mongodb_uri,
-    last_batch,
-    date_inf = min(periods) %m-% months(rollback_months),
-    date_sup = max(periods) %m+% months(1),
-    min_effectif = min_effectif,
-    fields = fields
-  )
-
-  if ("periode" %in% fields && max(current_data$periode) != max(periods)) {
-    logger::log_warn("Data is missing at actual period !")
-  }
-  return(current_data)
 }

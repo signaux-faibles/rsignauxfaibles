@@ -8,18 +8,26 @@ get_test_task <- function(seed = 1793) {
     target = "target",
     verbose = FALSE
   )
-  set.seed(seed)
-  task[["hist_data"]] <-  data.frame(
-    siret = as.factor(1:10),
-    periode = as.character(
-      seq(
-        from = as.Date("2014-01-01"),
-        to = as.Date("2014-10-01"),
-        length.out = 10
+  mock_query_database <- function(...) {
+    fake_df <- data.frame(
+      siret = as.character(1:10),
+      periode = as.POSIXct(
+        seq(
+          from = as.Date("2014-01-01"),
+          to = as.Date("2014-10-01"),
+          length.out = 10
         )
-      ),
-    target = stats::runif(10),
-    score = stats::runif(10)
+        ),
+      target = rep(c(T, F), length.out = 10),
+      feature = stats::runif(10)
+    )
+  }
+
+  task <-  load_hist_data(
+    task,
+    batch = "0000",
+    fields = c("siret", "periode", "target", "feature"),
+    database_query_fun = mock_query_database
   )
 
   task  <- split_data(task)
@@ -29,46 +37,6 @@ get_test_task <- function(seed = 1793) {
   task[["prepared_validation_data"]]  <- task[["validation_data"]]
   task[["outcome_field"]] <- "target"
 
-  return(task)
-}
-
-#' Get a test task for tests
-#'
-#' Loads fake data to run tests.
-#'
-#' @export
-get_test_task_2 <- function() {
-
-  task <- sf_task(
-    mongodb_uri = "fake_uri",
-    database = "fake_database",
-    collection = "fake_collection",
-    id = "Fake task",
-    target = "target",
-    verbose = FALSE
-  )
-
-  task[["hist_data"]] <- readr::read_csv("testing.csv")
-  task[["new_data"]]  <- task[["hist_data"]]
-
-  task <- split_data(task)
-  task <- prepare(
-    task,
-    training_fields = c(
-      "effectif",
-      "excedent_brut_d_exploitation",
-      "taux_marge",
-      "montant_part_patronale"
-      ),
-    data_names = c("train_data", "validation_data", "test_data"),
-    target_encode_fields = c()
-  )
-  task[["model_parameters"]] <- list(
-    learn_rate = 0.1,
-    max_depth = 2,
-    ntrees = 23,
-    min_child_weight = 1
-  )
   return(task)
 }
 

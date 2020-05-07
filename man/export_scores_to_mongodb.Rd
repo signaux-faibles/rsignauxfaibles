@@ -34,7 +34,8 @@ param exporter.}
 \item{collection}{`character(1)' \cr Nom de la collection vers laquelle
 exporter.}
 
-\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri format.}
+\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri
+format.}
 }
 \value{
 Retourne TRUE. \cr Les objets insérés dans la base de données ont les

@@ -5,16 +5,18 @@
 \title{Initialiser une tâche d'apprentissage}
 \usage{
 sf_task(
-  verbose,
+  mongodb_uri,
   database = "test_signauxfaibles",
   collection = "Features",
-  mongodb_uri,
-  tracker = NULL
+  id = "Signaux-faibles",
+  target = "outcome",
+  tracker = NULL,
+  verbose
 )
 }
 \arguments{
-\item{verbose}{\code{logical(1)} \cr
-Active ou désactive le log des actions ultérieures.}
+\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri
+format.}
 
 \item{database}{\code{character(1)} \cr Nom de la base de données vers laquelle
 param exporter. Par défaut, celle stockée dans \code{task}.}
@@ -22,10 +24,12 @@ param exporter. Par défaut, celle stockée dans \code{task}.}
 \item{collection}{\code{character(1)} \cr Nom de la collection vers laquelle
 exporter. Par défaut, celle stockée dans \code{task}.}
 
-\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri format.}
-
 \item{tracker}{\code{mlflow::mlflow_run} \cr
-Un mlflow_run pour tracker les modèles et expériences.}
+Un mlflow_run pour tracker les modèles et expériences. Les logs
+utiliseront la propriété \code{tracker$run_id}.}
+
+\item{verbose}{\code{logical(1)} \cr
+Active ou désactive le log des actions ultérieures.}
 
 \item{experiment_name}{\code{character()} \cr
 Quel est l'objet de cette tâche ?}

@@ -4,7 +4,8 @@
 \alias{mongodb_connection}
 \title{Documentation des informations de connection à mongodb}
 \arguments{
-\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri format.}
+\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri
+format.}
 
 \item{database}{\code{character(1)} \cr Nom de la base de données vers laquelle
 param exporter. Par défaut, celle stockée dans \code{task}.}

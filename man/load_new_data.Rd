@@ -15,6 +15,7 @@
   fields = get_fields(training = FALSE),
   min_effectif = 10L,
   rollback_months = 1L,
+  database_query_fun = query_database,
   debug = FALSE,
   ...
 )
@@ -38,7 +39,8 @@ param exporter. Par défaut, celle stockée dans \code{task}.}
 \item{collection}{\code{character(1)} \cr Nom de la collection vers laquelle
 exporter. Par défaut, celle stockée dans \code{task}.}
 
-\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri format.}
+\item{mongodb_uri}{\code{character(1)} \cr url to the database in mongodb uri
+format.}
 
 \item{fields}{\code{character()} \cr Noms des champs à requêter dans la base de
 données. Doit contenir "siret" et "periode". Si égal à \code{NULL}, alors
