@@ -205,16 +205,7 @@ split_snapshot_rdm_month <- function(
   data_sample,
   fracs,
   names,
-  seed = 1234
-  ) {
-
-  assertthat::assert_that(
-    all(c("siret", "periode") %in% names(data_sample)),
-    msg = paste0(
-      "split_snapshot_rdm_month only operates on data_sample input frame",
-      "with 'siret' and 'period' columns"
-    )
-  )
+  seed = 1234) {
   assertthat::assert_that(
     sum(fracs) == 1,
     msg = "Sum of fractions should be equal to 1"
