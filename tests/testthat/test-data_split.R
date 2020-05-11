@@ -93,15 +93,13 @@ test_that(
     )
   )
 
-  expect_known_output(
-    split_snapshot_rdm_month(
-      my_test_frame,
-      fracs = c(0.60, 0.25, 0.15),
-      names = c("train", "validation", "test")
-      ),
-    file.path(folder, "test_split"),
-    print = TRUE,
-    update = FALSE
+  expect_known_hash(
+    split_data(
+      get_test_task(my_test_frame, "outcome", stage = "load"),
+      ratio = 2 / 3,
+      resampling_strategy = "holdout"
+    ),
+  "a00c49d18cfc6bbd0b3e7f5aaf83a"
   )
 })
 

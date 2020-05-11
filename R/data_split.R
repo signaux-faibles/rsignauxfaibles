@@ -45,10 +45,6 @@ split_data.sf_task <- function(
   assertthat::assert_that(ratio > 0 && ratio <= 1)
 
   # creating mlr3task
-
-  # ###########################################################
-  # TODO: column specifications must directly be made when importing data.
-  # TODO: unit test that data that should be a factor is a factor.
   mlr3_data <- task[["hist_data"]]
 
   mlr3_data[[task[["target"]]]] <- as.factor(mlr3_data[[task[["target"]]]])
@@ -74,6 +70,7 @@ split_data.sf_task <- function(
   if (resampling_strategy == "holdout") {
     mlr3resampling$param_set$values[["ratio"]] <- ratio
   }
+  set.seed(3)
   mlr3resampling$instantiate(mlr3task)
 
   task[["mlr3task"]] <- mlr3task
