@@ -20,50 +20,48 @@ dplyr::mutate(
   ) %>%
 tibble::as_tibble()
 
-test_task <- get_test_task(my_test_frame, "outcome")
+test_task <- get_test_task(my_test_frame, "outcome", stage = "load")
 
 
-# train <- res[["train"]] %>%
-#   mutate(siren = substr(siret, 1, 9))
-# validation <- res[["validation"]] %>%
-#   mutate(siren = substr(siret, 1, 9))
-# test <- res[["test"]] %>%
-#   mutate(siren = substr(siret, 1, 9))
+test_that("split_data fonctionne et crée des champs train_data et test_data", {
+  splitted_task  <- split_data(test_task, ratio = 2/3, resampling_strategy = "holdout")
+  expect_true(all(c("train_data", "test_data") %in% names(splitted_task)))
+})
 
-# combined <- rbind(train, validation, test)
+test_that("Les échantillons ont les bonnes proportions", {
 
-# test_that("Le format du resultat est respecte", {
-#   expect_false(is_grouped_df(train))
-#   expect_true(all(tbl_vars(res[["train"]]) == c("siret", "periode")))
-# })
+  expect_ratio <- function(task, expected_ratio, subframe_name , whole_frame_name) {
+    whole_frame <- task[[whole_frame_name]]
+    subframe <- task[[subframe_name]]
+    n_siren <- n_distinct(whole_frame$siren)
+    sub_siren <- n_distinct(subframe$siren)
+    ratio <- sub_siren / n_siren
+    expect_lt(abs(ratio - expected_ratio), 0.01)
+    return(ratio)
+  }
+  expect_train_test_ratio <- function(expected_ratio) {
+    splitted_task  <- split_data(test_task, ratio = expected_ratio, resampling_strategy = "holdout")
+    ratio_train <- expect_ratio(splitted_task, expected_ratio, "train_data", "hist_data")
+    ratio_test <- expect_ratio(splitted_task, 1 - expected_ratio, "test_data", "hist_data")
+    expect_true(ratio_train + ratio_test == 1)
+  }
 
-# test_that("Les échantillons ont les bonnes proportions", {
-#   expect_ratio <- function(sample, total, frac) {
-#     n_distinct <- function(myframe) {
-#       myframe %>%
-#         distinct() %>%
-#         count() %>%
-#         collect() %>%
-#         unlist() %>%
-#         as.vector()
-#     }
-#     expect_lt(abs(
-#         n_distinct(sample %>% select(siren)) /
-#           n_distinct(total %>% select(siren)) - frac
-#         ), 0.1)
-#   }
+  expect_train_test_ratio(2/3)
+  expect_train_test_ratio(1/10)
+  expect_train_test_ratio(1)
+  expect_error(expect_train_test_ratio(0))
+})
 
-#   expect_ratio(train, my_test_frame, 0.60)
-#   expect_ratio(validation, my_test_frame, 0.25)
-#   expect_ratio(test, my_test_frame, 0.15)
-# })
-
-
-# test_that("Il n'y a pas de fuite de données entre échantillons", {
-#   expect_equal(nrow(train %>% semi_join(validation, by = "siren")), 0)
-#   expect_equal(nrow(train %>% semi_join(test, by = "siren")), 0)
-#   expect_equal(nrow(test %>% semi_join(validation, by = "siren")), 0)
-# })
+test_that("Il n'y a pas de fuite de données entre échantillons", {
+  splitted_task  <- split_data(test_task, ratio = 1/2, resampling_strategy = "holdout")
+  expect_length(
+    intersect(
+      levels(splitted_task[["train_data"]]),
+      levels(splitted_task[["test_data"]])
+      ),
+    0
+  )
+})
 
 # test_that(
 #   "Les échantillons ne dépendent pas de l'ordre des données d'entrée et
