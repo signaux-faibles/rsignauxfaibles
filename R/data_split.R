@@ -70,14 +70,17 @@ split_data.sf_task <- function(
     c("siret", "siren")
   )
 
-  mlr3resampling <- mlr3::rsmp(resampling_strategy, ratio = ratio)
+  mlr3resampling <- mlr3::rsmp(resampling_strategy)
+  if (resampling_strategy == "holdout") {
+    mlr3resampling$param_set$values[["ratio"]] <- ratio
+  }
   mlr3resampling$instantiate(mlr3task)
 
   task[["mlr3task"]] <- mlr3task
   task[["mlr3rsmp"]] <- mlr3resampling
 
-  task[["train_data"]] <- task[["hist_data"]][mlr3resampling$train_set(1)]
-  task[["test_data"]] <- task[["hist_data"]][mlr3resampling$test_set(1)]
+  task[["train_data"]] <- task[["hist_data"]][mlr3resampling$train_set(1), ]
+  task[["test_data"]] <- task[["hist_data"]][mlr3resampling$test_set(1), ]
 
   # Temp: saving train_data, test_data to task
   log_param(task, "resampling_strategy", resampling)

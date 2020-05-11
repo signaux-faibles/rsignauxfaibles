@@ -14,9 +14,13 @@ my_test_frame <- expand.grid(
     ),
   stringsAsFactors = FALSE
   ) %>%
-dplyr::mutate(siren = substr(siret, 1, 9)) %>%
+dplyr::mutate(
+  siren = substr(siret, 1, 9),
+  outcome = rep(c(TRUE, FALSE), length.out = n())
+  ) %>%
 tibble::as_tibble()
 
+test_task <- get_test_task(my_test_frame, "outcome")
 
 
 # train <- res[["train"]] %>%

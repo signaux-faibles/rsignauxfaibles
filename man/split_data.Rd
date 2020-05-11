@@ -6,18 +6,18 @@
 \title{Scission des données en échantillon d'entraînement, de validation et de
 test.}
 \usage{
-\method{split_data}{sf_task}(task, fracs = c(0.6, 0.2, 0.2), ...)
+\method{split_data}{sf_task}(task, ratio = 2/3, resampling_strategy = "holdout", ...)
 
 split_data(task, ...)
 }
 \arguments{
 \item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
-\item{fracs}{\code{numeric()} \cr Fraction des différents sous-échantillons.
-Toutes les fractions doivent être dans ]0,1] et leur somme doit être égale
-à 1.}
+\item{ratio}{\code{numeric(1)} \cr Ratio of data used for training.}
 
 \item{...}{Not used}
+
+\item{resampling}{\code{character(1)} \cr Either "holdout" or "cross_validation"}
 }
 \value{
 \verb{[sf_task]} \cr
