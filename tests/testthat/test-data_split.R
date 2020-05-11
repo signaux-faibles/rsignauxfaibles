@@ -63,45 +63,47 @@ test_that("Il n'y a pas de fuite de données entre échantillons", {
   )
 })
 
-# test_that(
-#   "Les échantillons ne dépendent pas de l'ordre des données d'entrée et
-#   restent identiques d'une fois sur l'autre", {
-#   folder <- here::here(
-#     "tests",
-#     "testthat",
-#     "test_split_consistency_known_output"
-#   )
+test_that(
+  "Les échantillons ne dépendent pas de l'ordre des données d'entrée et
+  restent identiques d'une fois sur l'autre", {
+  folder <- here::here(
+    "tests",
+    "testthat",
+    "test_split_consistency_known_output"
+  )
 
-#   if (!dir.exists(folder)) skip("known values only on local repository")
+  if (!dir.exists(folder)) skip("known values only on local repository")
 
-#   scrambled_test_frame  <- sample_n(
-#     my_test_frame,
-#     size = nrow(my_test_frame),
-#     replace = FALSE
-#   )
-#   expect_equal(
-#     split_snapshot_rdm_month(
-#       my_test_frame,
-#       fracs = c(0.60, 0.25, 0.15),
-#       names = c("train", "validation", "test")
-#       ),
-#     split_snapshot_rdm_month(
-#       my_test_frame,
-#       fracs = c(0.60, 0.25, 0.15),
-#       names = c("train", "validation", "test")
-#     )
-#   )
-#   expect_known_output(
-#     split_snapshot_rdm_month(
-#       my_test_frame,
-#       fracs = c(0.60, 0.25, 0.15),
-#       names = c("train", "validation", "test")
-#       ),
-#     file.path(folder, "test_split"),
-#     print = TRUE,
-#     update = FALSE
-#   )
-# })
+  scrambled_test_frame  <- sample_n(
+    my_test_frame,
+    size = nrow(my_test_frame),
+    replace = FALSE
+  )
+
+  expect_equal(
+    split_data(
+      get_test_task(my_test_frame, "outcome", stage = "load"),
+      ratio = 2 / 3,
+      resampling_strategy = "holdout"
+      ),
+    split_data(
+      get_test_task(scrambled_test_frame, "outcome", stage = "load"),
+      ratio  = 2 / 3,
+      resampling_strategy  = "holdout"
+    )
+  )
+
+  expect_known_output(
+    split_snapshot_rdm_month(
+      my_test_frame,
+      fracs = c(0.60, 0.25, 0.15),
+      names = c("train", "validation", "test")
+      ),
+    file.path(folder, "test_split"),
+    print = TRUE,
+    update = FALSE
+  )
+})
 
 # test_that(
 #   "Chaque entreprise appartient au moins à un échantillon", {
@@ -168,3 +170,5 @@ test_that("Il n'y a pas de fuite de données entre échantillons", {
 #     task[["tracker"]] <- NULL
 #   }
 # )
+
+# TODO: remove here package from dependencies.
