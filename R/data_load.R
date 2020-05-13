@@ -99,8 +99,7 @@ load_hist_data.sf_task <- function(
       requete.")
   }
   check_overwrites(task, "hist_data")
-  task[["hist_data"]] <- hist_data %>%
-    arrange(siret, periode) # for a reproducible split
+  task[["hist_data"]] <- hist_data
 
   return(task)
 }

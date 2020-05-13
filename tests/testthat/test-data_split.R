@@ -22,12 +22,13 @@ dplyr::mutate(
 test_task <- get_test_task(my_test_frame, "outcome", stage = "load")
 
 
-test_that("split_data fonctionne et crée des champs train_data et test_data", {
+test_that("split_data est reproductible et crée des champs train_data et test_data", {
   splitted_task  <- split_data(
     test_task,
     ratio = 2 / 3,
     resampling_strategy = "holdout"
   )
+  expect_known_hash(splitted_task, "b60eb06e8ce15253fdcd")
   expect_true(all(c("train_data", "test_data") %in% names(splitted_task)))
 })
 
