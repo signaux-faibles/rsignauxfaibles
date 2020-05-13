@@ -70,6 +70,7 @@ split_data.sf_task <- function(
   if (resampling_strategy == "holdout") {
     mlr3resampling$param_set$values[["ratio"]] <- ratio
   }
+
   set.seed(3)
   mlr3resampling$instantiate(mlr3task)
 
@@ -80,7 +81,7 @@ split_data.sf_task <- function(
   task[["test_data"]] <- task[["hist_data"]][mlr3resampling$test_set(1), ]
 
   # Temp: saving train_data, test_data to task
-  log_param(task, "resampling_strategy", resampling)
+  log_param(task, "resampling_strategy", resampling_strategy)
   log_param(task, "train_test_ratio", ratio)
 
   return(task)
