@@ -69,6 +69,12 @@ load_hist_data.sf_task <- function(
   set_verbose_level(task)
   logger::log_info("Chargement des données historiques.")
 
+
+  assertthat::assert_that(
+    task[["target"]] %in% fields,
+    msg = "Target field is absent of loaded data: careful"
+  )
+
   hist_data <- import_data(
     database,
     collection,
@@ -403,7 +409,9 @@ update_types <- function(
   df
   ) {
 
-  # Dates de type Date
+  # Dates de type character
+  df <- df %>%
+    mutate_if(lubridate::is.Date, as.character)
   df <- df %>%
     mutate_if(lubridate::is.POSIXct, ~ as.character(as.Date(.)))
 
