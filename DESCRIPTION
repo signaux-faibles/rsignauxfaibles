@@ -13,7 +13,6 @@ Imports:
     assertthat,
     dplyr,
     fte,
-    here,
     jsonlite,
     logger,
     lubridate,
