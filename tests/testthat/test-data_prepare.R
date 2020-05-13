@@ -1,11 +1,7 @@
  context("Test preparation functions")
 
-test_task <- get_test_task()
 
-test_task[["prepared_train_data"]] <- NULL
-test_task[["prepared_test_data"]] <- NULL
-test_task[["prepared_validation_data"]] <- NULL
-test_task[["preparation_map"]] <- NULL
+ test_task <- get_test_task(stage = "split")
 
 fake_preparation_map_function <- function(data_to_prepare, options) {
   if (!is.null(options[["offset"]])) {
@@ -39,6 +35,7 @@ create_prepared_task <- function(test_task,
 
   prepared_task <- prepare(
     test_task,
+    data_names = c("train_data", "test_data"),
     preparation_map_function = fake_preparation_map_function,
     prepare_function = fake_prepare_function,
     shape_frame_function = matrix_or_identity,
@@ -53,17 +50,13 @@ create_prepared_task <- function(test_task,
 test_that("Prepare task works as expected", {
   prepared_task <- create_prepared_task(test_task)
   expect_true(all(
-      c("prepared_train_data", "prepared_test_data", "prepared_validation_data",
-        "preparation_map") %in% names(prepared_task)
+      c("prepared_train_data", "prepared_test_data", "preparation_map") %in%
+        names(prepared_task)
       ))
   expect_equal(prepared_task[["preparation_map"]], 1)
   expect_equal(
     prepared_task[["prepared_train_data"]]$feature,
     prepared_task[["train_data"]]$feature + 1
-  )
-  expect_equal(
-    prepared_task[["prepared_validation_data"]]$feature,
-    prepared_task[["validation_data"]]$feature + 1
   )
   expect_equal(
     prepared_task[["prepared_test_data"]]$feature,
@@ -96,23 +89,18 @@ test_that("Prepare task works with options as expected", {
   })
 
 create_fte_test_task <- function() {
-  test_task <- get_test_task()
-
-  set.seed(1)
-  test_task[["prepared_train_data"]] <- NULL
-  test_task[["prepared_test_data"]] <- NULL
-  test_task[["prepared_validation_data"]] <- NULL
-  test_task[["preparation_map"]] <- NULL
-  test_task[["validation_data"]] <- cbind(test_task[["validation_data"]],
-    ab = c("a", "b", "a", "b", "a"),
-    cd = c("c", "c", "d", "c", "c"),
-    outcome = c(TRUE, FALSE, FALSE, TRUE, TRUE)
-  )
+  test_task <- get_test_task(stage = "split")
 
   test_task[["train_data"]] <- cbind(test_task[["train_data"]],
-    ab = c("a", "b", "a", "a"),
-    cd = c("d", "d", "c", "c"),
-    outcome = c(TRUE, FALSE, TRUE, FALSE)
+    ab = c("a", "b", "a", "a", "a", "b", "b"),
+    cd = c("d", "d", "c", "c", "d", "d", "c"),
+    outcome = c(TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE)
+  )
+
+  test_task[["test_data"]] <- cbind(test_task[["test_data"]],
+    ab = c("a", "b", "a"),
+    cd = c("c", "c", "d"),
+    outcome = c(TRUE, FALSE, FALSE)
   )
   return(test_task)
 }
@@ -123,7 +111,7 @@ create_prepared_fte_test_task <- function() {
 
   prepared_task <- prepare(
     fte_test_task,
-    data_names = c("train_data", "validation_data"),
+    data_names = c("train_data", "test_data"),
     preparation_map_options = list(
       outcome_field = "outcome",
       target_encode_fields = c("ab", "cd")
@@ -140,31 +128,29 @@ create_prepared_fte_test_task <- function() {
 
 test_that("map creation works as expected", {
   prep_task <- create_prepared_fte_test_task()
-  expect_known_value(
-    prep_task[["prepared_validation_data"]],
-    file = "./map_golden.log",
-    update = FALSE
+  expect_known_hash(
+    prep_task[["prepared_test_data"]],
+    hash = "8d56010f2e1f9faf4a85"
   )
   })
 
 test_that(
   "Les logs de la fonction 'prepare_data' fonctionnent correctement", {
-    task <- get_test_task()
-    task[["tracker"]] <- new.env()
+    test_task <- get_test_task(stage = "split")
+    test_task[["tracker"]] <- new.env()
     with_mock(
-      create_prepared_task(task),
+      create_prepared_task(test_task),
       log_param = mock_log_param,
       log_metric = mock_log_metric
     )
-    expect_true(length(ls(task[["tracker"]])) > 0)
+    expect_true(length(ls(test_task[["tracker"]])) > 0)
     expect_setequal(
-      names(task[["tracker"]]),
+      names(test_task[["tracker"]]),
       c("preprocessing_strategy")
     )
     expect_equal(
-      get("preprocessing_strategy", envir = task[["tracker"]]),
+      get("preprocessing_strategy", envir = test_task[["tracker"]]),
       "Target encoding with fte"
     )
-    task[["tracker"]] <- NULL
   }
 )

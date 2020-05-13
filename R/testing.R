@@ -54,7 +54,7 @@ get_test_task <- function(
   if (stage == "load") {
     return(task)
   }
-  task  <- split_data(task)
+  task  <- split_data(task, ratio = 2 / 3, resampling_strategy = "holdout")
   if (stage == "split") {
     return(task)
   }

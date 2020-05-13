@@ -50,7 +50,7 @@ split_data.sf_task <- function(
   mlr3_data[[task[["target"]]]] <- as.factor(mlr3_data[[task[["target"]]]])
 
   if (!c("siren") %in% names(mlr3_data)) {
-    mlr3_data["siren"] <- substr(mlr3_data["siret"], 1, 9)
+    mlr3_data$siren <- substr(mlr3_data$siret, 1, 9)
   }
 
   mlr3task <- mlr3::TaskClassif$new(

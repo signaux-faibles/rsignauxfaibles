@@ -37,7 +37,6 @@ prepare.sf_task <- function( #nolint
   task,
   data_names = c(
     "train_data",
-    "validation_data",
     "test_data",
     "new_data"
     ),
