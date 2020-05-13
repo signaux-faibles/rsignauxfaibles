@@ -23,7 +23,7 @@
 split_data.sf_task <- function(
   task,
   ratio = 2 / 3,
-  resampling_strategy="holdout",
+  resampling_strategy = "holdout",
   ...
 ) {
 
