@@ -7,7 +7,7 @@
 train_xgboost(
   train_data,
   outcome,
-  validation_data = NULL,
+  test_data = NULL,
   learn_rate = 0.1,
   max_depth = 4,
   ntrees = 60,
@@ -22,7 +22,7 @@ d'un H2OFrame}
 \item{outcome}{\code{character(1)} \cr Nom de la variable qui sert de cible
 d'apprentissage}
 
-\item{validation_data}{\code{H2OFrame} \cr Données d'évaluation, sous la forme
+\item{test_data}{\code{H2OFrame} \cr Données d'évaluation, sous la forme
 d'un H2OFrame}
 
 \item{seed}{\code{integer(1)} \cr Graine aléatoire pour que les opérations

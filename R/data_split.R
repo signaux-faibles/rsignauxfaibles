@@ -11,9 +11,13 @@
 #'  frac_val. (frac_train + frac_val) doit donc être inférieur à 1. Le seul
 #'  cas où cette condition n'est pas testée est lorsque frac_train = 1.
 #'
-#' @inheritParams generic_task @param ratio `numeric(1)` \cr Ratio of data
-#' used for training. @param resampling `character(1)` \cr Either "holdout" or
-#' "cross_validation" @describeIn split_data
+#' @inheritParams generic_task
+#' @param ratio `numeric(1)` \cr Ratio of data
+#' used for training.
+#' @param resampling `character(1)` \cr Either "holdout" or
+#' "cross_validation"
+#'
+#' @describeIn split_data
 #'
 #' @return `[sf_task]` \cr L'objet \code{task} donné en entrée auquel les
 #' champs "train_data", et "test_data" ont été ajoutés (ou écrasés), chacun

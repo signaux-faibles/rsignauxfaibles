@@ -6,7 +6,7 @@
 \usage{
 \method{prepare}{cv_task}(
   task,
-  data_names = c("train_data", "validation_data", "test_data", "new_data"),
+  data_names = c("train_data", "test_data", "new_data"),
   preparation_map_function = create_fte_map,
   preparation_map_options = list(outcome_field = outcome_field, target_encode_fields =
     c("code_ape_niveau2", "code_ape_niveau3")),

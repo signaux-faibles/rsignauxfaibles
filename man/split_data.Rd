@@ -13,19 +13,19 @@ split_data(task, ...)
 \arguments{
 \item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
-\item{ratio}{\code{numeric(1)} \cr Ratio of data used for training.}
+\item{ratio}{\code{numeric(1)} \cr Ratio of data
+used for training.}
 
 \item{...}{Not used}
 
-\item{resampling}{\code{character(1)} \cr Either "holdout" or "cross_validation"}
+\item{resampling}{\code{character(1)} \cr Either "holdout" or
+"cross_validation"}
 }
 \value{
-\verb{[sf_task]} \cr
-L'objet \code{task} donné en entrée auquel les champs "train_data",
-"validation_data" et "test_data" ont été
-ajoutés (ou écrasés), chacun contenant un data.frame() avec les colonnes
-de \code{task[["hist_data"]]} et un sous-ensemble (possiblement vide) de ces
-lignes.
+\verb{[sf_task]} \cr L'objet \code{task} donné en entrée auquel les
+champs "train_data", et "test_data" ont été ajoutés (ou écrasés), chacun
+contenant un data.frame() avec les colonnes de \code{task[["hist_data"]]} et un
+sous-ensemble (possiblement vide) de ces lignes.
 }
 \description{
 Scinde les données historiques en échantillon d'entraînement, de validation
@@ -35,13 +35,12 @@ et de test, selon les proportions souhaitées. S'assure que deux
 vers l'autre.
 }
 \details{
-La fraction de l'échantillon de test est calculée par
-1 - frac_train - frac_val. (frac_train + frac_val) doit donc être inférieur
-à 1. Le seul cas où cette condition n'est pas testée est lorsque frac_train
-= 1.
+La fraction de l'échantillon de test est calculée par 1 - frac_train -
+frac_val. (frac_train + frac_val) doit donc être inférieur à 1. Le seul
+cas où cette condition n'est pas testée est lorsque frac_train = 1.
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{sf_task}:
+\item \code{sf_task}: 
 }}
 

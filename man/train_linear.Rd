@@ -4,13 +4,7 @@
 \alias{train_linear}
 \title{Train a linear model}
 \usage{
-train_linear(
-  train_data,
-  outcome,
-  validation_data = NULL,
-  parameters,
-  seed = 123
-)
+train_linear(train_data, outcome, test_data = NULL, parameters, seed = 123)
 }
 \arguments{
 \item{train_data}{\code{data.frame} \cr données d'entraînement, sous la forme
@@ -19,7 +13,7 @@ d'un H2OFrame}
 \item{outcome}{\code{character(1)} \cr Nom de la variable qui sert de cible
 d'apprentissage}
 
-\item{validation_data}{\code{H2OFrame} \cr Données d'évaluation, sous la forme
+\item{test_data}{\code{data.frame} \cr Données d'évaluation, sous la forme
 d'un H2OFrame}
 
 \item{parameters}{\code{list()} \cr Paramètres de la régression logistique.}
