@@ -6,7 +6,7 @@
 \usage{
 \method{prepare}{sf_task}(
   task,
-  data_names = c("train_data", "validation_data", "test_data", "new_data"),
+  data_names = c("train_data", "test_data", "new_data"),
   training_fields = get_fields(training = TRUE),
   outcome_field = "outcome",
   preparation_map_function = create_fte_map,

@@ -18,7 +18,6 @@ predict.sf_task <- function(
   data_names = c(
     "new_data",
     "train_data",
-    "validation_data",
     "test_data"
     ),
   predict_fun = predict_model,
@@ -82,7 +81,6 @@ predict.cv_task <- function(
   data_names = c(
     "new_data",
     "train_data",
-    "validation_data",
     "test_data"
     ),
   predict_fun = predict_model,

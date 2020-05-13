@@ -136,5 +136,3 @@ test_that(
     task[["tracker"]] <- NULL
   }
 )
-
-# TODO: remove here package from dependencies.

@@ -29,7 +29,7 @@
 evaluate <- function(
   ...,
   eval_function =  NULL,
-  data_name = "validation_data",
+  data_name = "test_data",
   plot = TRUE,
   prediction_names = NULL,
   target_names = "outcome",
@@ -105,7 +105,7 @@ evaluate <- function(
 #'
 #' @param ... `sf_tasks | cv_tasks` \cr Tasks to consolidate
 #' @param data_name `character()` \cr Name of the type of data to consolidate
-#' ("train_data", "validation_data", "test_data")
+#' ("train_data", "test_data")
 #'
 consolidate <- function(..., data_name) {
   postfix <- ".cv"

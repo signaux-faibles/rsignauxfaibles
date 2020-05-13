@@ -10,7 +10,7 @@ consolidate(..., data_name)
 \item{...}{\code{sf_tasks | cv_tasks} \cr Tasks to consolidate}
 
 \item{data_name}{\code{character()} \cr Name of the type of data to consolidate
-("train_data", "validation_data", "test_data")}
+("train_data", "test_data")}
 }
 \description{
 Consolidate several tasks into a frame for evaluation

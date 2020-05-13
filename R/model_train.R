@@ -131,7 +131,7 @@ train.cv_task  <- function(
 #'
 #' @param train_data `data.frame` \cr données d'entraînement, sous la forme
 #'   d'un H2OFrame
-#' @param validation_data `H2OFrame` \cr Données d'évaluation, sous la forme
+#' @param test_data `H2OFrame` \cr Données d'évaluation, sous la forme
 #'   d'un H2OFrame
 #' @param outcome `character(1)` \cr Nom de la variable qui sert de cible
 #'   d'apprentissage
@@ -145,7 +145,7 @@ train.cv_task  <- function(
 train_xgboost <- function(
   train_data,
   outcome,
-  validation_data = NULL,
+  test_data = NULL,
   learn_rate = 0.1,
   max_depth = 4,
   ntrees = 60,
@@ -177,7 +177,7 @@ train_xgboost <- function(
 #'
 #' @param train_data `data.frame` \cr données d'entraînement, sous la forme
 #'   d'un H2OFrame
-#' @param validation_data `H2OFrame` \cr Données d'évaluation, sous la forme
+#' @param test_data `data.frame` \cr Données d'évaluation, sous la forme
 #'   d'un H2OFrame
 #' @param outcome `character(1)` \cr Nom de la variable qui sert de cible
 #'   d'apprentissage
@@ -189,7 +189,7 @@ train_xgboost <- function(
 train_linear <- function(
   train_data,
   outcome,
-  validation_data = NULL,
+  test_data = NULL,
   parameters,
   seed = 123
   ) {

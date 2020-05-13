@@ -31,7 +31,7 @@
 #   without_aggregation <- explain(
 #     test_task,
 #     type = "local",
-#     data_to_explain = test_task[["validation_data"]]
+#     data_to_explain = test_task[["test_data"]]
 #     )
 #
 #   with_aggregation <- explain(
@@ -39,7 +39,7 @@
 #     type = "local",
 #     aggregation_matrix = test_aggregation_matrix,
 #     group_name = "group",
-#     data_to_explain = test_task[["validation_data"]]
+#     data_to_explain = test_task[["test_data"]]
 #     )
 # })
 #
@@ -47,7 +47,7 @@
 #   without_aggregation <- explain(
 #     test_task,
 #     type = "local",
-#     data_to_explain = test_task[["validation_data"]]
+#     data_to_explain = test_task[["test_data"]]
 #     )
 #   plot_waterfall(without_aggregation[7,])
 #

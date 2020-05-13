@@ -54,7 +54,7 @@ get_test_task <- function(
   if (stage == "load") {
     return(task)
   }
-  task  <- split_data(task)
+  task  <- split_data(task, ratio = 2 / 3, resampling_strategy = "holdout")
   if (stage == "split") {
     return(task)
   }
@@ -62,7 +62,6 @@ get_test_task <- function(
   task[["new_data"]]  <- task[["hist_data"]]
   task[["prepared_train_data"]]  <- task[["train_data"]]
   task[["prepared_test_data"]]  <- task[["test_data"]]
-  task[["prepared_validation_data"]]  <- task[["validation_data"]]
   task[["outcome_field"]] <- "target"
 
   # stage == "prepare"
