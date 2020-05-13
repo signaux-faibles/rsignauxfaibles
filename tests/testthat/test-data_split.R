@@ -28,6 +28,8 @@ test_that("split_data est reproductible et crée des champs train_data et test_d
     ratio = 2 / 3,
     resampling_strategy = "holdout"
   )
+  print(head(splitted_task[["test_data"]]))
+  print(nrow(splitted_task[["test_data"]]))
   expect_known_hash(splitted_task, "b60eb06e8ce15253fdcd")
   expect_true(all(c("train_data", "test_data") %in% names(splitted_task)))
 })
