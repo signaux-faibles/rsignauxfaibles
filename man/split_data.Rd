@@ -42,6 +42,6 @@ La fraction de l'échantillon de test est calculée par
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{sf_task}: 
+\item \code{sf_task}:
 }}
 

@@ -62,7 +62,6 @@ get_test_task <- function(
   task[["new_data"]]  <- task[["hist_data"]]
   task[["prepared_train_data"]]  <- task[["train_data"]]
   task[["prepared_test_data"]]  <- task[["test_data"]]
-  task[["prepared_validation_data"]]  <- task[["validation_data"]]
   task[["outcome_field"]] <- "target"
 
   # stage == "prepare"

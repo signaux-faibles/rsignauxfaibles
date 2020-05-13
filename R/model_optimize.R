@@ -63,10 +63,10 @@ optimize_hyperparameters.sf_task <- function( #nolint
           parameters = as.list(x),
           fields = fields
         )
-        new_task <- predict(new_task, data_names = c("validation_data"))
+        new_task <- predict(new_task, data_names = c("test_data"))
         new_task <- evaluate(
           new_task,
-          data_name = c("validation_data"),
+          data_name = c("test_data"),
           plot = FALSE
         )
         # TODO: Bayesian optimization criteria should be more flexible
