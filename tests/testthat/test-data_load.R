@@ -12,7 +12,7 @@ test_replace_missing_data <- function(
                                       expected) {
   testthat::test_that("replace_missing_data " %>% paste0(description), {
     expect_equal(
-      replace_missing_data(df, fields, replace_missing),
+      replace_missing_data(df, fields, replace_missing, FALSE),
       expected
     )
   })
