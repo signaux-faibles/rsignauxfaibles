@@ -7,7 +7,7 @@
 evaluate(
   ...,
   eval_function = NULL,
-  data_name = "validation_data",
+  data_name = "test_data",
   plot = TRUE,
   prediction_names = NULL,
   target_names = "outcome",

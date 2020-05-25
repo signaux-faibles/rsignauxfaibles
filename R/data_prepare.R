@@ -37,7 +37,6 @@ prepare.sf_task <- function( #nolint
   task,
   data_names = c(
     "train_data",
-    "validation_data",
     "test_data",
     "new_data"
     ),
@@ -475,7 +474,6 @@ transformation_map_apply <- function(transformation_map, data_to_transform) {
 prepare.cv_task <- function( #nolint
   task,
   data_names = c("train_data",
-    "validation_data",
     "test_data",
     "new_data"
     ),

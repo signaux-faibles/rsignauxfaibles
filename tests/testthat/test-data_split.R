@@ -1,169 +1,138 @@
 context("Check the test/train split function")
 
 my_test_frame <- expand.grid(
-  siret = unlist(tidyr::unite(expand.grid(
-        siren = 100000001:100000500,
-        et_id = 20001:20004
-        ), col = "siret", sep = "")),
+  siret = unlist(
+    tidyr::unite(
+      expand.grid(siren = 100000001:100000500, et_id = 20001:20004),
+      col = "siret",
+      sep = ""
+    )
+    ),
   periode = seq.Date(
     from = as.Date("2014-01-01"),
     to = as.Date("2014-12-01"), "month"
     ),
   stringsAsFactors = FALSE
   ) %>%
-dplyr::mutate(siren = substr(siret, 1, 9)) %>%
-tibble::as_tibble()
+dplyr::mutate(
+  siren = substr(siret, 1, 9),
+  outcome = rep(c(TRUE, FALSE), length.out = n())
+)
+
+test_task <- get_test_task(my_test_frame, "outcome", stage = "load")
 
 
-res <- split_snapshot_rdm_month(
-  my_test_frame,
-  fracs = c(0.60, 0.25, 0.15),
-  names = c("train", "validation", "test")
+test_that("split_data est reproductible et crée des champs train_data et test_data", {
+  splitted_task  <- split_data(
+    test_task,
+    ratio = 2 / 3,
+    resampling_strategy = "holdout"
   )
-
-train <- res[["train"]] %>%
-  mutate(siren = substr(siret, 1, 9))
-validation <- res[["validation"]] %>%
-  mutate(siren = substr(siret, 1, 9))
-test <- res[["test"]] %>%
-  mutate(siren = substr(siret, 1, 9))
-
-combined <- rbind(train, validation, test)
-
-test_that("Le format du resultat est respecte", {
-  expect_false(is_grouped_df(train))
-  expect_true(all(tbl_vars(res[["train"]]) == c("siret", "periode")))
-    })
+  expect_true(all(c("train_data", "test_data") %in% names(splitted_task)))
+  expect_known_hash(splitted_task[["train_data"]], "f73807fd07")
+  expect_known_hash(splitted_task[["test_data"]], "9882b045c5")
+})
 
 test_that("Les échantillons ont les bonnes proportions", {
-  expect_ratio <- function(sample, total, frac) {
-    n_distinct <- function(myframe) {
-      myframe %>%
-        distinct() %>%
-        count() %>%
-        collect() %>%
-        unlist() %>%
-        as.vector()
-    }
-    expect_lt(abs(
-        n_distinct(sample %>% select(siren)) /
-          n_distinct(total %>% select(siren)) - frac
-        ), 0.1)
+
+  expect_ratio <- function(
+    task,
+    expected_ratio,
+    subframe_name,
+    whole_frame_name
+  ) {
+    whole_frame <- task[[whole_frame_name]]
+    subframe <- task[[subframe_name]]
+    n_siren <- n_distinct(whole_frame$siren)
+    sub_siren <- n_distinct(subframe$siren)
+    ratio <- sub_siren / n_siren
+    expect_lt(abs(ratio - expected_ratio), 0.01)
+    return(ratio)
+  }
+  expect_train_test_ratio <- function(expected_ratio) {
+    splitted_task  <- split_data(
+      test_task,
+      ratio = expected_ratio,
+      resampling_strategy = "holdout"
+    )
+    ratio_train <- expect_ratio(
+      splitted_task,
+      expected_ratio,
+      "train_data",
+      "hist_data"
+    )
+    ratio_test <- expect_ratio(
+      splitted_task,
+      1 - expected_ratio,
+      "test_data",
+      "hist_data"
+    )
+    expect_true(ratio_train + ratio_test == 1)
   }
 
-  expect_ratio(train, my_test_frame, 0.60)
-  expect_ratio(validation, my_test_frame, 0.25)
-  expect_ratio(test, my_test_frame, 0.15)
-    })
-
+  expect_train_test_ratio(2 / 3)
+  expect_train_test_ratio(1 / 10)
+  expect_train_test_ratio(1)
+  expect_error(expect_train_test_ratio(0))
+})
 
 test_that("Il n'y a pas de fuite de données entre échantillons", {
-  expect_equal(nrow(train %>% semi_join(validation, by = "siren")), 0)
-  expect_equal(nrow(train %>% semi_join(test, by = "siren")), 0)
-  expect_equal(nrow(test %>% semi_join(validation, by = "siren")), 0)
-    })
+  splitted_task  <- split_data(
+    test_task,
+    ratio = 1 / 2,
+    resampling_strategy = "holdout"
+  )
+  expect_length(
+    intersect(
+      levels(splitted_task[["train_data"]]),
+      levels(splitted_task[["test_data"]])
+      ),
+    0
+  )
+})
 
 test_that(
-  "Les échantillons ne dépendent pas de l'ordre des données d'entrée et
-  restent identiques d'une fois sur l'autre", {
-    folder <- here::here(
-      "tests",
-      "testthat",
-      "test_split_consistency_known_output"
+  "Chaque (établissement x période) appartient au moins à un échantillon", {
+    splitted_task  <- split_data(
+      test_task,
+      ratio = 2 / 3,
+      resampling_strategy = "holdout"
     )
-
-    if (!dir.exists(folder)) skip("known values only on local repository")
-
-    scrambled_test_frame  <- sample_n(
-      my_test_frame,
-      size = nrow(my_test_frame),
-      replace = FALSE
-      )
-    expect_equal(
-      split_snapshot_rdm_month(
-        my_test_frame,
-        fracs = c(0.60, 0.25, 0.15),
-        names = c("train", "validation", "test")
-        ),
-      split_snapshot_rdm_month(
-        my_test_frame,
-        fracs = c(0.60, 0.25, 0.15),
-        names = c("train", "validation", "test")
+    should_be_empty <- splitted_task[["hist_data"]] %>%
+      filter(
+        !(siret %in% splitted_task[["train_data"]]$siret &
+          periode %in% splitted_task[["train_data"]]$periode)
+        ) %>%
+      filter(
+        !(siret %in% splitted_task[["test_data"]]$siret &
+            periode %in% splitted_task[["test_data"]]$periode)
         )
-      )
-    expect_known_output(
-      split_snapshot_rdm_month(
-        my_test_frame,
-        fracs = c(0.60, 0.25, 0.15),
-        names = c("train", "validation", "test")
-        ),
-      file.path(folder, "test_split"),
-      print = TRUE,
-      update = FALSE
-      )
-  })
-
-test_that(
-  "Chaque entreprise appartient au moins à un échantillon", {
-    expect_true(all(unique(my_test_frame$siret) %in% combined$siret))
+    testthat::expect_equal(nrow(should_be_empty), 0)
   }
-  )
-
-
-test_that(
-  "split_snapshot_rdm_month gère un nom unique", {
-      split <- split_snapshot_rdm_month(
-        my_test_frame,
-        fracs = c(0.25, 0.25, 0.25, 0.25),
-        names = c("cv")
-        )
-  actual_names <- names(split)
-  expected_names  <- c("cv_1", "cv_2", "cv_3", "cv_4")
-
-  expect_equal(actual_names, expected_names)
-  }
-  )
-
-
-test_that(
-  "La fusion de deux catégories ne change pas la reproductibilité de la
-  troisième", {
-  split_1  <- split_snapshot_rdm_month(
-        my_test_frame,
-        fracs = c(0.25, 0.25, 0.25, 0.25),
-        names = c("no1", "no2", "no3", "test")
-        )
-  split_2  <- split_snapshot_rdm_month(
-        my_test_frame,
-        fracs = c(0.75, 0.25),
-        names = c("no1", "test")
-        )
-
-  expect_equal(split_1[["test"]], split_2[["test"]])
-}
 )
 
 test_that(
   "Les logs de la fonction 'split_data' fonctionnent correctement", {
     task <- get_test_task()
     task[["tracker"]] <- new.env()
+    ratio <- 2 / 3
     with_mock(
-      split_data(task, c(0.75, 0.20, 0.05)),
+      split_data(task, ratio = ratio, resampling_strategy = "holdout"),
       log_param = mock_log_param,
       log_metric = mock_log_metric
     )
     expect_true(length(ls(task[["tracker"]])) > 0)
     expect_setequal(
       names(task[["tracker"]]),
-      c("resampling_strategy", "train_val_test_shares")
+      c("resampling_strategy", "train_test_ratio")
     )
     expect_equal(
       get("resampling_strategy", envir = task[["tracker"]]),
       "holdout"
     )
     expect_equal(
-      get("train_val_test_shares", envir = task[["tracker"]]),
-      c(train = 0.75, validation = 0.2, test = 0.05)
+      get("train_test_ratio", envir = task[["tracker"]]),
+      ratio
     )
     task[["tracker"]] <- NULL
   }

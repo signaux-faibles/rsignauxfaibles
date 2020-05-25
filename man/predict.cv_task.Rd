@@ -6,7 +6,7 @@
 \usage{
 \method{predict}{cv_task}(
   object,
-  data_names = c("new_data", "train_data", "validation_data", "test_data"),
+  data_names = c("new_data", "train_data", "test_data"),
   predict_fun = predict_model,
   ...
 )

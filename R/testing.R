@@ -1,15 +1,24 @@
-get_test_task <- function(seed = 1793) {
+#' Get a fake task
+#'
+#' @param fake_data Data that is stored as "hist_data". If none is provided,
+#'   some data will be automatically set.
+#' @param stage `character(1)` \cr Either "load", "split" or "prepare". The
+#'   output task will be at the end of the specified stage.
+#'
+#' @export
+get_test_task <- function(
+  fake_data = NULL,
+  fake_target = "target",
+  stage = "prepare"
+) {
 
-  task <- sf_task(
-    mongodb_uri = "fake_uri",
-    database = "fake_database",
-    collection = "fake_collection",
-    id = "Fake task",
-    target = "target",
-    verbose = FALSE
-  )
-  mock_query_database <- function(...) {
-    fake_df <- data.frame(
+  assertthat::assert_that(
+    stage %in% c("load", "split", "prepare"),
+    msg = "Stage should be either 'load', 'split' or 'prepare'"
+    )
+
+  if (is.null(fake_data)) {
+    fake_data <- data.frame(
       siret = as.character(1:10),
       periode = as.POSIXct(
         seq(
@@ -19,24 +28,43 @@ get_test_task <- function(seed = 1793) {
         )
         ),
       target = rep(c(T, F), length.out = 10),
-      feature = stats::runif(10)
+      feature = c(0.48, 0.08, 0.74, 0.27, 0.68, 0.54, 0.54, 0.61, 0.5, 0.69)
     )
+  }
+
+  task <- sf_task(
+    mongodb_uri = "fake_uri",
+    database = "fake_database",
+    collection = "fake_collection",
+    id = "Fake task",
+    target = fake_target,
+    verbose = FALSE
+  )
+  mock_query_database <- function(...) {
+    return(fake_data)
   }
 
   task <-  load_hist_data(
     task,
     batch = "0000",
-    fields = c("siret", "periode", "target", "feature"),
+    fields = names(fake_data),
     database_query_fun = mock_query_database
   )
 
-  task  <- split_data(task)
+  if (stage == "load") {
+    return(task)
+  }
+  task  <- split_data(task, ratio = 2 / 3, resampling_strategy = "holdout")
+  if (stage == "split") {
+    return(task)
+  }
+
   task[["new_data"]]  <- task[["hist_data"]]
   task[["prepared_train_data"]]  <- task[["train_data"]]
   task[["prepared_test_data"]]  <- task[["test_data"]]
-  task[["prepared_validation_data"]]  <- task[["validation_data"]]
   task[["outcome_field"]] <- "target"
 
+  # stage == "prepare"
   return(task)
 }
 

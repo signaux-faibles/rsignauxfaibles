@@ -69,6 +69,12 @@ load_hist_data.sf_task <- function(
   set_verbose_level(task)
   logger::log_info("Chargement des données historiques.")
 
+
+  assertthat::assert_that(
+    task[["target"]] %in% fields,
+    msg = "Target field is absent of loaded data: careful"
+  )
+
   hist_data <- import_data(
     database,
     collection,
@@ -291,7 +297,8 @@ import_data <- function(
   df <- replace_missing_data(
     df = df,
     fields = fields,
-    replace_missing = replace_missing
+    replace_missing = replace_missing,
+    verbose = verbose
   )
 
   n_eta <- dplyr::n_distinct(df$siret)
@@ -332,7 +339,8 @@ query_database <- function(
 replace_missing_data <- function(
   df,
   fields,
-  replace_missing
+  replace_missing,
+  verbose
   ) {
 
   df <- add_missing_fields(
@@ -367,7 +375,7 @@ replace_missing_data <- function(
     )
   }
 
-  if (any(names(replace_missing) %in% colnames(df))) {
+  if (verbose && any(names(replace_missing) %in% colnames(df))) {
     logger::log_info("Filling missing values with default values.")
   }
 
@@ -403,7 +411,9 @@ update_types <- function(
   df
   ) {
 
-  # Dates de type Date
+  # Dates de type character
+  df <- df %>%
+    mutate_if(lubridate::is.Date, as.character)
   df <- df %>%
     mutate_if(lubridate::is.POSIXct, ~ as.character(as.Date(.)))
 

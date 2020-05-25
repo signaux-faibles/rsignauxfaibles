@@ -9,10 +9,11 @@ test_that("predict.sf_task works as expected", {
   test_task[["model"]] <- list()
   predicted_task <- predict(
     test_task,
-    data_names = "validation_data",
+    data_names = "test_data",
     predict_fun = test_predict_fun
   )
-  expect_equal(predicted_task[["validation_data"]]$score, rep(1, 5))
+  pred_data <- predicted_task[["test_data"]]
+  expect_equal(pred_data$score, rep(1, nrow(pred_data)))
 })
 
 test_that("predict.cv_task works as expected", {
@@ -26,11 +27,9 @@ test_that("predict.cv_task works as expected", {
   )
   predicted_task <- predict(
     test_task,
-    data_names = "validation_data",
+    data_names = "test_data",
     predict_fun = test_predict_fun
   )
-  expect_equal(
-    predicted_task[["cross_validation"]][[3]][["validation_data"]]$score,
-    rep(1, 5)
-  )
+  pred_data <- predicted_task[["cross_validation"]][[3]][["test_data"]]
+  expect_equal(pred_data$score, rep(1, nrow(pred_data)))
 })
