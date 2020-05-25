@@ -28,12 +28,9 @@ test_that("split_data est reproductible et crée des champs train_data et test_d
     ratio = 2 / 3,
     resampling_strategy = "holdout"
   )
-  expect_known_hash("boubou", "6d89babf89")
-  expect_known_hash(data.frame(a = c(1,2)), "7003fdc1d5")
   expect_true(all(c("train_data", "test_data") %in% names(splitted_task)))
   expect_known_hash(splitted_task[["train_data"]], "f73807fd07")
   expect_known_hash(splitted_task[["test_data"]], "9882b045c5")
-  expect_known_hash(splitted_task, "b60eb06e8ce15253fdcd")
 })
 
 test_that("Les échantillons ont les bonnes proportions", {
