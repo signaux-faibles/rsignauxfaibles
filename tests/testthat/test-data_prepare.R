@@ -1,7 +1,6 @@
  context("Test preparation functions")
 
-
- test_task <- get_test_task(stage = "split")
+test_task <- get_test_task(stage = "split")
 
 fake_preparation_map_function <- function(data_to_prepare, options) {
   if (!is.null(options[["offset"]])) {
@@ -62,6 +61,18 @@ test_that("Prepare task works as expected", {
     prepared_task[["prepared_test_data"]]$feature,
     prepared_task[["test_data"]]$feature + 1
   )
+  })
+
+test_that("prepare filters the requested features", {
+  prepared_task <- create_prepared_task(test_task)
+  testthat::expect_equal(
+    prepared_task[["training_fields"]],
+    "feature"
+    )
+  testthat::expect_equal(
+    prepared_task[["mlr3task"]]$col_roles$feature,
+    "feature"
+    )
   })
 
 test_that("Prepare task works with options as expected", {
