@@ -85,6 +85,7 @@ prepare.sf_task <- function( #nolint
   )
 
   # TODO: warn when invalid features as argument
+  # TODO: accept new variables created during preparation as features
   task[["mlr3task"]]$col_roles$feature <- intersect(
     training_fields,
     task[["mlr3task"]]$col_roles$feature

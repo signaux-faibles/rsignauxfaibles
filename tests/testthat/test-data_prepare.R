@@ -75,6 +75,18 @@ test_that("prepare filters the requested features", {
     )
   })
 
+test_that("prepare changes the outcome field if requested", {
+  prepared_task <- create_prepared_task(test_task)
+  testthat::expect_equal(
+    prepared_task[["outcome_field"]],
+    "target"
+    )
+  testthat::expect_equal(
+    prepared_task[["mlr3task"]]$col_roles$target,
+    "target"
+    )
+  })
+
 test_that("Prepare task works with options as expected", {
   offset2_task <- create_prepared_task(
     test_task,
