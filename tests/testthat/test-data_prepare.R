@@ -29,13 +29,14 @@ matrix_or_identity <- function(x, options) {
 create_prepared_task <- function(test_task,
   preparation_map_options = list(),
   prepare_options = list(),
-  shape_frame_options = list()
+  shape_frame_options = list(),
+  target = NULL
   ) {
 
   prepared_task <- prepare(
     test_task,
     data_names = c("train_data", "test_data"),
-    outcome_field = NULL,
+    outcome_field = target,
     preparation_map_function = fake_preparation_map_function,
     prepare_function = fake_prepare_function,
     shape_frame_function = matrix_or_identity,
@@ -85,6 +86,18 @@ test_that("prepare changes the outcome field if requested", {
   testthat::expect_equal(
     prepared_task[["mlr3task"]]$col_roles$target,
     "target"
+    )
+  prepared_task2 <- create_prepared_task(
+    test_task,
+    target =  "periode"
+  )
+  testthat::expect_equal(
+    prepared_task[["outcome_field"]],
+    "periode"
+    )
+  testthat::expect_equal(
+    prepared_task2[["mlr3task"]]$col_roles$target,
+    "periode"
     )
   })
 
