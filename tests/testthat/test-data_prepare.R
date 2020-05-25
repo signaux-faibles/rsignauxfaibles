@@ -35,6 +35,7 @@ create_prepared_task <- function(test_task,
   prepared_task <- prepare(
     test_task,
     data_names = c("train_data", "test_data"),
+    outcome_field = NULL,
     preparation_map_function = fake_preparation_map_function,
     prepare_function = fake_prepare_function,
     shape_frame_function = matrix_or_identity,
@@ -46,7 +47,7 @@ create_prepared_task <- function(test_task,
   return(prepared_task)
 }
 
-test_that("Prepare task works as expected", {
+test_that("Prepare task works NULL as expected", {
   prepared_task <- create_prepared_task(test_task)
   expect_true(all(
       c("prepared_train_data", "prepared_test_data", "preparation_map") %in%
@@ -114,13 +115,15 @@ test_that("Prepare task works with options as expected", {
 create_fte_test_task <- function() {
   test_task <- get_test_task(stage = "split")
 
-  test_task[["train_data"]] <- cbind(test_task[["train_data"]],
+  test_task[["train_data"]] <- cbind(
+    test_task[["train_data"]],
     ab = c("a", "b", "a", "a", "a", "b", "b"),
     cd = c("d", "d", "c", "c", "d", "d", "c"),
     outcome = c(TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE)
   )
 
-  test_task[["test_data"]] <- cbind(test_task[["test_data"]],
+  test_task[["test_data"]] <- cbind(
+    test_task[["test_data"]],
     ab = c("a", "b", "a"),
     cd = c("c", "c", "d"),
     outcome = c(TRUE, FALSE, FALSE)
@@ -136,7 +139,7 @@ create_prepared_fte_test_task <- function() {
     fte_test_task,
     data_names = c("train_data", "test_data"),
     preparation_map_options = list(
-      outcome_field = "outcome",
+      outcome_field = NULL,
       target_encode_fields = c("ab", "cd")
       ),
     prepare_options = list(
@@ -153,9 +156,9 @@ test_that("map creation works as expected", {
   prep_task <- create_prepared_fte_test_task()
   expect_known_hash(
     prep_task[["prepared_test_data"]],
-    hash = "8d56010f2e1f9faf4a85"
+    hash = "5e7252444f824e5c2f3f"
   )
-  })
+})
 
 test_that(
   "Les logs de la fonction 'prepare_data' fonctionnent correctement", {

@@ -41,7 +41,7 @@ prepare.sf_task <- function( #nolint
     "new_data"
     ),
   training_fields = get_fields(training = TRUE),
-  outcome_field = "outcome",
+  outcome_field = NULL,
   # OLD API
   preparation_map_function = create_fte_map,
   preparation_map_options = list(
@@ -66,7 +66,12 @@ prepare.sf_task <- function( #nolint
 
   ## Core ##
   task[["training_fields"]] <- training_fields
-  task[["outcome_field"]] <- outcome_field
+
+  if (is.null(outcome_field)) {
+    task[["outcome_field"]] <- task[["target"]]
+  } else {
+    task[["outcome_field"]] <- outcome_field
+  }
 
 
   task  <- purrr::reduce(
