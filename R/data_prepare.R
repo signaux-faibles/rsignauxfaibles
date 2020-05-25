@@ -73,7 +73,7 @@ prepare.sf_task <- function( #nolint
     task[["outcome_field"]] <- outcome_field
     task[["mlr3task"]]$col_roles$target <- outcome_field
   }
-
+  task[["mlr3pipeline"]] <- processing_pipeline
 
   task  <- purrr::reduce(
     data_names,

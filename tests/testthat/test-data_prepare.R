@@ -30,7 +30,8 @@ create_prepared_task <- function(test_task,
   preparation_map_options = list(),
   prepare_options = list(),
   shape_frame_options = list(),
-  target = NULL
+  target = NULL,
+  processing_pipeline = NULL
   ) {
 
   prepared_task <- prepare(
@@ -43,27 +44,51 @@ create_prepared_task <- function(test_task,
     preparation_map_options = preparation_map_options,
     prepare_options = prepare_options,
     shape_frame_options = shape_frame_options,
-    training_fields = c("feature")
+    training_fields = c("feature"),
+    processing_pipeline = processing_pipeline
   )
   return(prepared_task)
 }
 
-test_that("Prepare task works NULL as expected", {
-  prepared_task <- create_prepared_task(test_task)
+fake_mlr3pipeline <- po("mutate")
+fake_mlr3pipeline$param_set$values$mutation <- list(
+  feature = ~ feature + 2
+)
+
+test_that("Prepare task works as expected", {
+  prepared_task <- create_prepared_task(
+    test_task,
+    processing_pipeline = fake_mlr3pipeline
+  )
   expect_true(all(
       c("prepared_train_data", "prepared_test_data", "preparation_map") %in%
         names(prepared_task)
       ))
-  expect_equal(prepared_task[["preparation_map"]], 1)
+  # expect_equal(prepared_task[["preparation_map"]], 1)
   expect_equal(
     prepared_task[["prepared_train_data"]]$feature,
-    prepared_task[["train_data"]]$feature + 1
+    prepared_task[["train_data"]]$feature + 2
   )
   expect_equal(
     prepared_task[["prepared_test_data"]]$feature,
-    prepared_task[["test_data"]]$feature + 1
+    prepared_task[["test_data"]]$feature + 2
   )
   })
+
+
+# test_that("Prepare task works as expected with mlr3pipeline", {
+#   prepared_task <- create_prepared_task(
+#     test_task,
+#     processing_pipeline = fake_mlr3pipeline
+#   )
+#   expect_true("mlr3pipeline" %in% names(prepared_task))
+#   graph <- mlr3pipelines::as_graph(prepared_task[["mlr3pipeline"]])
+#   prepared_data <- graph$train(prepared_task[["mlr3task"]])[[1]]$data()
+#   expect_equal(
+#     prepared_data$feature,
+#     prepared_task[["hist_data"]]$feature + 1,
+#     )
+#   })
 
 test_that("prepare filters the requested features", {
   prepared_task <- create_prepared_task(test_task)
