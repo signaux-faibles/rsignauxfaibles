@@ -42,6 +42,7 @@ prepare.sf_task <- function( #nolint
     ),
   training_fields = get_fields(training = TRUE),
   outcome_field = "outcome",
+  # OLD API
   preparation_map_function = create_fte_map,
   preparation_map_options = list(
     target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3")
@@ -52,6 +53,9 @@ prepare.sf_task <- function( #nolint
     ),
   shape_frame_function = shape_for_xgboost,
   shape_frame_options = list(),
+  # NEW API
+  processing_pipeline = NULL,
+  # END
   preprocessing_strategy = NULL,
   ...
   ) {
@@ -63,6 +67,7 @@ prepare.sf_task <- function( #nolint
   ## Core ##
   task[["training_fields"]] <- training_fields
   task[["outcome_field"]] <- outcome_field
+
 
   task  <- purrr::reduce(
     data_names,
@@ -77,6 +82,12 @@ prepare.sf_task <- function( #nolint
       shape_frame_options
       ),
     .init = task,
+  )
+
+  # TODO: warn when invalid features as argument
+  task[["mlr3task"]]$col_roles$feature <- intersect(
+    training_fields,
+    task[["mlr3task"]]$col_roles$feature
   )
 
   if (is.null(preprocessing_strategy)) {
