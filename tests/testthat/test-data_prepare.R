@@ -92,7 +92,7 @@ test_that("prepare changes the outcome field if requested", {
     target =  "periode"
   )
   testthat::expect_equal(
-    prepared_task[["outcome_field"]],
+    prepared_task2[["outcome_field"]],
     "periode"
     )
   testthat::expect_equal(
