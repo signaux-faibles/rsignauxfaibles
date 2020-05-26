@@ -75,6 +75,7 @@ prepare.sf_task <- function( #nolint
   }
   task[["mlr3pipeline"]] <- processing_pipeline
 
+  if (is.null(processing_pipeline)) {
   task  <- purrr::reduce(
     data_names,
     ~ prepare_one_data_name(
@@ -89,6 +90,19 @@ prepare.sf_task <- function( #nolint
       ),
     .init = task,
   )
+  }  else {
+    gpo <-  mlr3pipelines::as_graph(
+      task[["mlr3pipeline"]]
+    )
+    #
+    # TODO temporary
+    train_id <- task[["mlr3rsmp"]]$train_set(1)
+    test_id <- task[["mlr3rsmp"]]$test_set(1)
+    gpo$train(task[["mlr3task"]]$clone()$filter(train_id))
+    pred <- gpo$predict(task[["mlr3task"]])[[1]]
+    task[["prepared_train_data"]] <- pred$data(train_id) %>% as.data.frame()
+    task[["prepared_test_data"]] <- pred$data(test_id) %>% as.data.frame()
+  }
 
   # TODO: warn when invalid features as argument
   # TODO: accept new variables created during preparation as features

@@ -1,4 +1,4 @@
- context("Test preparation functions")
+context("Test preparation functions")
 
 test_task <- get_test_task(stage = "split")
 
@@ -14,7 +14,7 @@ fake_prepare_function  <- function(data_to_prepare, options) {
     return(data_to_prepare)
   }
 
-  prepared_data <- data_to_prepare %>%
+prepared_data <- data_to_prepare %>%
     dplyr::mutate(feature = feature + options[["PREPARATION_MAP"]])
   return(prepared_data)
 }
@@ -50,7 +50,7 @@ create_prepared_task <- function(test_task,
   return(prepared_task)
 }
 
-fake_mlr3pipeline <- po("mutate")
+fake_mlr3pipeline <- mlr3pipelines::po("mutate")
 fake_mlr3pipeline$param_set$values$mutation <- list(
   feature = ~ feature + 2
 )
@@ -61,7 +61,7 @@ test_that("Prepare task works as expected", {
     processing_pipeline = fake_mlr3pipeline
   )
   expect_true(all(
-      c("prepared_train_data", "prepared_test_data", "preparation_map") %in%
+      c("prepared_train_data", "prepared_test_data") %in%
         names(prepared_task)
       ))
   # expect_equal(prepared_task[["preparation_map"]], 1)
