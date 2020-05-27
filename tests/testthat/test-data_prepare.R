@@ -50,15 +50,35 @@ create_prepared_task <- function(test_task,
   return(prepared_task)
 }
 
-fake_mlr3pipeline <- mlr3pipelines::po("mutate")
-fake_mlr3pipeline$param_set$values$mutation <- list(
-  feature = ~ feature + 2
+
+TestPipeOp <- R6::R6Class("TestPipeOp", #nolint
+  inherit = mlr3pipelines::PipeOpTaskPreprocSimple,
+  public = list(
+    initialize = function(id = "test", ...) {
+      super$initialize(id, feature_types = "numeric", ...)
+    }
+    ),
+  private = list(
+    .get_state_dt = function(dt, levels, target) {
+      list(offset = 1)
+    },
+    .transform_dt = function(dt, levels) {
+        dt[,
+          (names(dt)) := purrr::map(.SD, ~ . + self$state$offset)
+        ]
+    }
+  )
 )
+
+fake_pipeline <- TestPipeOp$new(
+  param_vals = list(affect_columns = mlr3pipelines::selector_name("feature"))
+)
+fake_pipeline <- mlr3pipelines::as_graph(fake_pipeline)
 
 test_that("Prepare task works as expected", {
   prepared_task <- create_prepared_task(
     test_task,
-    processing_pipeline = fake_mlr3pipeline
+    processing_pipeline = fake_pipeline
   )
   expect_true(all(
       c("prepared_train_data", "prepared_test_data") %in%
@@ -67,11 +87,11 @@ test_that("Prepare task works as expected", {
   # expect_equal(prepared_task[["preparation_map"]], 1)
   expect_equal(
     prepared_task[["prepared_train_data"]]$feature,
-    prepared_task[["train_data"]]$feature + 2
+    prepared_task[["train_data"]]$feature + 1
   )
   expect_equal(
     prepared_task[["prepared_test_data"]]$feature,
-    prepared_task[["test_data"]]$feature + 2
+    prepared_task[["test_data"]]$feature + 1
   )
   })
 

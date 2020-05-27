@@ -19,11 +19,11 @@ Imports:
     mlr3,
     mongolite,
     purrr,
-    rlang,
     stringr,
     tibble,
     tidyr,
-    xgboost
+    xgboost,
+    data.table
 Suggests:
     DiceKriging,
     ParamHelpers,

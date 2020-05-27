@@ -1,6 +1,6 @@
 #' @import dplyr
 #' @importFrom lubridate %m+% %m-%
-#' @importFrom rlang :=
+#' @importFrom data.table :=
 #' @importFrom stats predict
 NULL
 
@@ -400,7 +400,7 @@ add_missing_fields <- function(
     logger::log_info("Remplacements par NA.")
 
     for (missing_field in missing_fields) {
-      df <- df %>% dplyr::mutate(!!missing_field := NA)
+      df[missing_field] <- rep(NA, nrow(df))
     }
   }
   return(df)
