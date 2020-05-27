@@ -65,6 +65,7 @@ get_test_task <- function(
   task[["outcome_field"]] <- "target"
 
   # stage == "prepare"
+  # TODO real preparation. Then change in create_fte_test_task as well.
   return(task)
 }
 
