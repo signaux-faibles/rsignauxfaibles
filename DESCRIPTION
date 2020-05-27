@@ -17,6 +17,8 @@ Imports:
     logger,
     lubridate,
     mlr3,
+    mlr3learners,
+    mlr3pipelines,
     mongolite,
     purrr,
     stringr,
