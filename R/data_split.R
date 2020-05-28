@@ -20,7 +20,7 @@
 #' sous-ensemble (possiblement vide) de ses lignes.
 #'
 #' @export
-split_data.sf_task <- function(
+split_data.sf_task <- function( #nolint
   task,
   ratio = 2 / 3,
   resampling_strategy = "holdout",
@@ -28,6 +28,17 @@ split_data.sf_task <- function(
 ) {
 
   set_verbose_level(task)
+  allowable_strategies <- mlr3::mlr_resamplings$keys()
+
+  if (is.null(resampling_strategy) ||
+    !resampling_strategy %in% allowable_strategies) {
+    logger::log_info(paste(
+        "Les données ne sont pas échantillonnées car le paramètre",
+        "'resampling_strategy' n'est pas valide. Les paramètres valides sont:",
+        allowable_strategies
+        ))
+    return(task)
+  }
 
   logger::log_info(paste0("Les donnees historiques sont scindes en ",
       "echantillons d'entrainement et de test"))

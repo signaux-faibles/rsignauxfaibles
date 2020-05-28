@@ -9,7 +9,12 @@
 get_test_task <- function(
   fake_data = NULL,
   fake_target = "target",
-  stage = "prepare"
+  training_fields = "feature",
+  stage = "prepare",
+  resampling_strategy = "holdout",
+  processing_pipeline = NULL,
+  learner = NULL,
+  measures = NULL
 ) {
 
   assertthat::assert_that(
@@ -40,6 +45,7 @@ get_test_task <- function(
     target = fake_target,
     verbose = FALSE
   )
+
   mock_query_database <- function(...) {
     return(fake_data)
   }
@@ -51,20 +57,40 @@ get_test_task <- function(
     database_query_fun = mock_query_database
   )
 
+  task[["new_data"]]  <- head(task[["hist_data"]])
+  # TODO: same mocking than for load_hist_data
+
   if (stage == "load") {
     return(task)
   }
-  task  <- split_data(task, ratio = 2 / 3, resampling_strategy = "holdout")
+
+  task  <- split_data(
+    task,
+    ratio = 2 / 3,
+    resampling_strategy = resampling_strategy
+  )
+
   if (stage == "split") {
     return(task)
   }
 
-  task[["new_data"]]  <- task[["hist_data"]]
-  task[["prepared_train_data"]]  <- task[["train_data"]]
-  task[["prepared_test_data"]]  <- task[["test_data"]]
-  task[["outcome_field"]] <- "target"
+  if (!is.null(processing_pipeline)) {
+  task <- prepare(
+    task,
+    training_fields = training_fields,
+    processing_pipeline = processing_pipeline
+    )
+  } else {
+   # TODO: temporary
+    task[["prepared_train_data"]]  <- task[["train_data"]]
+    task[["prepared_test_data"]]  <- task[["test_data"]]
+    task[["outcome_field"]] <- fake_target
+  }
+  if (stage == "prepare") {
+    return(task)
+  }
 
-  # stage == "prepare"
+  task <-
   # TODO real preparation. Then change in create_fte_test_task as well.
   return(task)
 }
