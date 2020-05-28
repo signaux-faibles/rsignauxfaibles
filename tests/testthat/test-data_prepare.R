@@ -122,7 +122,11 @@ test_that("prepare filters the requested features", {
   test_features(NULL, "feature")
   mutate_po <- mlr3pipelines::PipeOpMutate$new()
   mutate_po$param_set$values$mutation <- list(new_feature = ~ feature ^ 2)
-  test_features(mutate_po, features =  c("feature", "new_feature"), mlr_features = "feature")
+  test_features(
+    mutate_po,
+    features = c("feature", "new_feature"),
+    mlr_features = "feature"
+  )
 })
 
 test_that("prepare changes the outcome field if requested", {
