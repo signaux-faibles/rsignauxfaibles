@@ -100,6 +100,7 @@ evaluate <- function(
   } else {
     assertthat::assert_that("mlr3prediction_test" %in% names(task))
     task[["model_performance"]] <- task[["mlr3prediction_test"]]$score(measures)
+    # TODO: filter strong signals
   }
 
   log_metric(task, "model_performance", task[["model_performance"]])
