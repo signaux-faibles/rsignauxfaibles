@@ -76,26 +76,27 @@ prepare.sf_task <- function( #nolint
   task[["mlr3pipeline"]] <- processing_pipeline
 
   if (is.null(processing_pipeline)) {
-  task  <- purrr::reduce(
-    data_names,
-    ~ prepare_one_data_name(
-      task = .x,
-      data_name = .y,
-      preparation_map_function,
-      preparation_map_options,
-      prepare_function,
-      prepare_options,
-      shape_frame_function,
-      shape_frame_options
-      ),
-    .init = task,
-  )
+    task  <- purrr::reduce(
+      data_names,
+      ~ prepare_one_data_name(
+        task = .x,
+        data_name = .y,
+        preparation_map_function,
+        preparation_map_options,
+        prepare_function,
+        prepare_options,
+        shape_frame_function,
+        shape_frame_options
+        ),
+      .init = task,
+    )
   }  else {
     gpo <-  mlr3pipelines::as_graph(
       task[["mlr3pipeline"]]
     )
     #
     # TODO temporary
+
     train_id <- task[["mlr3rsmp"]]$train_set(1)
     test_id <- task[["mlr3rsmp"]]$test_set(1)
     gpo$train(task[["mlr3task"]]$clone()$filter(train_id))
@@ -205,6 +206,16 @@ assert_preparation_map <- function(task) {
     msg = 'No preparation map has been found. Have you prepared the
     "train_data" first ?'
   )
+}
+
+create_fte_pipeline <- function(
+   target_encode_fields
+  ) {
+  poe <- mlr3pipelines::po("encodeimpact",
+    param_vals = list(
+      affect_columns = mlr3pipelines::selector_name(target_encode_fields)
+      )
+   )
 }
 
 

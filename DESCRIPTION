@@ -17,13 +17,15 @@ Imports:
     logger,
     lubridate,
     mlr3,
+    mlr3learners,
+    mlr3pipelines,
     mongolite,
     purrr,
-    rlang,
     stringr,
     tibble,
     tidyr,
-    xgboost
+    xgboost,
+    data.table
 Suggests:
     DiceKriging,
     ParamHelpers,
@@ -39,6 +41,7 @@ Suggests:
     xgboostExplainer
 Remotes:
     AppliedDataSciencePartners/xgboostExplainer,
+    mlr-org/mlr3pipelines,
     signaux-faibles/MLsegmentr,
     signaux-faibles/fte
 RoxygenNote: 7.1.0

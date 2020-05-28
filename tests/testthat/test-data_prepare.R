@@ -50,45 +50,49 @@ create_prepared_task <- function(test_task,
   return(prepared_task)
 }
 
-fake_mlr3pipeline <- mlr3pipelines::po("mutate")
-fake_mlr3pipeline$param_set$values$mutation <- list(
-  feature = ~ feature + 2
+
+TestPipeOp <- R6::R6Class("TestPipeOp", #nolint
+  inherit = mlr3pipelines::PipeOpTaskPreprocSimple,
+  public = list(
+    initialize = function(id = "test", ...) {
+      super$initialize(id, feature_types = "numeric", ...)
+    }
+    ),
+  private = list(
+    .get_state_dt = function(dt, levels, target) {
+      list(offset = 1)
+    },
+    .transform_dt = function(dt, levels) {
+        dt[,
+          (names(dt)) := purrr::map(.SD, ~ . + self$state$offset)
+        ]
+    }
+  )
 )
 
-test_that("Prepare task works as expected", {
+fake_pipeline <- TestPipeOp$new(
+  param_vals = list(affect_columns = mlr3pipelines::selector_name("feature"))
+)
+fake_pipeline <- mlr3pipelines::as_graph(fake_pipeline)
+
+test_that("Prepare task works with mlr3pipeline as expected", {
   prepared_task <- create_prepared_task(
     test_task,
-    processing_pipeline = fake_mlr3pipeline
+    processing_pipeline = fake_pipeline
   )
   expect_true(all(
       c("prepared_train_data", "prepared_test_data") %in%
         names(prepared_task)
       ))
-  # expect_equal(prepared_task[["preparation_map"]], 1)
   expect_equal(
     prepared_task[["prepared_train_data"]]$feature,
-    prepared_task[["train_data"]]$feature + 2
+    prepared_task[["train_data"]]$feature + 1
   )
   expect_equal(
     prepared_task[["prepared_test_data"]]$feature,
-    prepared_task[["test_data"]]$feature + 2
+    prepared_task[["test_data"]]$feature + 1
   )
   })
-
-
-# test_that("Prepare task works as expected with mlr3pipeline", {
-#   prepared_task <- create_prepared_task(
-#     test_task,
-#     processing_pipeline = fake_mlr3pipeline
-#   )
-#   expect_true("mlr3pipeline" %in% names(prepared_task))
-#   graph <- mlr3pipelines::as_graph(prepared_task[["mlr3pipeline"]])
-#   prepared_data <- graph$train(prepared_task[["mlr3task"]])[[1]]$data()
-#   expect_equal(
-#     prepared_data$feature,
-#     prepared_task[["hist_data"]]$feature + 1,
-#     )
-#   })
 
 test_that("prepare filters the requested features", {
   prepared_task <- create_prepared_task(test_task)
@@ -150,31 +154,22 @@ test_that("Prepare task works with options as expected", {
   expect_true(inherits(matrix_task[["prepared_test_data"]], "matrix"))
   })
 
-create_fte_test_task <- function() {
-  test_task <- get_test_task(stage = "split")
+create_fte_test_task <- function(processing_pipeline = NULL) {
+  test_task <- get_test_task(stage = "load")
+  new_data <- test_task[["hist_data"]] %>%
+    cbind(
+      ab = c("a", "b", "a", "a", "a", "b", "b", "a", "b", "a"),
+      cd = c("d", "d", "c", "c", "d", "d", "c", "c", "c", "d"),
+      outcome = c(TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE)
+      )
 
-  test_task[["train_data"]] <- cbind(
-    test_task[["train_data"]],
-    ab = c("a", "b", "a", "a", "a", "b", "b"),
-    cd = c("d", "d", "c", "c", "d", "d", "c"),
-    outcome = c(TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE)
+  prepared_task <- get_test_task(
+    fake_data = new_data,
+    fake_target = "outcome",
+    stage = "split"
   )
-
-  test_task[["test_data"]] <- cbind(
-    test_task[["test_data"]],
-    ab = c("a", "b", "a"),
-    cd = c("c", "c", "d"),
-    outcome = c(TRUE, FALSE, FALSE)
-  )
-  return(test_task)
-}
-
-create_prepared_fte_test_task <- function() {
-
-  fte_test_task <- create_fte_test_task()
-
   prepared_task <- prepare(
-    fte_test_task,
+    prepared_task,
     data_names = c("train_data", "test_data"),
     preparation_map_options = list(
       outcome_field = NULL,
@@ -185,17 +180,30 @@ create_prepared_fte_test_task <- function() {
       target_encode_fields = c("ab", "cd")
       ),
     training_fields = c("feature", "target_encode_ab",
-      "target_encode_cd")
+      "target_encode_cd"),
+    processing_pipeline = processing_pipeline
   )
   return(prepared_task)
 }
 
 test_that("map creation works as expected", {
-  prep_task <- create_prepared_fte_test_task()
+  testthat::skip_on_ci()
+  prep_task <- create_fte_test_task()
   expect_known_hash(
     prep_task[["prepared_test_data"]],
-    hash = "5e7252444f824e5c2f3f"
+    "787aefe2fa"
   )
+})
+
+test_that("fte state works as expected", {
+  testthat::skip_on_ci()
+  prep_task <- create_fte_test_task(
+    create_fte_pipeline(c("ab", "cd"))
+  )
+  expect_known_hash(
+    prep_task[["prepared_test_data"]],
+    "3c90fa4ae4"
+    )
 })
 
 test_that(
