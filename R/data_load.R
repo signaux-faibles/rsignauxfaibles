@@ -39,6 +39,9 @@ NULL
 #'   \code{NULL}, charge tous les sirens disponibles.
 #' @param code_ape `character()` \cr Liste de codes APE à exporter. Si égale à
 #'   \code{NULL}, charge tous les codes disponibles.
+#' @param database_query_fun `function` \cr Fonction qui permet de requêter la
+#'   base de données.
+#' @param debug `logical(1)` \cr si `TRUE`, alors la requête est affichée.
 #'
 #' @return `[sf_task]` \cr
 #'   L'objet \code{task} donné en entrée auquel le champs "hist_data" a été
@@ -64,6 +67,7 @@ load_hist_data.sf_task <- function(
   code_ape = NULL,
   database_query_fun = query_database,
   debug = FALSE,
+  # TODO: ^^ inclure dans le logging bas niveau. Idem pour load_new_data
   ...
   ) {
 

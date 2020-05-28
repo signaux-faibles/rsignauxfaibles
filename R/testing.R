@@ -57,8 +57,13 @@ get_test_task <- function(
     database_query_fun = mock_query_database
   )
 
-  task[["new_data"]]  <- head(task[["hist_data"]])
-  # TODO: same mocking than for load_hist_data
+  task <- load_new_data(
+    task,
+    periods = as.Date("2014-10-01"),
+    batch = "0000",
+    fields = names(fake_data),
+    database_query_fun = mock_query_database
+    )
 
   if (stage == "load") {
     return(task)
