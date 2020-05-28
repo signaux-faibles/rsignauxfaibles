@@ -54,7 +54,7 @@ fake_pipeline <- mlr3pipelines::as_graph(fake_pipeline)
 
 test_that("no error is thrown with a valid 'processing_pipeline'", {
   expect_error(
-    prepared_task <- get_test_task(
+    get_test_task(
       stage = "prepare",
       processing_pipeline = mlr3pipelines::PipeOpNOP$new()
     ),
@@ -93,6 +93,19 @@ test_that("'processing_pipeline' is correctly applied", {
   # test_data
   test_mean_sd(mean, 0.346, "test")
   test_mean_sd(sd, 0.46, "test")
+})
+
+test_that("processing pipeline is stored in 'mlr3pipeline' property", {
+  test_mlr3pipeline_prop <- function(pipe) {
+    prep_task <- get_test_task(stage = "prepare", processing_pipeline = pipe)
+    expect_true("mlr3pipeline" %in% names(prep_task))
+    expect_true(inherits(prep_task[["mlr3pipeline"]], "PipeOp") ||
+      inherits(prep_task[["mlr3pipeline"]], "Graph"))
+  }
+  test_mlr3pipeline_prop(mlr3pipelines::PipeOpNOP$new())
+  test_mlr3pipeline_prop(
+    mlr3pipelines::as_graph(mlr3pipelines::PipeOpNOP$new())
+  )
 })
 
 test_that("prepare filters the requested features", {
