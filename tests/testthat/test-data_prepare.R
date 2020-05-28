@@ -109,7 +109,7 @@ test_that("processing pipeline is stored in 'mlr3pipeline' property", {
 })
 
 test_that("prepare filters the requested features", {
-  test_features <- function(pipe, features) {
+  test_features <- function(pipe, features, mlr_features = features) {
     prepared_task <- get_test_task(
       stage = "prepare",
       processing_pipeline = pipe,
@@ -117,22 +117,24 @@ test_that("prepare filters the requested features", {
     )
     # TEMP
     expect_equal(prepared_task[["training_fields"]], features)
-    expect_equal(prepared_task[["mlr3task"]]$col_roles$feature, features)
+    expect_equal(prepared_task[["mlr3task"]]$col_roles$feature, mlr_features)
   }
-  test_features(pipe = NULL, features =  "feature")
-  test_features(pipe = NULL, features =  "feature")
-  })
+  test_features(NULL, "feature")
+  mutate_po <- mlr3pipelines::PipeOpMutate$new()
+  mutate_po$param_set$values$mutation <- list(new_feature = ~ feature ^ 2)
+  test_features(mutate_po, features =  c("feature", "new_feature"), mlr_features = "feature")
+})
 
 test_that("prepare changes the outcome field if requested", {
   prepared_task <- create_prepared_task(test_task)
   testthat::expect_equal(
     prepared_task[["outcome_field"]],
     "target"
-    )
+  )
   testthat::expect_equal(
     prepared_task[["mlr3task"]]$col_roles$target,
     "target"
-    )
+  )
   prepared_task2 <- create_prepared_task(
     test_task,
     target =  "periode"
@@ -140,12 +142,12 @@ test_that("prepare changes the outcome field if requested", {
   testthat::expect_equal(
     prepared_task2[["outcome_field"]],
     "periode"
-    )
+  )
   testthat::expect_equal(
     prepared_task2[["mlr3task"]]$col_roles$target,
     "periode"
-    )
-  })
+  )
+})
 
 test_that("Prepare task works with options as expected", {
   offset2_task <- create_prepared_task(
@@ -169,7 +171,7 @@ test_that("Prepare task works with options as expected", {
     no_offset_task[["train_data"]]$feature
   )
   expect_true(inherits(matrix_task[["prepared_test_data"]], "matrix"))
-  })
+})
 
 create_fte_test_task <- function(processing_pipeline = NULL) {
   test_task <- get_test_task(stage = "load")
@@ -178,7 +180,7 @@ create_fte_test_task <- function(processing_pipeline = NULL) {
       ab = c("a", "b", "a", "a", "a", "b", "b", "a", "b", "a"),
       cd = c("d", "d", "c", "c", "d", "d", "c", "c", "c", "d"),
       outcome = c(TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE)
-      )
+    )
 
   prepared_task <- get_test_task(
     fake_data = new_data,

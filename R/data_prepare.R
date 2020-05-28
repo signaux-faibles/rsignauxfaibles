@@ -95,23 +95,22 @@ prepare.sf_task <- function( #nolint
     gpo <-  mlr3pipelines::as_graph(
       task[["mlr3pipeline"]]
     )
-    #
-    # TODO temporary
 
+    # TEMP temporary
     train_id <- task[["mlr3rsmp"]]$train_set(1)
     test_id <- task[["mlr3rsmp"]]$test_set(1)
     gpo$train(task[["mlr3task"]]$clone()$filter(train_id))
     pred <- gpo$predict(task[["mlr3task"]])[[1]]
     task[["prepared_train_data"]] <- pred$data(train_id) %>% as.data.frame()
     task[["prepared_test_data"]] <- pred$data(test_id) %>% as.data.frame()
+    # END TEMP
   }
 
-  # TODO: warn when invalid features as argument
-  # TODO: accept new variables created during preparation as features
+
   task[["mlr3task"]]$col_roles$feature <- intersect(
     training_fields,
     task[["mlr3task"]]$col_roles$feature
-  )
+  ) # New features are automatically added when training pipeline
 
   if (is.null(preprocessing_strategy)) {
     ## Default value
