@@ -34,69 +34,77 @@ evaluate <- function(
   prediction_names = NULL,
   target_names = "outcome",
   segment_names = NULL,
-  remove_strong_signals = TRUE
+  remove_strong_signals = TRUE,
+  measures = NULL
   ) {
   tasks <- list(...)
-  assertthat::assert_that(length(tasks) >= 1)
-  assertthat::assert_that(
-    length(data_name) == 1,
-    msg = "Evaluation can only be made on a single data.frame at once"
-  )
-
-  if (is.null(eval_function)) {
-    default_eval_fun <- TRUE
-    eval_function <- MLsegmentr::eval_precision_recall()
-  } else {
-    default_eval_fun <- FALSE
-  }
-
-  evaluation_data  <- purrr::invoke(consolidate, tasks, data_name = data_name)
-
-  if (is.null(prediction_names)) {
-    model_names <- make.names(purrr::map(tasks, "name"))
-    prediction_names <- grep(
-      paste0("^", model_names, collapse = "|"),
-      names(evaluation_data),
-      value = TRUE
+  if (is.null(measures)) {
+    assertthat::assert_that(length(tasks) >= 1)
+    assertthat::assert_that(
+      length(data_name) == 1,
+      msg = "Evaluation can only be made on a single data.frame at once"
     )
-  }
 
-  if (remove_strong_signals) {
-    logger::log_info("Les 'signaux forts' sont retires des donnees
-      d'evaluation (test, validation)")
-      # TODO add to log
-      # task a7368366-ad3c-4dcb-b8d9-2e23de616bf0
-      assertthat::assert_that("time_til_outcome" %in% names(evaluation_data))
-      evaluation_data  <- evaluation_data %>%
-        dplyr::filter(is.na(time_til_outcome) | time_til_outcome > 0)
-  }
+    if (is.null(eval_function)) {
+      default_eval_fun <- TRUE
+      eval_function <- MLsegmentr::eval_precision_recall()
+    } else {
+      default_eval_fun <- FALSE
+    }
 
-  requireNamespace("MLsegmentr")
-  assesser <- MLsegmentr::Assesser$new(
-    evaluation_data
-  )
-  assesser$set_predictions(prediction_names)
-  assesser$set_targets(target_names)
-  if (!is.null(segment_names)) {
-    assesser$set_segments(segment_names)
-  }
-  assesser$evaluation_funs <- eval_function
+    evaluation_data  <- purrr::invoke(consolidate, tasks, data_name = data_name)
 
-  aux <- assesser$assess_model(plot = plot)
+    if (is.null(prediction_names)) {
+      model_names <- make.names(purrr::map(tasks, "name"))
+      prediction_names <- grep(
+        paste0("^", model_names, collapse = "|"),
+        names(evaluation_data),
+        value = TRUE
+      )
+    }
 
-  task <- tasks[[1]]
+    if (remove_strong_signals) {
+      logger::log_info("Les 'signaux forts' sont retires des donnees
+        d'evaluation (test, validation)")
+        # TODO add to log
+        # task a7368366-ad3c-4dcb-b8d9-2e23de616bf0
+        assertthat::assert_that("time_til_outcome" %in% names(evaluation_data))
+        evaluation_data  <- evaluation_data %>%
+          dplyr::filter(is.na(time_til_outcome) | time_til_outcome > 0)
+    }
 
-  perf  <- aux[["performance_frame"]]
-  task[["plot"]] <- aux[["plot"]]
+    requireNamespace("MLsegmentr")
+    assesser <- MLsegmentr::Assesser$new(
+      evaluation_data
+    )
+    assesser$set_predictions(prediction_names)
+    assesser$set_targets(target_names)
+    if (!is.null(segment_names)) {
+      assesser$set_segments(segment_names)
+    }
+    assesser$evaluation_funs <- eval_function
 
-  if (default_eval_fun) {
-    task[["model_performance"]] <- perf %>%
-      filter(evaluation_name != "prcurve")
+    aux <- assesser$assess_model(plot = plot)
+
+    task <- tasks[[1]]
+
+    perf  <- aux[["performance_frame"]]
+    task[["plot"]] <- aux[["plot"]]
+
+    if (default_eval_fun) {
+      task[["model_performance"]] <- perf %>%
+        filter(evaluation_name != "prcurve")
+    } else {
+      task[["model_performance"]] <- perf
+    }
   } else {
-    task[["model_performance"]] <- perf
+    assertthat::assert_that("mlr3prediction_test" %in% names(task))
+    task[["model_performance"]] <- task[["mlr3prediction_test"]]$score(measures)
+    # TODO: filter strong signals
   }
 
   log_metric(task, "model_performance", task[["model_performance"]])
+
   return(task)
   ## Log model performance.
 }
