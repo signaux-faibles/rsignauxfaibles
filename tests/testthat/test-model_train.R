@@ -38,7 +38,7 @@ test_that("train.sf_task works with learner as expected", {
     trained_task[["model"]]$score(
       msr("classif.acc")
     )$classif.acc,
-    1/3
+    1 / 3
   )
 })
 
