@@ -277,6 +277,13 @@ test_that("build_siret_match_stage builds a valid match stage", {
 # import_data
 #
 
+test_that(
+  "La propriété 'mlr3task' est créée", {
+    expect_error(test_task <- get_test_task(stage = "load"), NA)
+    expect_true("mlr3task" %in% names(test_task))
+    expect_true(inherits(test_task$mlr3task, "TaskClassif"))
+})
+
 import_test_data <- function(
                              batch,
                              fields,
@@ -321,7 +328,7 @@ test_that(
   })
 
 test_that(
-  "On arrive à récupérer les éléments de la base avec une requête standard", {
+  "On récupére les éléments de la base avec une requête standard", {
 
   testthat::skip_on_ci()
   fields <- c("siret", "periode")
@@ -349,7 +356,7 @@ test_that(
 })
 
 test_that(
-  "On arrive à récupérer les éléments de la base avec une requête par siret", {
+  "On récupére les éléments de la base avec une requête par siret", {
   testthat::skip_on_ci()
   fields <- c("siret", "periode")
   test_object <- import_test_data(
@@ -364,7 +371,7 @@ test_that(
 })
 
 test_that(
-  "On arrive à récupérer les éléments de la base avec une requête par code ape", {
+  "On récupére les éléments de la base avec une requête par code ape", {
   testthat::skip_on_ci()
   fields <- c("siret", "periode")
   test_object <- import_test_data(
