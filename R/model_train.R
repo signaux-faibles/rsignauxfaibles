@@ -21,12 +21,15 @@
 #' avec la fonction `[prepare.sf_task]`.
 #'
 #' @export
-train.sf_task <- function(
+train.sf_task <- function( #nolint
   task,
+  ## Should not be needed here
   outcome = "outcome",
   parameters = NULL,
   seed = 0,
+  ## Neither should this
   train_fun = "xgboost",
+  learner = NULL,
   ...
   ) {
 
@@ -60,32 +63,52 @@ train.sf_task <- function(
 
   logger::log_info("Model is being trained.")
 
-  assertthat::assert_that(
-    all(c("learn_rate", "max_depth", "ntrees", "min_child_weight") %in%
-      names(parameters)),
-    msg = paste("Following parameters are missing: ",
-      dplyr::setdiff(c("learn_rate", "max_depth", "ntrees", "min_child_weight"),
+  if (is.null(learner)) {
+
+    assertthat::assert_that(
+      all(c("learn_rate", "max_depth", "ntrees", "min_child_weight") %in%
         names(parameters)),
-      sep = ", ")
-  )
+      msg = paste("Following parameters are missing: ",
+        dplyr::setdiff(c("learn_rate", "max_depth", "ntrees", "min_child_weight"),
+          names(parameters)),
+        sep = ", ")
+    )
 
-  outcome <- task[["train_data"]][[task[["outcome_field"]]]]
-  model <- train_fun(
-    train_data = task[["prepared_train_data"]],
-    outcome = outcome,
-    learn_rate = parameters[["learn_rate"]],
-    max_depth = parameters[["max_depth"]],
-    ntrees = parameters[["ntrees"]],
-    min_child_weight = parameters[["min_child_weight"]],
-    seed = seed
-  )
+    outcome <- task[["train_data"]][[task[["outcome_field"]]]]
+    model <- train_fun(
+      train_data = task[["prepared_train_data"]],
+      outcome = outcome,
+      learn_rate = parameters[["learn_rate"]],
+      max_depth = parameters[["max_depth"]],
+      ntrees = parameters[["ntrees"]],
+      min_child_weight = parameters[["min_child_weight"]],
+      seed = seed
+    )
 
-  logger::log_info("Model trained_successfully")
-  task[["model"]] <- model
+    logger::log_info("Model trained_successfully")
+    task[["model"]] <- model
 
-  log_param(task, "model_name",  "light gradient boosting")
-  log_param(task, "model_parameters", parameters)
-  log_param(task, "model_target",  "18 mois, defaut et defaillance")
+    log_param(task, "model_name",  "light gradient boosting")
+    log_param(task, "model_parameters", parameters)
+    log_param(task, "model_target",  "18 mois, defaut et defaillance")
+
+  } else {
+    possible_parameters <- learner$param_set %>% data.table::as.data.table() %>% .[, id] #nolint
+    assertthat::assert_that(
+      all(names(parameters) %in% possible_parameters),
+      msg = paste("Following parameters are missing: ",
+        names(parameters)[!names(parameters) %in% possible_parameters],
+        sep = ", ")
+    )
+
+    task[["mlr3graphlearner"]] <- mlr3pipelines::GraphLearner$new(task[["mlr3pipeline"]] %>>% learner) #nolint
+    task[["mlr3resampled"]] <- mlr3::resample(
+      task = task[["mlr3task"]],
+      learner = task[["mlr3graphlearner"]],
+      resampling = task[["mlr3rsmp"]]
+    )
+    task[["model"]] <- task[["mlr3resampled"]]
+  }
 
   return(invisible(task))
 }
