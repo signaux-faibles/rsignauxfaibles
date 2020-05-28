@@ -187,6 +187,7 @@ create_fte_test_task <- function(processing_pipeline = NULL) {
 }
 
 test_that("map creation works as expected", {
+  testthat::skip_on_ci()
   prep_task <- create_fte_test_task()
   expect_known_hash(
     prep_task[["prepared_test_data"]],
@@ -195,6 +196,7 @@ test_that("map creation works as expected", {
 })
 
 test_that("fte state works as expected", {
+  testthat::skip_on_ci()
   prep_task <- create_fte_test_task(
     create_fte_pipeline(c("ab", "cd"))
   )
