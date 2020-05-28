@@ -109,15 +109,18 @@ test_that("processing pipeline is stored in 'mlr3pipeline' property", {
 })
 
 test_that("prepare filters the requested features", {
-  prepared_task <- create_prepared_task(test_task)
-  testthat::expect_equal(
-    prepared_task[["training_fields"]],
-    "feature"
+  test_features <- function(pipe, features) {
+    prepared_task <- get_test_task(
+      stage = "prepare",
+      processing_pipeline = pipe,
+      training_fields = features
     )
-  testthat::expect_equal(
-    prepared_task[["mlr3task"]]$col_roles$feature,
-    "feature"
-    )
+    # TEMP
+    expect_equal(prepared_task[["training_fields"]], features)
+    expect_equal(prepared_task[["mlr3task"]]$col_roles$feature, features)
+  }
+  test_features(pipe = NULL, features =  "feature")
+  test_features(pipe = NULL, features =  "feature")
   })
 
 test_that("prepare changes the outcome field if requested", {
