@@ -71,7 +71,6 @@ get_test_task <- function(
 
   task  <- split_data(
     task,
-    ratio = 2 / 3,
     resampling_strategy = resampling_strategy
   )
 
