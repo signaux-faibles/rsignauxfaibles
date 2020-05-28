@@ -36,7 +36,7 @@ test_that("train.sf_task works with learner as expected", {
   )
   expect_equal(
     trained_task[["mlr3resampled"]]$score(
-      msr("classif.acc")
+      mlr3::msr("classif.acc")
     )$classif.acc,
     1 / 3
   )
