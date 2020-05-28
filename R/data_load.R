@@ -1,6 +1,7 @@
 #' @import dplyr
 #' @importFrom lubridate %m+% %m-%
 #' @importFrom data.table :=
+#' @importFrom mlr3pipelines %>>%
 #' @importFrom stats predict
 NULL
 

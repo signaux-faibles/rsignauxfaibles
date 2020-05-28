@@ -73,9 +73,9 @@ prepare.sf_task <- function( #nolint
     task[["outcome_field"]] <- outcome_field
     task[["mlr3task"]]$col_roles$target <- outcome_field
   }
-  task[["mlr3pipeline"]] <- processing_pipeline
 
   if (is.null(processing_pipeline)) {
+    task[["mlr3pipeline"]] <- mlr3pipelines::po("nop")
     task  <- purrr::reduce(
       data_names,
       ~ prepare_one_data_name(
@@ -91,6 +91,7 @@ prepare.sf_task <- function( #nolint
       .init = task,
     )
   }  else {
+    task[["mlr3pipeline"]] <- processing_pipeline
     gpo <-  mlr3pipelines::as_graph(
       task[["mlr3pipeline"]]
     )

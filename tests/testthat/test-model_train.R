@@ -14,7 +14,6 @@ parameters  <- list(
 test_that("train.sf_task works as expected", {
   test_task <- get_test_task()
   test_task[["model_parameters"]] <- parameters
-  test_task[["model"]] <- NULL
   trained_task <- train(
     task = test_task,
     outcome = "target",
@@ -23,6 +22,23 @@ test_that("train.sf_task works as expected", {
   expect_equal(
     trained_task[["model"]](3),
     3
+  )
+})
+
+test_that("train.sf_task works with learner as expected", {
+  test_task <- get_test_task()
+  test_task[["mlr3pipeline"]] <- mlr3pipelines::po("nop")
+  test_task[["model_parameters"]] <- list()
+  trained_task <- train(
+    task = test_task,
+    outcome = "target",
+    learner = mlr3::lrn("classif.featureless")
+  )
+  expect_equal(
+    trained_task[["model"]]$score(
+      mlr3::msr("classif.acc")
+    )$classif.acc,
+    1/3
   )
 })
 
