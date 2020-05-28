@@ -103,11 +103,11 @@ train.sf_task <- function( #nolint
     )
 
     graph_learner <- mlr3pipelines::GraphLearner$new(
-      task[["mlr3pipeline"]] %>>% learner,
-      param_set  = list(predict_set = c("train", "test"))
+      task[["mlr3pipeline"]] %>>% learner
     ) #nolint
     graph_learner$predict_type <- "prob"
     task[["mlr3graphlearner"]] <- graph_learner
+
     if ("mlr3rsmp" %in% names(task)) {
       task[["mlr3resampled"]] <- mlr3::resample(
         task = task[["mlr3task"]],
