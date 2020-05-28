@@ -62,10 +62,23 @@ predict.sf_task <- function(
       return(task)
     }
 
-    for (name in data_names) {
-      task  <- predict_on_given_data(name, task)
+    if (any(c("mlr3model", "mlr3resampled") %in% names(task))) {
+      if (name == "test_data") {
+        assertthat::assert_that("mlr3resampled" %in% names(task))
+        task[["prediction_test"]] <- task[["mlr3resampled"]]$prediction() %>%
+          as.data.table()
+      } else if (name == "train_data") {
+        stop("Currently not supported")
+      } else if (name == "new_data") {
+        assertthat::assert_that("mlr3model" %in% names(task))
+        task[["prediction_new"]] <- task[["mlr3model"]]$predict_newdata(task[["new_data"]]) %>%
+          as.data.table()
+      }
+    } else {
+      for (name in data_names) {
+        task  <- predict_on_given_data(name, task)
+      }
     }
-
     return(task)
 }
 

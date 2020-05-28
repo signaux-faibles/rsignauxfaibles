@@ -93,6 +93,7 @@ train.sf_task <- function( #nolint
     log_param(task, "model_target",  "18 mois, defaut et defaillance")
 
   } else {
+    learner$predict_type <- "prob"
     possible_parameters <- learner$param_set %>% data.table::as.data.table() %>% .[, id] #nolint
     assertthat::assert_that(
       all(names(parameters) %in% possible_parameters),
@@ -101,13 +102,21 @@ train.sf_task <- function( #nolint
         sep = ", ")
     )
 
-    task[["mlr3graphlearner"]] <- mlr3pipelines::GraphLearner$new(task[["mlr3pipeline"]] %>>% learner) #nolint
-    task[["mlr3resampled"]] <- mlr3::resample(
-      task = task[["mlr3task"]],
-      learner = task[["mlr3graphlearner"]],
-      resampling = task[["mlr3rsmp"]]
-    )
-    task[["model"]] <- task[["mlr3resampled"]]
+    graph_learner <- mlr3pipelines::GraphLearner$new(
+      task[["mlr3pipeline"]] %>>% learner
+    ) #nolint
+    graph_learner$predict_type <- "prob"
+    task[["mlr3graphlearner"]] <- graph_learner
+
+    if ("mlr3rsmp" %in% names(task)) {
+      task[["mlr3resampled"]] <- mlr3::resample(
+        task = task[["mlr3task"]],
+        learner = task[["mlr3graphlearner"]],
+        resampling = task[["mlr3rsmp"]]
+      )
+    } else {
+      task[["mlr3model"]] <- graph_learner$train(task[["mlr3task"]])
+    }
   }
 
   return(invisible(task))

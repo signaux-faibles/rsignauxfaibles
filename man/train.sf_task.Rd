@@ -10,6 +10,7 @@
   parameters = NULL,
   seed = 0,
   train_fun = "xgboost",
+  learner = NULL,
   ...
 )
 }
