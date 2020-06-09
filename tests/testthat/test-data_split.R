@@ -56,8 +56,10 @@ test_that("mlr3 resampling obj is stored in 'mlr3rsmp' property", {
 test_that("invalid resampling_strategy does not create a 'mlr3rsmp' property", {
     test_no_mlr3rsmp <- function(rsmp_strat) {
       splitted <- split_data(test_task, resampling_strategy = rsmp_strat)
+      test_task_train <- test_task
+      test_task_train[["train_data"]] <- test_task[["hist_data"]]
       expect_false("mlr3rsmp" %in% names(splitted))
-      expect_equal(test_task, splitted)
+      expect_equal(test_task_train, splitted)
     }
     rsmp_strat_cases <- list("none", NULL)
     purrr::walk(rsmp_strat_cases, test_no_mlr3rsmp)

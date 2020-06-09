@@ -111,7 +111,6 @@ get_test_task <- function(
     return(task)
   }
 
-  browser()
   task[["model_parameters"]] <- list()
   task <- train(task, learner = learner)
 

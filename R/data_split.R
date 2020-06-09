@@ -40,6 +40,7 @@ split_data.sf_task <- function( #nolint
         "'resampling_strategy' n'est pas valide. Les paramètres valides sont:",
         allowable_strategies
         ))
+    task[["train_data"]] <- task[["hist_data"]]
     return(task)
   }
 
