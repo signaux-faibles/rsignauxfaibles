@@ -37,8 +37,6 @@ test_that(
     )
 })
 
-
-
 test_that("works with 'cv' resampling strategy,", {
     expect_error(split_data(test_task, resampling_strategy = "cv"), NA)
 })
