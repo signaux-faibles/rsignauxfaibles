@@ -12,6 +12,18 @@ test_that("evaluate works as expected on sf_tasks",  {
   expect_equal(benchmark_result$classif.acc, 1 / 3)
 })
 
+test_that("evaluate works as expected on sf_tasks with cv",  {
+  requireNamespace("mlr3measures")
+  trained_task <- get_test_task(
+    stage = "train",
+    resampling_strategy = "cv",
+    learner = mlr3::LearnerClassifFeatureless$new()
+  )
+  benchmark_result <- evaluate(trained_task, measures = msr("classif.acc"))
+  expect_is(benchmark_result, "data.table")
+  expect_true("classif.acc" %in% names(benchmark_result))
+  expect_equal(benchmark_result$classif.acc, 0.1)
+})
 
 test_that("evaluate works as expected on two sf_tasks",  {
   requireNamespace("mlr3measures")
@@ -32,6 +44,29 @@ test_that("evaluate works as expected on two sf_tasks",  {
   expect_is(benchmark_result, "data.table")
   expect_true("classif.acc" %in% names(benchmark_result))
   expect_equal(benchmark_result$classif.acc, c(1 / 3, 1 / 3))
+})
+
+
+test_that("evaluate works as expected on two sf_tasks with mixed cv and holdout",  {
+  requireNamespace("mlr3measures")
+  trained_task <- get_test_task(
+    stage = "train",
+    resampling_strategy = "cv",
+    learner = mlr3::LearnerClassifFeatureless$new()
+  )
+  other_task <- get_test_task(
+    stage = "train",
+    learner = mlr3::LearnerClassifFeatureless$new()
+  )
+
+  benchmark_result <- evaluate(
+    other_task,
+    trained_task,
+    measures = msr("classif.acc")
+  )
+  expect_is(benchmark_result, "data.table")
+  expect_true("classif.acc" %in% names(benchmark_result))
+  expect_equal(benchmark_result$classif.acc, c(1 / 3, 1 / 10))
 })
 
 

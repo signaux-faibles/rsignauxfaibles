@@ -42,6 +42,34 @@ test_that("train.sf_task works with learner as expected", {
   )
 })
 
+test_that("train.sf_task works with learner and cv as expected ", {
+  test_task <- get_test_task(resampling_strategy = "cv")
+  test_task[["mlr3pipeline"]] <- mlr3pipelines::po("nop")
+  test_task[["model_parameters"]] <- list()
+  trained_task <- train(
+    task = test_task,
+    outcome = "target",
+    learner = mlr3::lrn("classif.featureless")
+  )
+  expect_equal(
+    c(classif.acc = 0.1),
+    trained_task[["mlr3resampled"]]$aggregate(mlr3::msr("classif.acc")),
+  )
+})
+
+test_that("processing pipeline is stored in 'mlr3pipeline' property", {
+  test_mlr3pipeline_prop <- function(pipe) {
+    prep_task <- get_test_task(stage = "prepare", processing_pipeline = pipe)
+    expect_true("mlr3pipeline" %in% names(prep_task))
+    expect_true(inherits(prep_task[["mlr3pipeline"]], "PipeOp") ||
+      inherits(prep_task[["mlr3pipeline"]], "Graph"))
+  }
+  test_mlr3pipeline_prop(mlr3pipelines::PipeOpNOP$new())
+  test_mlr3pipeline_prop(
+    mlr3pipelines::as_graph(mlr3pipelines::PipeOpNOP$new())
+  )
+})
+
 
 test_that("train.sf_task works with learner as expected", {
   test_task <- get_test_task()

@@ -9,7 +9,6 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
-    MLsegmentr,
     assertthat,
     dplyr,
     fte,
@@ -43,7 +42,6 @@ Suggests:
 Remotes:
     AppliedDataSciencePartners/xgboostExplainer,
     mlr-org/mlr3pipelines,
-    signaux-faibles/MLsegmentr,
     signaux-faibles/fte
 RoxygenNote: 7.1.0
 Roxygen: list(markdown = TRUE)

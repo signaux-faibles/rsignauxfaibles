@@ -50,11 +50,21 @@ create_prepared_task <- function(test_task,
   return(prepared_task)
 }
 
-
 test_that("no error is thrown with a valid 'processing_pipeline'", {
   expect_error(
     get_test_task(
       stage = "prepare",
+      processing_pipeline = mlr3pipelines::PipeOpNOP$new()
+    ),
+  NA
+  )
+})
+
+test_that("no error is thrown with a valid 'processing_pipeline' with cv", {
+  expect_error(
+    get_test_task(
+      stage = "prepare",
+      resampling_strategy = "cv",
       processing_pipeline = mlr3pipelines::PipeOpNOP$new()
     ),
   NA
@@ -66,6 +76,7 @@ fake_pipe <- mlr3pipelines::PipeOpScale$new(
 )
 fake_pipe <- mlr3pipelines::as_graph(fake_pipe)
 
+# TEMP: will be deleted
 test_that("'processing_pipeline' is correctly applied", {
   prepared_task <- get_test_task(
     stage = "prepare",
@@ -95,9 +106,27 @@ test_that("'processing_pipeline' is correctly applied", {
   test_mean_sd(sd, 0.46, "test")
 })
 
+
 test_that("processing pipeline is stored in 'mlr3pipeline' property", {
   test_mlr3pipeline_prop <- function(pipe) {
     prep_task <- get_test_task(stage = "prepare", processing_pipeline = pipe)
+    expect_true("mlr3pipeline" %in% names(prep_task))
+    expect_true(inherits(prep_task[["mlr3pipeline"]], "PipeOp") ||
+      inherits(prep_task[["mlr3pipeline"]], "Graph"))
+  }
+  test_mlr3pipeline_prop(mlr3pipelines::PipeOpNOP$new())
+  test_mlr3pipeline_prop(
+    mlr3pipelines::as_graph(mlr3pipelines::PipeOpNOP$new())
+  )
+})
+
+test_that("processing pipeline is stored in 'mlr3pipeline' property with cv", {
+  test_mlr3pipeline_prop <- function(pipe) {
+    prep_task <- get_test_task(
+      stage = "prepare",
+      resampling_strategy = "cv",
+      processing_pipeline = pipe
+    )
     expect_true("mlr3pipeline" %in% names(prep_task))
     expect_true(inherits(prep_task[["mlr3pipeline"]], "PipeOp") ||
       inherits(prep_task[["mlr3pipeline"]], "Graph"))
