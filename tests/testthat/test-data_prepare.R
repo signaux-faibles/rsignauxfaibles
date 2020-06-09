@@ -50,7 +50,6 @@ create_prepared_task <- function(test_task,
   return(prepared_task)
 }
 
-fake_pipeline <- mlr3pipelines::as_graph(fake_pipeline)
 
 test_that("no error is thrown with a valid 'processing_pipeline'", {
   expect_error(
@@ -62,9 +61,10 @@ test_that("no error is thrown with a valid 'processing_pipeline'", {
   )
 })
 
-fake_pipe <- PipeOpScale$new(
+fake_pipe <- mlr3pipelines::PipeOpScale$new(
   param_vals = list(affect_columns = mlr3pipelines::selector_name("feature"))
 )
+fake_pipe <- mlr3pipelines::as_graph(fake_pipe)
 
 test_that("'processing_pipeline' is correctly applied", {
   prepared_task <- get_test_task(
@@ -125,7 +125,7 @@ test_that("prepare filters the requested features", {
   test_features(
     mutate_po,
     features = c("feature", "new_feature"),
-    mlr_features = "feature"
+    mlr_features = "feature" # new features are added when training
   )
 })
 

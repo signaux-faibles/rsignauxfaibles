@@ -46,8 +46,8 @@ test_that("works with 'cv' resampling strategy,", {
 test_that("mlr3 resampling obj is stored in 'mlr3rsmp' property", {
     test_mlr3rsmp <- function(rsmp_strat) {
       splitted <- split_data(test_task, resampling_strategy = rsmp_strat)
-      expect_true("mlr3rsmp" %in% names(task))
-      expect_true(inherits(task[["mlr3rsmp"]], "Resampling"))
+      expect_true("mlr3rsmp" %in% names(splitted))
+      expect_true(inherits(splitted[["mlr3rsmp"]], "Resampling"))
     }
     rsmp_strat_cases <- list("holdout", "cv")
     purrr::walk(rsmp_strat_cases, test_mlr3rsmp)
