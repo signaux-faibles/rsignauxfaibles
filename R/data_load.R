@@ -767,7 +767,8 @@ build_sector_match_stage <- function(
 #' correspond à aucune données. Le niveau 1 aux données élémentaires, et le
 #' niveau 2 toutes les données retravaillées.
 #'
-#' @return `character()` \cr Vecteur de noms de variables @export
+#' @return `character()` \cr Vecteur de noms de variables
+#' @export
 get_fields <- function(
   training,
   siren = 2,
