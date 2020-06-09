@@ -12,7 +12,8 @@ evaluate(
   prediction_names = NULL,
   target_names = "outcome",
   segment_names = NULL,
-  remove_strong_signals = TRUE
+  remove_strong_signals = TRUE,
+  measures = NULL
 )
 }
 \arguments{

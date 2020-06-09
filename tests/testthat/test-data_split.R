@@ -68,7 +68,9 @@ test_that("'cv' respects 'nfold' parameter", {
     expect_equal(splitted$mlr3rsmp$param_set$values$folds, 5)
 })
 
-test_that("split_data est reproductible et crée des champs train_data et test_data", {
+test_that(
+  "split_data est reproductible et crée des champs train_data et test_data", {
+  skip_on_ci()
   splitted_task  <- split_data(
     test_task,
     ratio = 2 / 3,

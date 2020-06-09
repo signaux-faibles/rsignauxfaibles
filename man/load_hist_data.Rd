@@ -62,6 +62,11 @@ données.}
 \item{code_ape}{\code{character()} \cr Liste de codes APE à exporter. Si égale à
 \code{NULL}, charge tous les codes disponibles.}
 
+\item{database_query_fun}{\code{function} \cr Fonction qui permet de requêter la
+base de données.}
+
+\item{debug}{\code{logical(1)} \cr si \code{TRUE}, alors la requête est affichée.}
+
 \item{...}{Additional parameters depending on class of task}
 }
 \value{
