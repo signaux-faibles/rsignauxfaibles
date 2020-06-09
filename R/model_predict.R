@@ -27,57 +27,62 @@ predict.sf_task <- function(
   task  <- object
   set_verbose_level(task)
 
-  assertthat::assert_that(all(c("model") %in% names(task)),
-    msg = "Task should have a model to predict on new
-    data")
+  predict_on_given_data <- function(data_name, task) {
 
-    predict_on_given_data <- function(data_name, task) {
-
-      prepared_data_name <- paste0("prepared_", data_name)
-      if (!prepared_data_name %in% names(task)) {
-        logger::log_warn("{data_name} is missing or has not been prepared yet")
-        return(task)
-      }
-
-      logger::log_info("Model is being applied on {prepared_data_name}")
-
-      prediction <- predict_fun(
-        model = task[["model"]],
-        new_data = task[[prepared_data_name]]
-      )
-
-      if (is.data.frame(prediction)) {
-        dup_names <- intersect(names(prediction %>%
-            dplyr::select(-siret, -periode)),
-          names(task[[data_name]]))
-        task[[data_name]] <- task[[data_name]] %>%
-          dplyr::select(-one_of(dup_names))
-        task[[data_name]] <- task[[data_name]] %>%
-          left_join(prediction, by = c("siret", "periode"))
-      } else {
-        task[[data_name]][["score"]]  <- prediction
-      }
-
-      logger::log_info("Prediction successfully done.")
+    prepared_data_name <- paste0("prepared_", data_name)
+    if (!prepared_data_name %in% names(task)) {
+      logger::log_warn("{data_name} is missing or has not been prepared yet")
       return(task)
     }
 
-    if (any(c("mlr3model", "mlr3resampled") %in% names(task))) {
-      if (name == "test_data") {
-        assertthat::assert_that("mlr3resampled" %in% names(task))
-        task[["prediction_test"]] <- task[["mlr3resampled"]]$prediction()
-      } else if (name == "train_data") {
-        stop("Currently not supported")
-      } else if (name == "new_data") {
-        assertthat::assert_that("mlr3model" %in% names(task))
-        task[["prediction_new"]] <- task[["mlr3model"]]$predict_newdata(task[["new_data"]])
-      }
+    logger::log_info("Model is being applied on {prepared_data_name}")
+
+    prediction <- predict_fun(
+      model = task[["model"]],
+      new_data = task[[prepared_data_name]]
+    )
+
+    if (is.data.frame(prediction)) {
+      dup_names <- intersect(names(prediction %>%
+          dplyr::select(-siret, -periode)),
+        names(task[[data_name]]))
+      task[[data_name]] <- task[[data_name]] %>%
+        dplyr::select(-one_of(dup_names))
+      task[[data_name]] <- task[[data_name]] %>%
+        left_join(prediction, by = c("siret", "periode"))
     } else {
-      for (name in data_names) {
-        task  <- predict_on_given_data(name, task)
-      }
+      task[[data_name]][["score"]]  <- prediction
     }
+
+    logger::log_info("Prediction successfully done.")
     return(task)
+  }
+
+
+  if (any(c("mlr3model", "mlr3resampled") %in% names(task))) {
+
+    if ("test_data" %in% data_names) {
+
+      assertthat::assert_that("mlr3resampled" %in% names(task))
+      task[["prediction_test"]] <- task[["mlr3resampled"]]$prediction()
+
+    } else if ("train_data" %in% data_names) {
+
+      stop("Currently not supported")
+
+    } else if ("new_data" %in% data_names) {
+
+      assertthat::assert_that("mlr3model" %in% names(task))
+      task[["prediction_new"]] <- task[["mlr3model"]]$predict_newdata(
+        task[["new_data"]]
+      )
+    }
+  } else {
+    for (name in data_names) {
+      task  <- predict_on_given_data(name, task)
+    }
+  }
+  return(task)
 }
 
 #' Predict model on new data for a cross-validated task

@@ -1,6 +1,6 @@
 context("Check the test/train split function")
 
-my_test_frame <- expand.grid(
+split_test_frame <- expand.grid(
   siret = unlist(
     tidyr::unite(
       expand.grid(siren = 100000001:100000500, et_id = 20001:20004),
@@ -19,10 +19,60 @@ dplyr::mutate(
   outcome = rep(c(TRUE, FALSE), length.out = n())
 )
 
-test_task <- get_test_task(my_test_frame, "outcome", stage = "load")
+test_task <- get_test_task(
+  fake_data = split_test_frame,
+  fake_target = "outcome",
+  stage = "load"
+)
+
+test_that(
+  "split_data does not throw an error with 'holdout' resampling strategy", {
+    expect_error(
+      split_data(
+        test_task,
+        ratio = 1 / 3,
+        resampling_strategy = "holdout"
+        ),
+        NA
+    )
+})
 
 
-test_that("split_data est reproductible et crée des champs train_data et test_data", {
+
+test_that("works with 'cv' resampling strategy,", {
+    expect_error(split_data(test_task, resampling_strategy = "cv"), NA)
+})
+
+test_that("mlr3 resampling obj is stored in 'mlr3rsmp' property", {
+    test_mlr3rsmp <- function(rsmp_strat) {
+      splitted <- split_data(test_task, resampling_strategy = rsmp_strat)
+      expect_true("mlr3rsmp" %in% names(splitted))
+      expect_true(inherits(splitted[["mlr3rsmp"]], "Resampling"))
+    }
+    rsmp_strat_cases <- list("holdout", "cv")
+    purrr::walk(rsmp_strat_cases, test_mlr3rsmp)
+})
+
+test_that("invalid resampling_strategy does not create a 'mlr3rsmp' property", {
+    test_no_mlr3rsmp <- function(rsmp_strat) {
+      splitted <- split_data(test_task, resampling_strategy = rsmp_strat)
+      test_task_train <- test_task
+      test_task_train[["train_data"]] <- test_task[["hist_data"]]
+      expect_false("mlr3rsmp" %in% names(splitted))
+      expect_equal(test_task_train, splitted)
+    }
+    rsmp_strat_cases <- list("none", NULL)
+    purrr::walk(rsmp_strat_cases, test_no_mlr3rsmp)
+})
+
+test_that("'cv' respects 'nfold' parameter", {
+    splitted <- split_data(test_task, nfolds = 5, resampling_strategy = "cv")
+    expect_equal(splitted$mlr3rsmp$param_set$values$folds, 5)
+})
+
+test_that(
+  "split_data est reproductible et crée des champs train_data et test_data", {
+  skip_on_ci()
   splitted_task  <- split_data(
     test_task,
     ratio = 2 / 3,

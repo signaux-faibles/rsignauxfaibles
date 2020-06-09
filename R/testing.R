@@ -9,11 +9,16 @@
 get_test_task <- function(
   fake_data = NULL,
   fake_target = "target",
-  stage = "prepare"
+  training_fields = "feature",
+  stage = "prepare",
+  resampling_strategy = "holdout",
+  processing_pipeline = NULL,
+  learner = NULL,
+  measures = NULL
 ) {
 
   assertthat::assert_that(
-    stage %in% c("load", "split", "prepare"),
+    stage %in% c("load", "split", "prepare", "train"),
     msg = "Stage should be either 'load', 'split' or 'prepare'"
     )
 
@@ -40,6 +45,7 @@ get_test_task <- function(
     target = fake_target,
     verbose = FALSE
   )
+
   mock_query_database <- function(...) {
     return(fake_data)
   }
@@ -51,21 +57,63 @@ get_test_task <- function(
     database_query_fun = mock_query_database
   )
 
+  task <- load_new_data(
+    task,
+    periods = as.Date("2014-10-01"),
+    batch = "0000",
+    fields = names(fake_data),
+    database_query_fun = mock_query_database
+    )
+
   if (stage == "load") {
     return(task)
   }
-  task  <- split_data(task, ratio = 2 / 3, resampling_strategy = "holdout")
+
+  task  <- split_data(
+    task,
+    resampling_strategy = resampling_strategy
+  )
+
   if (stage == "split") {
     return(task)
   }
 
-  task[["new_data"]]  <- task[["hist_data"]]
-  task[["prepared_train_data"]]  <- task[["train_data"]]
-  task[["prepared_test_data"]]  <- task[["test_data"]]
-  task[["outcome_field"]] <- "target"
+  if (!is.null(processing_pipeline)) {
+  task <- prepare(
+    task,
+    training_fields = training_fields,
+    processing_pipeline = processing_pipeline
+    )
+  } else {
+    # TEMP temporary
+    fake_preparation_map_function <- function(data_to_prepare, options) {
+      return(1)
+    }
 
-  # stage == "prepare"
-  # TODO real preparation. Then change in create_fte_test_task as well.
+    fake_prepare_function  <- function(data_to_prepare, options) {
+      return(data_to_prepare)
+    }
+
+    shape_identity <- function(x, options) {
+      return(x)
+    }
+    task <- prepare(
+      task,
+      outcome_field = fake_target,
+      preparation_map_function = fake_preparation_map_function,
+      prepare_function = fake_prepare_function,
+      shape_frame_function = shape_identity,
+      training_fields = training_fields
+    )
+    # END TEMP
+  }
+  if (stage == "prepare") {
+    return(task)
+  }
+
+  task[["model_parameters"]] <- list()
+  task <- train(task, learner = learner)
+
   return(task)
 }
 

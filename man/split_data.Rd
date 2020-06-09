@@ -5,18 +5,21 @@
 \alias{split_data}
 \title{Scission des données en échantillon d'entraînement et de test.}
 \usage{
-\method{split_data}{sf_task}(task, ratio = 2/3, resampling_strategy = "holdout", ...)
+\method{split_data}{sf_task}(task, ratio = 2/3, nfolds = 5, resampling_strategy = "holdout", ...)
 
 split_data(task, ...)
 }
 \arguments{
 \item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
-\item{ratio}{\code{numeric(1)} \cr Ratio of data
-used for training.}
+\item{ratio}{\code{numeric(1)} \cr Ratio des données utilisées pour
+l'entraînement. Ignoré si 'resampling_strategy != "holdout"'}
 
-\item{resampling_strategy}{\code{character(1)} \cr Either "holdout"
-or "cross_validation"}
+\item{nfolds}{\code{numeric(1)} \cr Nombre d'échantillons de validation croisé.
+Ignoré si 'resampling_strategy != "cv"'.}
+
+\item{resampling_strategy}{\code{character(1)} \cr Ou bien "holdout"
+ou "cv". Toute autre valeur n'occasionne aucun échantillonnage.}
 
 \item{...}{Not used}
 }

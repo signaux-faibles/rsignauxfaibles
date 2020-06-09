@@ -51,71 +51,94 @@ create_prepared_task <- function(test_task,
 }
 
 
-TestPipeOp <- R6::R6Class("TestPipeOp", #nolint
-  inherit = mlr3pipelines::PipeOpTaskPreprocSimple,
-  public = list(
-    initialize = function(id = "test", ...) {
-      super$initialize(id, feature_types = "numeric", ...)
-    }
+test_that("no error is thrown with a valid 'processing_pipeline'", {
+  expect_error(
+    get_test_task(
+      stage = "prepare",
+      processing_pipeline = mlr3pipelines::PipeOpNOP$new()
     ),
-  private = list(
-    .get_state_dt = function(dt, levels, target) {
-      list(offset = 1)
-    },
-    .transform_dt = function(dt, levels) {
-        dt[,
-          (names(dt)) := purrr::map(.SD, ~ . + self$state$offset)
-        ]
-    }
+  NA
   )
-)
+})
 
-fake_pipeline <- TestPipeOp$new(
+fake_pipe <- mlr3pipelines::PipeOpScale$new(
   param_vals = list(affect_columns = mlr3pipelines::selector_name("feature"))
 )
-fake_pipeline <- mlr3pipelines::as_graph(fake_pipeline)
+fake_pipe <- mlr3pipelines::as_graph(fake_pipe)
 
-test_that("Prepare task works with mlr3pipeline as expected", {
-  prepared_task <- create_prepared_task(
-    test_task,
-    processing_pipeline = fake_pipeline
+test_that("'processing_pipeline' is correctly applied", {
+  prepared_task <- get_test_task(
+    stage = "prepare",
+    processing_pipeline = fake_pipe
   )
+  # TEMP
   expect_true(all(
       c("prepared_train_data", "prepared_test_data") %in%
         names(prepared_task)
       ))
-  expect_equal(
-    prepared_task[["prepared_train_data"]]$feature,
-    prepared_task[["train_data"]]$feature + 1
+
+  test_mean_sd <- function(mean_or_sd, expected, test_or_train) {
+    expect_equal(
+      mean_or_sd(
+        prepared_task[[paste0("prepared_", test_or_train, "_data")]]$feature
+      ),
+      expected,
+      tolerance = 10e-3
+    )
+  }
+
+  # train_data
+  test_mean_sd(mean, 0, "train")
+  test_mean_sd(sd, 1, "train")
+  # test_data
+  test_mean_sd(mean, 0.346, "test")
+  test_mean_sd(sd, 0.46, "test")
+})
+
+test_that("processing pipeline is stored in 'mlr3pipeline' property", {
+  test_mlr3pipeline_prop <- function(pipe) {
+    prep_task <- get_test_task(stage = "prepare", processing_pipeline = pipe)
+    expect_true("mlr3pipeline" %in% names(prep_task))
+    expect_true(inherits(prep_task[["mlr3pipeline"]], "PipeOp") ||
+      inherits(prep_task[["mlr3pipeline"]], "Graph"))
+  }
+  test_mlr3pipeline_prop(mlr3pipelines::PipeOpNOP$new())
+  test_mlr3pipeline_prop(
+    mlr3pipelines::as_graph(mlr3pipelines::PipeOpNOP$new())
   )
-  expect_equal(
-    prepared_task[["prepared_test_data"]]$feature,
-    prepared_task[["test_data"]]$feature + 1
-  )
-  })
+})
 
 test_that("prepare filters the requested features", {
-  prepared_task <- create_prepared_task(test_task)
-  testthat::expect_equal(
-    prepared_task[["training_fields"]],
-    "feature"
+  test_features <- function(pipe, features, mlr_features = features) {
+    prepared_task <- get_test_task(
+      stage = "prepare",
+      processing_pipeline = pipe,
+      training_fields = features
     )
-  testthat::expect_equal(
-    prepared_task[["mlr3task"]]$col_roles$feature,
-    "feature"
-    )
-  })
+    # TEMP
+    expect_equal(prepared_task[["training_fields"]], features)
+    expect_equal(prepared_task[["mlr3task"]]$col_roles$feature, mlr_features)
+  }
+  test_features(NULL, "feature")
+  mutate_po <- mlr3pipelines::PipeOpMutate$new()
+  mutate_po$param_set$values$mutation <- list(new_feature = ~ feature ^ 2)
+  test_features(
+    mutate_po,
+    features = c("feature", "new_feature"),
+    mlr_features = "feature" # new features are added when training
+  )
+})
 
 test_that("prepare changes the outcome field if requested", {
   prepared_task <- create_prepared_task(test_task)
   testthat::expect_equal(
     prepared_task[["outcome_field"]],
     "target"
-    )
+  )
   testthat::expect_equal(
     prepared_task[["mlr3task"]]$col_roles$target,
     "target"
-    )
+  )
   prepared_task2 <- create_prepared_task(
     test_task,
     target =  "periode"
@@ -123,12 +146,12 @@ test_that("prepare changes the outcome field if requested", {
   testthat::expect_equal(
     prepared_task2[["outcome_field"]],
     "periode"
-    )
+  )
   testthat::expect_equal(
     prepared_task2[["mlr3task"]]$col_roles$target,
     "periode"
-    )
-  })
+  )
+})
 
 test_that("Prepare task works with options as expected", {
   offset2_task <- create_prepared_task(
@@ -152,7 +175,7 @@ test_that("Prepare task works with options as expected", {
     no_offset_task[["train_data"]]$feature
   )
   expect_true(inherits(matrix_task[["prepared_test_data"]], "matrix"))
-  })
+})
 
 create_fte_test_task <- function(processing_pipeline = NULL) {
   test_task <- get_test_task(stage = "load")
@@ -161,7 +184,7 @@ create_fte_test_task <- function(processing_pipeline = NULL) {
       ab = c("a", "b", "a", "a", "a", "b", "b", "a", "b", "a"),
       cd = c("d", "d", "c", "c", "d", "d", "c", "c", "c", "d"),
       outcome = c(TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE)
-      )
+    )
 
   prepared_task <- get_test_task(
     fake_data = new_data,
