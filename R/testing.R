@@ -18,7 +18,7 @@ get_test_task <- function(
 ) {
 
   assertthat::assert_that(
-    stage %in% c("load", "split", "prepare"),
+    stage %in% c("load", "split", "prepare", "train"),
     msg = "Stage should be either 'load', 'split' or 'prepare'"
     )
 
@@ -110,6 +110,11 @@ get_test_task <- function(
   if (stage == "prepare") {
     return(task)
   }
+
+  browser()
+  task[["model_parameters"]] <- list()
+  task <- train(task, learner = learner)
+
   return(task)
 }
 
