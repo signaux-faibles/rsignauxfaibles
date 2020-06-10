@@ -54,7 +54,7 @@ prepare.sf_task <- function( #nolint
   shape_frame_function = shape_for_xgboost,
   shape_frame_options = list(),
   # NEW API
-  processing_pipeline = NULL,
+  processing_pipeline = get_default_pipeline(),
   # END
   preprocessing_strategy = NULL,
   ...
@@ -216,6 +216,10 @@ create_fte_pipeline <- function(
       affect_columns = mlr3pipelines::selector_name(target_encode_fields)
       )
    )
+}
+
+get_default_pipeline <- function() {
+  return(create_fte_pipeline(c("code_ape_niveau2", "code_ape_niveau3")))
 }
 
 

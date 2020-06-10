@@ -103,7 +103,8 @@ get_test_task <- function(
       preparation_map_function = fake_preparation_map_function,
       prepare_function = fake_prepare_function,
       shape_frame_function = shape_identity,
-      training_fields = training_fields
+      training_fields = training_fields,
+      processing_pipeline = NULL
     )
     # END TEMP
   }
