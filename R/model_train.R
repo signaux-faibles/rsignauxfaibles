@@ -46,11 +46,6 @@ train.sf_task <- function( #nolint
     )
   }
 
-  assertthat::assert_that(
-    "prepared_train_data" %in% names(task),
-    msg = "task does not contain prepared train data."
-  )
-
   if (is.null(parameters)) {
     parameters <- task[["model_parameters"]]
   }

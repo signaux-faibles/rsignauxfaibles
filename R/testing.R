@@ -12,7 +12,7 @@ get_test_task <- function(
   training_fields = "feature",
   stage = "prepare",
   resampling_strategy = "holdout",
-  processing_pipeline = NULL,
+  processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
   learner = NULL,
   measures = NULL
 ) {
@@ -78,36 +78,12 @@ get_test_task <- function(
     return(task)
   }
 
-  if (!is.null(processing_pipeline)) {
   task <- prepare(
     task,
     training_fields = training_fields,
     processing_pipeline = processing_pipeline
-    )
-  } else {
-    # TEMP temporary
-    fake_preparation_map_function <- function(data_to_prepare, options) {
-      return(1)
-    }
+  )
 
-    fake_prepare_function  <- function(data_to_prepare, options) {
-      return(data_to_prepare)
-    }
-
-    shape_identity <- function(x, options) {
-      return(x)
-    }
-    task <- prepare(
-      task,
-      outcome_field = fake_target,
-      preparation_map_function = fake_preparation_map_function,
-      prepare_function = fake_prepare_function,
-      shape_frame_function = shape_identity,
-      training_fields = training_fields,
-      processing_pipeline = NULL
-    )
-    # END TEMP
-  }
   if (stage == "prepare") {
     return(task)
   }

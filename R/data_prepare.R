@@ -42,27 +42,13 @@ prepare.sf_task <- function( #nolint
     ),
   training_fields = get_fields(training = TRUE),
   outcome_field = NULL,
-  # OLD API
-  preparation_map_function = create_fte_map,
-  preparation_map_options = list(
-    target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3")
-    ),
-  prepare_function = apply_fte_map,
-  prepare_options = list(
-    target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3")
-    ),
-  shape_frame_function = shape_for_xgboost,
-  shape_frame_options = list(),
-  # NEW API
   processing_pipeline = get_default_pipeline(),
-  # END
   preprocessing_strategy = NULL,
   ...
   ) {
 
   set_verbose_level(task)
   data_names <- subset_data_names_in_task(data_names, task)
-
 
   ## Core ##
   task[["training_fields"]] <- training_fields
@@ -74,38 +60,8 @@ prepare.sf_task <- function( #nolint
     task[["mlr3task"]]$col_roles$target <- outcome_field
   }
 
-  if (is.null(processing_pipeline)) {
-    task[["mlr3pipeline"]] <- mlr3pipelines::po("nop")
-    task  <- purrr::reduce(
-      data_names,
-      ~ prepare_one_data_name(
-        task = .x,
-        data_name = .y,
-        preparation_map_function,
-        preparation_map_options,
-        prepare_function,
-        prepare_options,
-        shape_frame_function,
-        shape_frame_options
-        ),
-      .init = task,
-    )
-  }  else {
-    task[["mlr3pipeline"]] <- processing_pipeline
-    gpo <-  mlr3pipelines::as_graph(
-      task[["mlr3pipeline"]]
-    )
-
-    # TEMP temporary
-    train_id <- task[["mlr3rsmp"]]$train_set(1)
-    test_id <- task[["mlr3rsmp"]]$test_set(1)
-    gpo$train(task[["mlr3task"]]$clone()$filter(train_id))
-    pred <- gpo$predict(task[["mlr3task"]])[[1]]
-    task[["prepared_train_data"]] <- pred$data(train_id) %>% as.data.frame()
-    task[["prepared_test_data"]] <- pred$data(test_id) %>% as.data.frame()
-    # END TEMP
-  }
-
+  task[["mlr3pipeline"]] <- processing_pipeline
+  gpo <-  mlr3pipelines::as_graph(task[["mlr3pipeline"]])
 
   task[["mlr3task"]]$col_roles$feature <- intersect(
     training_fields,
