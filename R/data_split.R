@@ -35,10 +35,11 @@ split_data.sf_task <- function( #nolint
 
   if (is.null(resampling_strategy) ||
     !resampling_strategy %in% allowable_strategies) {
+    browser()
     logger::log_info(paste(
         "Les données ne sont pas échantillonnées car le paramètre",
         "'resampling_strategy' n'est pas valide. Les paramètres valides sont:",
-        paste(allowable_strategies, sep = ", ")
+        paste(allowable_strategies, collapse = ", ")
         ))
     task[["train_data"]] <- task[["hist_data"]]
     return(task)
