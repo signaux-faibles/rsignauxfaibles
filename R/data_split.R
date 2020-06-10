@@ -35,7 +35,6 @@ split_data.sf_task <- function( #nolint
 
   if (is.null(resampling_strategy) ||
     !resampling_strategy %in% allowable_strategies) {
-    browser()
     logger::log_info(paste(
         "Les données ne sont pas échantillonnées car le paramètre",
         "'resampling_strategy' n'est pas valide. Les paramètres valides sont:",
