@@ -10,7 +10,7 @@ get_test_task(
   training_fields = "feature",
   stage = "prepare",
   resampling_strategy = "holdout",
-  processing_pipeline = NULL,
+  processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
   learner = NULL,
   measures = NULL
 )

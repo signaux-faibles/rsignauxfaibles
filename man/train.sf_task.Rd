@@ -4,33 +4,25 @@
 \alias{train.sf_task}
 \title{Entraînement de l'algorithme}
 \usage{
-\method{train}{sf_task}(
-  task,
-  outcome = "outcome",
-  parameters = NULL,
-  seed = 0,
-  train_fun = "xgboost",
-  learner = NULL,
-  ...
-)
+\method{train}{sf_task}(task, seed = 0, learner = get_default_learner(), ...)
 }
 \arguments{
 \item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
-\item{outcome}{\code{character()} \cr Nom de la colonne dans laquelle on trouve
-l'objectif d'apprentissage.}
+\item{seed}{\code{integer()}\cr Graîne pour que les calculs aléatoires soient
+reproductibles.}
+
+\item{...}{Not used}
 
 \item{parameters}{\code{list(any())} \cr Paramètres du modèle. Cf
 \verb{[train_light_gradient_boosting]}. Si \code{NULL}, alors des paramètres par
 défaut sont sélectionnés.}
 
-\item{seed}{\code{integer()}\cr Graîne pour que les calculs aléatoires soient
-reproductibles.}
-
 \item{train_fun}{\code{training_data} \cr Training_function, or "xgboost" or
 "linear"}
 
-\item{...}{Not used}
+\item{outcome}{\code{character()} \cr Nom de la colonne dans laquelle on trouve
+l'objectif d'apprentissage.}
 }
 \value{
 \verb{[sf_task]} \cr L'objet \code{task} donné en entré, auquel a été ajouté

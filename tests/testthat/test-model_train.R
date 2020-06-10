@@ -11,19 +11,6 @@ parameters  <- list(
   ntrees = 60,
   min_child_weight = 1
 )
-test_that("train.sf_task works as expected", {
-  test_task <- get_test_task()
-  test_task[["model_parameters"]] <- parameters
-  trained_task <- train(
-    task = test_task,
-    outcome = "target",
-    train_fun = test_train_function
-  )
-  expect_equal(
-    trained_task[["model"]](3),
-    3
-  )
-})
 
 test_that("train.sf_task works with learner as expected", {
   test_task <- get_test_task()
@@ -89,36 +76,19 @@ test_that("train.sf_task works with learner as expected", {
   )
 })
 
-
-test_that("train.cv works as expected", {
-  test_task <- get_cv_test_task()
-  test_task[["model"]] <- NULL
-  test_task[["model_parameters"]] <- parameters
-  trained_task <- train(
-    task = test_task,
-    outcome = "target",
-    train_fun = test_train_function
-  )
-  expect_equal(
-    trained_task[["cross_validation"]][[4]][["model"]](3),
-    3
-  )
-})
-
 test_that(
-  "Les logs de la fonction 'prepare_data' fonctionnent correctement", {
+  "Les logs de la fonction 'train_data' fonctionnent correctement", {
     task <- get_test_task()
-    task[["model_parameters"]] <- parameters
     task[["tracker"]] <- new.env()
     with_mock(
-      train(task, outcome = "target", train_fun = test_train_function),
+      train(task, learner = mlr3::LearnerClassifFeatureless$new()),
       log_param = mock_log_param,
       log_metric = mock_log_metric
     )
     expect_true(length(ls(task[["tracker"]])) > 0)
     expect_setequal(
       names(task[["tracker"]]),
-      c("model_name", "model_target", "model_parameters")
+      c("model_name", "model_target")
     )
     expect_equal(
       get("model_name", envir = task[["tracker"]]),
@@ -128,9 +98,5 @@ test_that(
       get("model_target", envir = task[["tracker"]]),
       "18 mois, defaut et defaillance"
     )
-    expect_equal(
-      get("model_parameters", envir = task[["tracker"]]),
-      parameters
-      )
   }
 )

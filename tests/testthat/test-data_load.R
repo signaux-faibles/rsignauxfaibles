@@ -192,6 +192,10 @@ test_that("assemble_stages_to_query ignores NULLs", {
       assemble_stages_to_query(NULL, list(a = 1)) %>% toString(),
       '[{"a":1}]'
      )
+   expect_equal(
+      assemble_stages_to_query(list(b = NULL), list(a = 1)) %>% toString(),
+      '[{"a":1}]'
+     )
 })
 
 test_that("build_standard_query builds a valid query", {
@@ -384,3 +388,9 @@ test_that(
   expect_equal(as.character(test_object$siret), "01234567891011")
   expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
 })
+
+test_that(
+  "get_fields has not inadvertedly changed", {
+    # Mostly for coverage.
+    expect_length(get_fields(TRUE), 267)
+  })

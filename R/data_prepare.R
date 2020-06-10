@@ -42,27 +42,13 @@ prepare.sf_task <- function( #nolint
     ),
   training_fields = get_fields(training = TRUE),
   outcome_field = NULL,
-  # OLD API
-  preparation_map_function = create_fte_map,
-  preparation_map_options = list(
-    target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3")
-    ),
-  prepare_function = apply_fte_map,
-  prepare_options = list(
-    target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3")
-    ),
-  shape_frame_function = shape_for_xgboost,
-  shape_frame_options = list(),
-  # NEW API
-  processing_pipeline = NULL,
-  # END
+  processing_pipeline = get_default_pipeline(),
   preprocessing_strategy = NULL,
   ...
   ) {
 
   set_verbose_level(task)
   data_names <- subset_data_names_in_task(data_names, task)
-
 
   ## Core ##
   task[["training_fields"]] <- training_fields
@@ -74,38 +60,8 @@ prepare.sf_task <- function( #nolint
     task[["mlr3task"]]$col_roles$target <- outcome_field
   }
 
-  if (is.null(processing_pipeline)) {
-    task[["mlr3pipeline"]] <- mlr3pipelines::po("nop")
-    task  <- purrr::reduce(
-      data_names,
-      ~ prepare_one_data_name(
-        task = .x,
-        data_name = .y,
-        preparation_map_function,
-        preparation_map_options,
-        prepare_function,
-        prepare_options,
-        shape_frame_function,
-        shape_frame_options
-        ),
-      .init = task,
-    )
-  }  else {
-    task[["mlr3pipeline"]] <- processing_pipeline
-    gpo <-  mlr3pipelines::as_graph(
-      task[["mlr3pipeline"]]
-    )
-
-    # TEMP temporary
-    train_id <- task[["mlr3rsmp"]]$train_set(1)
-    test_id <- task[["mlr3rsmp"]]$test_set(1)
-    gpo$train(task[["mlr3task"]]$clone()$filter(train_id))
-    pred <- gpo$predict(task[["mlr3task"]])[[1]]
-    task[["prepared_train_data"]] <- pred$data(train_id) %>% as.data.frame()
-    task[["prepared_test_data"]] <- pred$data(test_id) %>% as.data.frame()
-    # END TEMP
-  }
-
+  task[["mlr3pipeline"]] <- processing_pipeline
+  gpo <-  mlr3pipelines::as_graph(task[["mlr3pipeline"]])
 
   task[["mlr3task"]]$col_roles$feature <- intersect(
     training_fields,
@@ -132,82 +88,6 @@ subset_data_names_in_task <- function(data_names, task) {
   return(data_names[!data_name_is_missing])
 }
 
-
-#' Prepares one type of data (train, test, validation, new, other ...)
-prepare_one_data_name <- function(
-  task,
-  data_name,
-  preparation_map_function,
-  preparation_map_options,
-  prepare_function,
-  prepare_options,
-  shape_frame_function,
-  shape_frame_options
-  ) {
-
-  training_fields <- task[["training_fields"]]
-
-  log_preparation_info(data_name)
-
-  is_train_data <- (data_name == "train_data")
-  if (is_train_data) {
-    task[["preparation_map"]]  <- preparation_map_function(
-      task[[data_name]],
-      c(
-        preparation_map_options,
-        list(
-          TRAINING_FIELDS = task[["training_fields"]],
-          OUTCOME_FIELD = task[["outcome_field"]]
-        )
-      )
-    )
-  }
-
-  # Maybe set prepare_train_options to default here
-  prepared_data <- prepare_function(
-    task[[data_name]],
-    c(
-      prepare_options,
-      list(
-        PREPARATION_MAP = task[["preparation_map"]],
-        IS_TRAIN_DATA = is_train_data,
-        TRAINING_FIELDS = task[["training_fields"]],
-        OUTCOME_FIELD = task[["outcome_field"]]
-      )
-    )
-  )
-
-  filtered_data <- prepared_data %>%
-    dplyr::select(dplyr::one_of(training_fields))
-
-  shaped_data <- shape_frame_function(
-    filtered_data,
-    shape_frame_options
-  )
-
-  task[[paste0("prepared_", data_name)]]  <- shaped_data
-  return(invisible(task))
-}
-
-#' Logs minimal information on preparation
-log_preparation_info <- function(data_name) {
-  if (data_name == "train_data") {
-    logger::log_info("Preparing {data_name} for training")
-  } else {
-    logger::log_info("Preparing {data_name} for predicting")
-  }
-  return()
-}
-
-#' Asserts that preparation map is present in data
-assert_preparation_map <- function(task) {
-  assertthat::assert_that(
-    "preparation_map" %in% names(task),
-    msg = 'No preparation map has been found. Have you prepared the
-    "train_data" first ?'
-  )
-}
-
 create_fte_pipeline <- function(
    target_encode_fields
   ) {
@@ -218,91 +98,8 @@ create_fte_pipeline <- function(
    )
 }
 
-
-#' Création d'une carte de préparation
-#'
-#'
-#'
-#'
-#'
-#'
-#' @export
-create_fte_map <- function(
-  data_to_prepare,
-  options
-  ) {
-  assertthat::assert_that(all(
-      c("target_encode_fields") %in%
-        names(options)
-      ))
-  outcome_field <- options[["OUTCOME_FIELD"]]
-  target_encode_fields <- options[["target_encode_fields"]]
-
-  preparation_map <- fte::target_encode_create(
-    data_to_encode = data_to_prepare,
-    group_variables = target_encode_fields,
-    outcome_variable = outcome_field
-  )
-
-  return(preparation_map)
-}
-
-
-#' Préparation des données pour l'entraînement
-#'
-#' Prépare les données pour l'entraînement, avec du target encoding et la
-#' transformation en matrice pour alimenter xgboost.
-#'
-#' La carte de target encoding est retourné en paramètre de sortie afin de
-#' pouvoir l'utiliser sur d'autres échantillons de données.
-#'
-#' @inheritParams prepare.sf_task
-#' @param data_to_prepare `data.frame()` \cr Données à préparer
-#' @param shape_function `function(data.frame => ?)` \cr
-#'   Fonction qui met en forme les données pour l'apprentissage.
-#'
-#' @return `list(2)` \cr
-#'   Une liste avec deux champs:
-#'   * "data": `H2OFrame`; les données préparées
-#'   * "preparation_map": `list(H2OFrame)`; la carte de target encoding
-#' @export
-apply_fte_map <- function(
-  data_to_prepare,
-  options
-  ) {
-
-  assertthat::assert_that(all(
-      c("target_encode_fields") %in%
-        names(options)
-      ))
-  outcome_field <- options[["OUTCOME_FIELD"]]
-  target_encode_fields <- options[["target_encode_fields"]]
-  should_target_encode <- length(target_encode_fields) > 0
-  if (! should_target_encode) {
-    return(data_to_prepare)
-  }
-
-  if (options[["IS_TRAIN_DATA"]]) {
-    holdout_type <- "leave_one_out"
-    prior_sample_size <- 30
-    noise_level <- 0.02
-  } else {
-    holdout_type <- "none"
-    prior_sample_size <- 30
-    noise_level <- 0
-  }
-
-  prepared_data <- fte::target_encode_apply(
-    data = data_to_prepare,
-    group_variables =  target_encode_fields,
-    outcome_variable = outcome_field,
-    preparation_map = options[["PREPARATION_MAP"]],
-    holdout_type = holdout_type,
-    prior_sample_size = prior_sample_size,
-    noise_level = noise_level
-  )
-
-  return(prepared_data)
+get_default_pipeline <- function() {
+  return(create_fte_pipeline(c("code_ape_niveau2", "code_ape_niveau3")))
 }
 
 #' Returns a matrix for using xgboost
@@ -333,60 +130,24 @@ assert_only_valid_columns <- function(data_to_shape) {
     return()
 }
 
-#' Prepares a cross-validated task
-#'
-#' Prepares all subtasks (one for each fold) from cv_task. Benefits from the
-#' same defaults as for sf_tasks.
-#'
-#' @inheritParams prepare.sf_task
-#' @return The task given as input where each fold-task has been prepared.
-#' @export
-prepare.cv_task <- function( #nolint
+# TODO def
+get_prepared_data <- function(
   task,
-  data_names = c("train_data",
-    "test_data",
-    "new_data"
-    ),
-  preparation_map_function = create_fte_map,
-  preparation_map_options = list(
-    outcome_field = outcome_field,
-    target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3")
-    ),
-  prepare_function = apply_fte_map,
-  prepare_options = list(
-    outcome_field = outcome_field,
-    target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3")
-    ),
-  shape_frame_function = shape_for_xgboost,
-  shape_frame_options = list(),
-  outcome_field = "outcome",
-  preprocessing_strategy = NULL,
-  training_fields =  get_fields(training = TRUE),
-  ...
+  train_or_test
   ) {
-
-  requireNamespace("purrr")
-
-  task[["cross_validation"]] <- purrr::map(
-    .x = task[["cross_validation"]],
-    .f = prepare.sf_task,
-    data_names = data_names,
-    preparation_map_function = create_fte_map,
-    preparation_map_options = list(
-      outcome_field = outcome_field,
-      target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3")
-      ),
-    prepare_function = apply_fte_map,
-    prepare_options = list(
-      outcome_field = outcome_field,
-      target_encode_fields = c("code_ape_niveau2", "code_ape_niveau3")
-      ),
-    shape_frame_function = shape_for_xgboost,
-    shape_frame_options = list(),
-    outcome_field = outcome_field,
-    tracker = tracker,
-    preprocessing_strategy = preprocessing_strategy,
-    training_fields = training_fields
+  assertthat::assert_that(train_or_test %in% c("train", "test"))
+  assertthat::assert_that(
+    "mlr3pipeline" %in% names(task),
+    msg = "A pipeline is needed to get prepared data (property: mlr3pipeline)"
   )
-  return(task)
+  train_id <- task[["mlr3rsmp"]]$train_set(1)
+  gpo <- mlr3pipelines::as_graph(task[["mlr3pipeline"]])
+  gpo$train(task[["mlr3task"]]$clone()$filter(train_id))
+  pred <- gpo$predict(task[["mlr3task"]])[[1]]
+  if (train_or_test == "test") {
+    test_id <- task[["mlr3rsmp"]]$test_set(1)
+    return(pred$data(test_id) %>% as.data.frame())
+  } else {
+    return(pred$data(train_id) %>% as.data.frame())
+  }
 }

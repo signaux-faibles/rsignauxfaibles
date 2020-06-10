@@ -12,7 +12,7 @@ get_test_task <- function(
   training_fields = "feature",
   stage = "prepare",
   resampling_strategy = "holdout",
-  processing_pipeline = NULL,
+  processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
   learner = NULL,
   measures = NULL
 ) {
@@ -78,35 +78,12 @@ get_test_task <- function(
     return(task)
   }
 
-  if (!is.null(processing_pipeline)) {
   task <- prepare(
     task,
     training_fields = training_fields,
     processing_pipeline = processing_pipeline
-    )
-  } else {
-    # TEMP temporary
-    fake_preparation_map_function <- function(data_to_prepare, options) {
-      return(1)
-    }
+  )
 
-    fake_prepare_function  <- function(data_to_prepare, options) {
-      return(data_to_prepare)
-    }
-
-    shape_identity <- function(x, options) {
-      return(x)
-    }
-    task <- prepare(
-      task,
-      outcome_field = fake_target,
-      preparation_map_function = fake_preparation_map_function,
-      prepare_function = fake_prepare_function,
-      shape_frame_function = shape_identity,
-      training_fields = training_fields
-    )
-    # END TEMP
-  }
   if (stage == "prepare") {
     return(task)
   }
@@ -115,32 +92,6 @@ get_test_task <- function(
   task <- train(task, learner = learner)
 
   return(task)
-}
-
-
-get_cv_test_task <- function() {
-  sf_task <- get_test_task()
-
-  cv_task <-  sf_task[c(
-    "name",
-    "database",
-    "collection",
-    "mongodb_uri",
-    "tracker",
-    "hist_data",
-    "new_data"
-    )]
-
-  class(cv_task) <- c("cv_task", "sf_task")
-  cv_task[["cross_validation"]] <- rep(list(get_test_task()), 4)
-  cv_task[["cross_validation"]] <- purrr::map2(
-    cv_task[["cross_validation"]],
-    1:4,
-    function(task, holdout) {
-      task[["train_data"]] <- task[["train_data"]][-holdout, ]
-      return(task)
-    })
-  return(cv_task)
 }
 
 # Pass an environment to client and it will assign new variables in it.

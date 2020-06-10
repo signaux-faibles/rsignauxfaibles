@@ -598,7 +598,7 @@ build_sector_query <- function(
 
 assemble_stages_to_query <- function(...) {
   query <- list(...)  %>%
-    .[!purrr::map_lgl(., is.null)] %>%
+    .[!purrr::map_lgl(., ~ is.null(.) || is.null(.[[1]]))] %>%
     jsonlite::toJSON(auto_unbox = TRUE)
   return(query)
 }
@@ -767,7 +767,8 @@ build_sector_match_stage <- function(
 #' correspond à aucune données. Le niveau 1 aux données élémentaires, et le
 #' niveau 2 toutes les données retravaillées.
 #'
-#' @return `character()` \cr Vecteur de noms de variables @export
+#' @return `character()` \cr Vecteur de noms de variables
+#' @export
 get_fields <- function(
   training,
   siren = 2,

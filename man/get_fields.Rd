@@ -56,7 +56,7 @@ disponibles si \code{training}= \code{TRUE}.}
 exercices Diane & Bdf}
 }
 \value{
-\code{character()} \cr Vecteur de noms de variables @export
+\code{character()} \cr Vecteur de noms de variables
 }
 \description{
 Fonction utilitaire pour récupérer rapidement une liste de noms de
