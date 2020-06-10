@@ -350,3 +350,24 @@ prepare.cv_task <- function( #nolint
   )
   return(task)
 }
+
+get_prepared_data <- function(
+  task,
+  train_or_test
+  ) {
+  assertthat::assert_that(train_or_test %in% c("train", "test"))
+  assertthat::assert_that(
+    "mlr3pipeline" %in% names(task),
+    msg = "A pipeline is needed to get prepared data (property: mlr3pipeline)"
+  )
+  train_id <- task[["mlr3rsmp"]]$train_set(1)
+  gpo <- mlr3pipelines::as_graph(task[["mlr3pipeline"]])
+  gpo$train(task[["mlr3task"]]$clone()$filter(train_id))
+  pred <- gpo$predict(task[["mlr3task"]])[[1]]
+  if (train_or_test == "test") {
+    test_id <- task[["mlr3rsmp"]]$test_set(1)
+    return(pred$data(test_id) %>% as.data.frame())
+  } else {
+    return(pred$data(train_id) %>% as.data.frame())
+  }
+}

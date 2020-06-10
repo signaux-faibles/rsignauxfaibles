@@ -50,17 +50,9 @@ test_that("'processing_pipeline' is correctly applied", {
     processing_pipeline = fake_pipe
   )
   test_mean_sd <- function(mean_or_sd, expected, test_or_train) {
-    train_id <- prep_task[["mlr3rsmp"]]$train_set(1)
-    test_id <- prep_task[["mlr3rsmp"]]$test_set(1)
-    gpo <- mlr3pipelines::as_graph(prep_task[["mlr3pipeline"]])
-    gpo$train(prep_task[["mlr3task"]]$clone()$filter(train_id))
-    pred <- gpo$predict(prep_task[["mlr3task"]])[[1]]
-    prep_task[["prepared_test_data"]] <- pred$data(test_id) %>% as.data.frame()
-    prep_task[["prepared_train_data"]] <- pred$data(train_id) %>% as.data.frame()
-
     expect_equal(
       mean_or_sd(
-        prep_task[[paste0("prepared_", test_or_train, "_data")]]$feature
+        get_prepared_data(prep_task, test_or_train)$feature
         ),
       expected,
       tolerance = 10e-3
@@ -159,7 +151,7 @@ create_fte_test_task <- function(processing_pipeline = NULL) {
     cbind(
       ab = c("a", "b", "a", "a", "a", "b", "b", "a", "b", "a"),
       cd = c("d", "d", "c", "c", "d", "d", "c", "c", "c", "d"),
-      outcome = c(TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE)
+      outcome = c(TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE) # nolint
     )
 
   prepared_task <- get_test_task(
@@ -176,13 +168,8 @@ test_that("fte state works as expected", {
   testthat::skip_on_ci()
   prep_task <- create_fte_test_task(create_fte_pipeline(c("ab", "cd")))
 
-  train_id <- prep_task[["mlr3rsmp"]]$train_set(1)
-  test_id <- prep_task[["mlr3rsmp"]]$test_set(1)
-  gpo <- mlr3pipelines::as_graph(prep_task[["mlr3pipeline"]])
-  gpo$train(prep_task[["mlr3task"]]$clone()$filter(train_id))
-  pred <- gpo$predict(prep_task[["mlr3task"]])[[1]]
   prep_task[["prepared_test_data"]] <-   expect_known_hash(
-    pred$data(test_id) %>% as.data.frame(),
+    get_prepared_data(prep_task, "test"),
     "e646accbaf"
     )
 })
