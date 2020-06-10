@@ -11,7 +11,6 @@ LazyData: true
 Imports:
     assertthat,
     dplyr,
-    fte,
     jsonlite,
     logger,
     lubridate,
@@ -42,7 +41,6 @@ Suggests:
 Remotes:
     AppliedDataSciencePartners/xgboostExplainer,
     mlr-org/mlr3pipelines,
-    signaux-faibles/fte
 RoxygenNote: 7.1.0
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/signaux-faibles/rsignauxfaibles
