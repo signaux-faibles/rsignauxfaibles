@@ -44,35 +44,36 @@ fake_pipe <- mlr3pipelines::PipeOpScale$new(
 )
 fake_pipe <- mlr3pipelines::as_graph(fake_pipe)
 
-# TEMP: must be adapted
-# test_that("'processing_pipeline' is correctly applied", {
-#   prepared_task <- get_test_task(
-#     stage = "prepare",
-#     processing_pipeline = fake_pipe
-#   )
-#   # TEMP
-#   expect_true(all(
-#       c("prepared_train_data", "prepared_test_data") %in%
-#         names(prepared_task)
-#       ))
+test_that("'processing_pipeline' is correctly applied", {
+  prep_task <- get_test_task(
+    stage = "prepare",
+    processing_pipeline = fake_pipe
+  )
+  test_mean_sd <- function(mean_or_sd, expected, test_or_train) {
+    train_id <- prep_task[["mlr3rsmp"]]$train_set(1)
+    test_id <- prep_task[["mlr3rsmp"]]$test_set(1)
+    gpo <- mlr3pipelines::as_graph(prep_task[["mlr3pipeline"]])
+    gpo$train(prep_task[["mlr3task"]]$clone()$filter(train_id))
+    pred <- gpo$predict(prep_task[["mlr3task"]])[[1]]
+    prep_task[["prepared_test_data"]] <- pred$data(test_id) %>% as.data.frame()
+    prep_task[["prepared_train_data"]] <- pred$data(train_id) %>% as.data.frame()
 
-#   test_mean_sd <- function(mean_or_sd, expected, test_or_train) {
-#     expect_equal(
-#       mean_or_sd(
-#         prepared_task[[paste0("prepared_", test_or_train, "_data")]]$feature
-#       ),
-#       expected,
-#       tolerance = 10e-3
-#     )
-#   }
+    expect_equal(
+      mean_or_sd(
+        prep_task[[paste0("prepared_", test_or_train, "_data")]]$feature
+        ),
+      expected,
+      tolerance = 10e-3
+    )
+  }
 
-#   # train_data
-#   test_mean_sd(mean, 0, "train")
-#   test_mean_sd(sd, 1, "train")
-#   # test_data
-#   test_mean_sd(mean, 0.346, "test")
-#   test_mean_sd(sd, 0.46, "test")
-# })
+  # train_data
+  test_mean_sd(mean, 0, "train")
+  test_mean_sd(sd, 1, "train")
+  # test_data
+  test_mean_sd(mean, 0.346, "test")
+  test_mean_sd(sd, 0.46, "test")
+})
 
 
 test_that("processing pipeline is stored in 'mlr3pipeline' property", {
