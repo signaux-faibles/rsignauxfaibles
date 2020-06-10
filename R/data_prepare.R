@@ -105,7 +105,7 @@ get_default_pipeline <- function() {
   pipeline <- create_fte_pipeline(
     c("code_ape_niveau2", "code_ape_niveau3")
     ) %>>%
-    po(
+    mlr3pipelines::po(
       "encode",
       method = "treatment",
       affect_columns = selector_type("factor")
