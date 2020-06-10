@@ -28,6 +28,8 @@ train.sf_task <- function( #nolint
   ...
   ) {
 
+  require(mlr3learners)
+
   set_verbose_level(task)
 
   logger::log_info("Model is being trained.")
