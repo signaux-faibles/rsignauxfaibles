@@ -192,6 +192,10 @@ test_that("assemble_stages_to_query ignores NULLs", {
       assemble_stages_to_query(NULL, list(a = 1)) %>% toString(),
       '[{"a":1}]'
      )
+   expect_equal(
+      assemble_stages_to_query(list(b = NULL), list(a = 1)) %>% toString(),
+      '[{"a":1}]'
+     )
 })
 
 test_that("build_standard_query builds a valid query", {

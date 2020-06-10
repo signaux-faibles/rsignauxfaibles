@@ -598,7 +598,7 @@ build_sector_query <- function(
 
 assemble_stages_to_query <- function(...) {
   query <- list(...)  %>%
-    .[!purrr::map_lgl(., is.null)] %>%
+    .[!purrr::map_lgl(., ~ is.null(.) || is.null(.[[1]]))] %>%
     jsonlite::toJSON(auto_unbox = TRUE)
   return(query)
 }
