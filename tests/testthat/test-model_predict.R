@@ -15,7 +15,6 @@ test_that("predict works as expected with mlr3", {
    )
 })
 
-
 test_that("predict works as expected with mlr3, with cv", {
    trained_task <- get_test_task(
      stage = "train",
