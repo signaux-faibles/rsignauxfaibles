@@ -108,7 +108,7 @@ get_default_pipeline <- function() {
     mlr3pipelines::po(
       "encode",
       method = "treatment",
-      affect_columns = selector_type("factor")
+      affect_columns = mlr3pipelines::selector_type("factor")
     )
   return(pipeline)
 }
