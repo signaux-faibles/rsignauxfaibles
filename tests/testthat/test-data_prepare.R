@@ -118,6 +118,7 @@ test_that("prepare filters the requested features", {
   )
 })
 
+
 test_that("prepare changes the outcome field if requested", {
   prepared_task <- create_prepared_task(test_task)
   testthat::expect_equal(
@@ -167,10 +168,35 @@ test_that("fte state works as expected", {
   testthat::skip_on_ci()
   prep_task <- create_fte_test_task(create_fte_pipeline(c("ab", "cd")))
 
-  prep_task[["prepared_test_data"]] <-   expect_known_hash(
+  expect_known_hash(
     get_prepared_data(prep_task, "test"),
     "e646accbaf"
     )
+})
+
+
+test_that("preparing twice with different training fields takes effect", {
+  prep_task <- create_fte_test_task(mlr3pipelines::PipeOpNOP$new())
+
+  check_names <- function(names){
+    expect_setequal(
+      names(get_prepared_data(prep_task, "test")),
+      names
+    )
+  }
+  check_names(c("outcome", "feature", "ab", "cd"))
+  prep_task <- prepare(
+    prep_task,
+    processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
+    training_fields = "feature"
+    )
+  check_names(c("outcome", "feature"))
+  prep_task <- prepare(
+    prep_task,
+    processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
+    training_fields = c("feature", "ab", "cd")
+    )
+  check_names(c("outcome", "feature", "ab", "cd"))
 })
 
 test_that(
