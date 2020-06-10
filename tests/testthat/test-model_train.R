@@ -17,7 +17,8 @@ test_that("train.sf_task works as expected", {
   trained_task <- train(
     task = test_task,
     outcome = "target",
-    train_fun = test_train_function
+    train_fun = test_train_function,
+    learner = NULL
   )
   expect_equal(
     trained_task[["model"]](3),
@@ -97,7 +98,8 @@ test_that("train.cv works as expected", {
   trained_task <- train(
     task = test_task,
     outcome = "target",
-    train_fun = test_train_function
+    train_fun = test_train_function,
+    learner = NULL
   )
   expect_equal(
     trained_task[["cross_validation"]][[4]][["model"]](3),
@@ -106,12 +108,12 @@ test_that("train.cv works as expected", {
 })
 
 test_that(
-  "Les logs de la fonction 'prepare_data' fonctionnent correctement", {
+  "Les logs de la fonction 'train_data' fonctionnent correctement", {
     task <- get_test_task()
     task[["model_parameters"]] <- parameters
     task[["tracker"]] <- new.env()
     with_mock(
-      train(task, outcome = "target", train_fun = test_train_function),
+      train(task, outcome = "target", train_fun = test_train_function, learner = NULL),
       log_param = mock_log_param,
       log_metric = mock_log_metric
     )

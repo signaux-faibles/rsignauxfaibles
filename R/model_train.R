@@ -29,7 +29,7 @@ train.sf_task <- function( #nolint
   seed = 0,
   ## Neither should this
   train_fun = "xgboost",
-  learner = NULL,
+  learner = get_default_learner(),
   ...
   ) {
 
@@ -124,6 +124,10 @@ train.sf_task <- function( #nolint
   return(invisible(task))
 }
 
+get_default_learner <- function() {
+  return(mlr3::lrn("classif.xgboost"))
+}
+
 #' Train a model on a cross-validated task
 #'
 #' Train models for each subtask, i.e. for each cross-validation fold.
@@ -138,6 +142,7 @@ train.cv_task  <- function(
   parameters = NULL,
   seed = 0,
   train_fun = "xgboost",
+  learner = get_default_learner(),
   ...
   ) {
 
@@ -153,6 +158,7 @@ train.cv_task  <- function(
     parameters = parameters,
     tracker = tracker,
     train_fun = train_fun,
+    learner = learner,
     seed = seed
   )
 
