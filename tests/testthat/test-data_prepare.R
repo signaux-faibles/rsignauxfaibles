@@ -105,7 +105,6 @@ test_that("prepare filters the requested features", {
       processing_pipeline = pipe,
       training_fields = features
     )
-    # TEMP
     expect_equal(prepared_task[["training_fields"]], features)
     expect_equal(prepared_task[["mlr3task"]]$col_roles$feature, mlr_features)
   }

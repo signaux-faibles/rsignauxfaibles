@@ -94,32 +94,6 @@ get_test_task <- function(
   return(task)
 }
 
-
-get_cv_test_task <- function() {
-  sf_task <- get_test_task()
-
-  cv_task <-  sf_task[c(
-    "name",
-    "database",
-    "collection",
-    "mongodb_uri",
-    "tracker",
-    "hist_data",
-    "new_data"
-    )]
-
-  class(cv_task) <- c("cv_task", "sf_task")
-  cv_task[["cross_validation"]] <- rep(list(get_test_task()), 4)
-  cv_task[["cross_validation"]] <- purrr::map2(
-    cv_task[["cross_validation"]],
-    1:4,
-    function(task, holdout) {
-      task[["train_data"]] <- task[["train_data"]][-holdout, ]
-      return(task)
-    })
-  return(cv_task)
-}
-
 # Pass an environment to client and it will assign new variables in it.
 mock_log_param <- function(task, key, value, ...) {
   assertthat::assert_that(inherits(task[["tracker"]], "environment"))

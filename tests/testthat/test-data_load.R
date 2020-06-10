@@ -388,3 +388,9 @@ test_that(
   expect_equal(as.character(test_object$siret), "01234567891011")
   expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
 })
+
+test_that(
+  "get_fields has not inadvertedly changed", {
+    # Mostly for coverage.
+    expect_length(get_fields(TRUE), 267)
+  })
