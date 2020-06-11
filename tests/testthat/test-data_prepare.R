@@ -167,7 +167,7 @@ test_that("fte state works as expected", {
 
   expect_known_hash(
     get_prepared_data(prep_task, "test"),
-    "e646accbaf"
+    "40734c2555"
     )
 })
 
