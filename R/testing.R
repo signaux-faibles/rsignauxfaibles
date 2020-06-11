@@ -13,14 +13,24 @@ get_test_task <- function(
   stage = "prepare",
   resampling_strategy = "holdout",
   processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
-  learner = NULL,
-  measures = NULL
+  learner = mlr3::LearnerClassifFeatureless$new(),
+  measures = msr("classif.acc")
 ) {
 
+  admissible_stages <- c(
+    "load",
+    "split",
+    "prepare",
+    "train",
+    "evaluate"
+  )
   assertthat::assert_that(
-    stage %in% c("load", "split", "prepare", "train"),
-    msg = "Stage should be either 'load', 'split' or 'prepare'"
+    stage %in% admissible_stages,
+    msg = paste0(
+      "Stage should be either ",
+      paste0(admissible_stages, collapse = ", ")
     )
+  )
 
   if (is.null(fake_data)) {
     fake_data <- data.frame(
@@ -88,8 +98,13 @@ get_test_task <- function(
     return(task)
   }
 
-  task[["model_parameters"]] <- list()
   task <- train(task, learner = learner)
+
+  if (stage == "train") {
+    return(task)
+  }
+
+  task <- evaluate(task, measures = measures)
 
   return(task)
 }

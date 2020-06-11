@@ -44,6 +44,11 @@ test_that("train.sf_task works with learner and cv as expected ", {
   )
 })
 
+test_that("train.sf_task returns a task", {
+  test_task <- get_test_task(stage = "train")
+  expect_is(test_task, "sf_task")
+})
+
 test_that("processing pipeline is stored in 'mlr3pipeline' property", {
   test_mlr3pipeline_prop <- function(pipe) {
     prep_task <- get_test_task(stage = "prepare", processing_pipeline = pipe)

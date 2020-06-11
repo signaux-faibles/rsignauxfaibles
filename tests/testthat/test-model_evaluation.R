@@ -85,3 +85,9 @@ test_that("evaluate works as expected with two measures",  {
   expect_equal(benchmark_result$classif.acc, c(1 / 3))
   expect_equal(benchmark_result$classif.ce, c(2 / 3))
 })
+
+
+test_that("evaluate.sf_task returns a task", {
+  test_task <- get_test_task(stage = "evaluate")
+  expect_is(test_task, "sf_task")
+})
