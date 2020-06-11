@@ -98,8 +98,7 @@ export.sf_task <- function(
         collection = collection_features,
         mongodb_uri = mongodb_uri,
         last_batch = batch,
-        known_sirens_full_path = known_sirens_full_path,
-        verbose = attr(task, "verbose")
+        known_sirens_full_path = known_sirens_full_path
         )
 
     logger::log_info(
@@ -147,8 +146,6 @@ export.sf_task <- function(
 #'   les données.
 #' @param known_sirens_full_path `character()` \cr Chemins absolus des
 #'   fichiers contenant des listes de sirens connus.
-#' @param verbose `logical()` \cr Faut-il imprimer des informations sur le
-#'   chargement des données supplémentaires ?
 #'
 #' @return `data.frame()`\cr
 #'   Données formatées avec les champs "siret", "periode", "score",
@@ -162,15 +159,10 @@ format_for_export <- function(
   collection,
   mongodb_uri,
   last_batch,
-  known_sirens_full_path,
-  verbose) {
+  known_sirens_full_path
+  ) {
 
   requireNamespace("logger")
-  if (verbose) {
-    logger::log_threshold(logger::TRACE)
-  } else {
-    logger::log_threshold(logger::WARN)
-  }
 
   prediction <- data_to_export %>%
     select(siret, periode, score)

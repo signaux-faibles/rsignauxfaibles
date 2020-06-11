@@ -52,8 +52,7 @@ get_test_task <- function(
     database = "fake_database",
     collection = "fake_collection",
     id = "Fake task",
-    target = fake_target,
-    verbose = FALSE
+    target = fake_target
   )
 
   mock_query_database <- function(...) {

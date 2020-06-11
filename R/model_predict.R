@@ -25,7 +25,6 @@ predict.sf_task <- function(
   ) {
 
   task  <- object
-  set_verbose_level(task)
 
   predict_on_given_data <- function(data_name, task) {
 

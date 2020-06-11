@@ -41,7 +41,6 @@ NULL
 #'   \code{NULL}, charge tous les codes disponibles.
 #' @param database_query_fun `function` \cr Fonction qui permet de requêter la
 #'   base de données.
-#' @param debug `logical(1)` \cr si `TRUE`, alors la requête est affichée.
 #'
 #' @return `[sf_task]` \cr
 #'   L'objet \code{task} donné en entrée auquel le champs "hist_data" a été
@@ -66,12 +65,9 @@ load_hist_data.sf_task <- function(
   sirets = NULL,
   code_ape = NULL,
   database_query_fun = query_database,
-  debug = FALSE,
-  # TODO: ^^ inclure dans le logging bas niveau. Idem pour load_new_data
   ...
   ) {
 
-  set_verbose_level(task)
   logger::log_info("Chargement des données historiques.")
 
 
@@ -92,9 +88,7 @@ load_hist_data.sf_task <- function(
     sirets = sirets,
     code_ape = code_ape,
     subsample = subsample,
-    verbose = attr(task, "verbose"),
-    database_query_fun = database_query_fun,
-    debug = debug
+    database_query_fun = database_query_fun
   )
 
   if (nrow(hist_data) > 1) {
@@ -163,9 +157,7 @@ load_new_data.sf_task <- function(
   min_effectif = 10L,
   rollback_months = 1L,
   database_query_fun = query_database,
-  debug = FALSE,
   ...) {
-  set_verbose_level(task)
 
   logger::log_info("Loading data from last batch")
   task[["new_data"]] <- import_data(
@@ -177,9 +169,7 @@ load_new_data.sf_task <- function(
     date_sup = max(periods) %m+% months(1),
     min_effectif = min_effectif,
     fields = fields,
-    verbose = attr(task, "verbose"),
-    database_query_fun = database_query_fun,
-    debug = debug
+    database_query_fun = database_query_fun
   )
 
   if ("periode" %in% fields &&
@@ -215,8 +205,6 @@ load_new_data.sf_task <- function(
 #'   permis de mélanger des codes de différents niveaux.
 #' @param subsample `integer(1)` \cr Nombre d'objets (c'est-à-dire de couples
 #'   siret x periode) à échantillonner.
-#' @param verbose `logical(1)` \cr Faut-il afficher dans le terminal des
-#'   informations sur l'évolution du chargement des données?
 #' @param replace_missing `list()` \cr Liste nommée, dont les noms sont les
 #'   noms de variables et les valeurs sont les valeurs de remplacement des NA.
 #'   Si égal à NULL, alors des remplacements par défauts
@@ -261,18 +249,11 @@ import_data <- function(
   sirets = NULL,
   code_ape = NULL,
   subsample = NULL,
-  verbose = FALSE,
   replace_missing = NULL,
-  database_query_fun = query_database,
-  debug
+  database_query_fun = query_database
   ) {
 
   requireNamespace("logger")
-  if (verbose) {
-    logger::log_threshold(logger::TRACE)
-  } else {
-    logger::log_threshold(logger::WARN)
-  }
 
   assertthat::assert_that(date_sup > date_inf)
   if (is.null(sirets) && is.null(code_ape)) {
@@ -310,24 +291,21 @@ import_data <- function(
     )
   }
 
-  if (debug) {
-    cat(query)
-  }
+  logger::log_debug(query)
 
   assertthat::assert_that(
     is.null(fields) || all(c("periode", "siret") %in% fields)
   )
 
   logger::log_info("Connexion a la collection mongodb {collection} ...")
-  df <- database_query_fun(query, database, collection, mongodb_uri, verbose)
+  df <- database_query_fun(query, database, collection, mongodb_uri)
   logger::log_info("Import fini.")
 
 
   df <- replace_missing_data(
     df = df,
     fields = fields,
-    replace_missing = replace_missing,
-    verbose = verbose
+    replace_missing = replace_missing
   )
 
   n_eta <- dplyr::n_distinct(df$siret)
@@ -350,15 +328,14 @@ query_database <- function(
   query,
   database,
   collection,
-  mongodb_uri,
-  verbose
+  mongodb_uri
   ) {
 
   dbconnection <- mongolite::mongo(
     collection = collection,
     db = database,
     url = mongodb_uri,
-    verbose = verbose
+    verbose = logger::log_threshold() <= logger::INFO
   )
   logger::log_info("Connexion effectuée avec succès. Début de l'import.")
   df <- dbconnection$aggregate(query)
@@ -368,8 +345,7 @@ query_database <- function(
 replace_missing_data <- function(
   df,
   fields,
-  replace_missing,
-  verbose
+  replace_missing
   ) {
 
   df <- add_missing_fields(
@@ -404,7 +380,7 @@ replace_missing_data <- function(
     )
   }
 
-  if (verbose && any(names(replace_missing) %in% colnames(df))) {
+  if (any(names(replace_missing) %in% colnames(df))) {
     logger::log_info("Filling missing values with default values.")
   }
 

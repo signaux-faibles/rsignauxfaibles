@@ -46,7 +46,6 @@ prepare.sf_task <- function( #nolint
   ...
   ) {
 
-  set_verbose_level(task)
   data_names <- subset_data_names_in_task(data_names, task)
 
   ## Core ##

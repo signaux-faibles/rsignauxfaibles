@@ -30,7 +30,6 @@ split_data.sf_task <- function( #nolint
   ...
 ) {
 
-  set_verbose_level(task)
   allowable_strategies <- mlr3::mlr_resamplings$keys()
 
   if (is.null(resampling_strategy) ||

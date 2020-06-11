@@ -13,8 +13,6 @@ NULL
 #' Un objet s3 de type sf_task est défini, dans lequel seront défini et
 #' stockés les tâches intermédiaires et les résultats de l'apprentissage.
 #'
-#' @param verbose `logical(1)` \cr
-#'   Active ou désactive le log des actions ultérieures.
 #' @inheritParams mongodb_connection
 #' @inheritParams generic_task
 #' @param experiment_name `character()` \cr
@@ -26,9 +24,7 @@ NULL
 #'   utiliseront la propriété `tracker$run_id`.
 #'
 #' @return `[rsignauxfaibles::sf_task]` \cr
-#'   Un objet sf_task avec un attribut de type `logical` "verbose", qui
-#'   définit le niveau de log, ainsi qu'un attribut "to_log" de type `list`
-#'   dans lequel seront stockés des informations spécifiques pour le log.
+#'   Un objet sf_task
 #'
 #' @export
 sf_task <- function(
@@ -37,8 +33,7 @@ sf_task <- function(
   collection = "Features",
   id = "Signaux-faibles",
   target = "outcome",
-  tracker = NULL,
-  verbose
+  tracker = NULL
   ) {
   res <- list(
     mongodb_uri = mongodb_uri,
@@ -49,24 +44,7 @@ sf_task <- function(
     tracker = tracker
   )
   class(res) <- "sf_task"
-  attr(res, "verbose") <- verbose
   return(res)
-}
-
-#' Active ou désactive le logging
-#'
-#' Prend en compte l'attribut "verbose" de l'objet task pour fixer le bon
-#' niveau de logging
-#' @param task `[sf_task]` \cr Objet s3 de type sf_task
-#' @return TRUE
-set_verbose_level <- function(task) {
-  requireNamespace("logger")
-  if (attr(task, "verbose")) {
-    logger::log_threshold(logger::TRACE)
-  } else {
-    logger::log_threshold(logger::WARN)
-  }
-  return(TRUE)
 }
 
 #' Print sf_task
@@ -105,7 +83,6 @@ print.sf_task <- function(x, ...) {
 #' @param field_names `character()` \cr Nom des champs à vérifier.
 #' @return Nom des champs écrasés, `character(0)` sinon.
 check_overwrites <- function(task, field_names) {
-  set_verbose_level(task)
   overwrite <- intersect(field_names, names(task))
   if (length(overwrite) > 1) {
     logger::log_info(

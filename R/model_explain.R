@@ -27,8 +27,6 @@ explain.sf_task <- function(
     msg = "Waterfall plots are currently only available for local explainations"
   )
 
-  set_verbose_level(task)
-
   explainer <- switch(type,
     "global" = xgboost_global_explainer,
     "local" = xgboost_local_explainer

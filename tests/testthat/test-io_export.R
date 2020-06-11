@@ -35,7 +35,7 @@ test_that("Test inputs for export_scores function to mongodb", {
   dbconnection <- mongolite::mongo(
     collection = test_collection,
     db = test_database,
-    verbose = TRUE,
+    verbose = FALSE,
     url = test_mongodb_uri
   )
   expect_error(export_scores_to_mongodb(
@@ -72,7 +72,7 @@ test_that("Scores are well exported with export_scores_to_mongodb function", {
   dbconnection <- mongolite::mongo(
     collection = test_collection,
     db = test_database,
-    verbose = TRUE,
+    verbose = FALSE,
     url = test_mongodb_uri
   )
   dbconnection$remove(query = "{}")
