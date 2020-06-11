@@ -32,7 +32,7 @@ train.sf_task <- function( #nolint
   require(mlr3learners)
 
 
-  logger::log_info("Model is being trained.")
+  lgr::lgr$info("Model is being trained.")
 
   graph_learner <- mlr3pipelines::GraphLearner$new(
     task[["mlr3pipeline"]] %>>% learner
@@ -50,7 +50,7 @@ train.sf_task <- function( #nolint
   } else {
     task[["mlr3model"]] <- graph_learner$train(task[["mlr3task"]])
   }
-  logger::log_info("Model trained_successfully")
+  lgr::lgr$info("Model trained_successfully")
 
   pipeops <- mlr3pipelines::as_graph(task[["mlr3graph_learner"]])$pipeops
   purrr::walk2(

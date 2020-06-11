@@ -46,7 +46,7 @@ evaluate <- function(
 
   resample_results <- purrr::map(tasks, "mlr3resample_result")
   if (should_remove_strong_signals) {
-    logger::log_info("Les 'signaux forts' sont retires des donnees
+    lgr::lgr$info("Les 'signaux forts' sont retires des donnees
       d'evaluation (test, validation)")
       resample_results <- purrr::map(resample_results, remove_strong_signals)
   }

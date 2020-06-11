@@ -34,7 +34,7 @@ split_data.sf_task <- function( #nolint
 
   if (is.null(resampling_strategy) ||
     !resampling_strategy %in% allowable_strategies) {
-    logger::log_info(paste(
+    lgr::lgr$info(paste(
         "Les données ne sont pas échantillonnées car le paramètre",
         "'resampling_strategy' n'est pas valide. Les paramètres valides sont:",
         paste(allowable_strategies, collapse = ", ")
@@ -43,7 +43,7 @@ split_data.sf_task <- function( #nolint
     return(task)
   }
 
-  logger::log_info(paste0("Les donnees historiques sont scindes en ",
+  lgr::lgr$info(paste0("Les donnees historiques sont scindes en ",
       "echantillons d'entrainement et de test"))
 
   assertthat::assert_that("hist_data" %in% names(task),

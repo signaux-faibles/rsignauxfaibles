@@ -68,7 +68,7 @@ load_hist_data.sf_task <- function(
   ...
   ) {
 
-  logger::log_info("Chargement des données historiques.")
+  lgr::lgr$info("Chargement des données historiques.")
 
 
   assertthat::assert_that(
@@ -92,9 +92,9 @@ load_hist_data.sf_task <- function(
   )
 
   if (nrow(hist_data) > 1) {
-    logger::log_info("Les donnees ont ete chargees avec succes.")
+    lgr::lgr$info("Les donnees ont ete chargees avec succes.")
   } else {
-    logger::log_warn("Aucune donnee n'a ete chargee. Veuillez verifier la
+    lgr::lgr$warn("Aucune donnee n'a ete chargee. Veuillez verifier la
       requete.")
   }
   check_overwrites(task, "hist_data")
@@ -159,7 +159,7 @@ load_new_data.sf_task <- function(
   database_query_fun = query_database,
   ...) {
 
-  logger::log_info("Loading data from last batch")
+  lgr::lgr$info("Loading data from last batch")
   task[["new_data"]] <- import_data(
     database = database,
     collection = collection,
@@ -174,7 +174,7 @@ load_new_data.sf_task <- function(
 
   if ("periode" %in% fields &&
     max(task[["new_data"]]$periode) != max(periods)) {
-    logger::log_warn("Data is missing at actual period !")
+    lgr::lgr$warn("Data is missing at actual period !")
   }
   return(task)
 }
@@ -253,7 +253,7 @@ import_data <- function(
   database_query_fun = query_database
   ) {
 
-  requireNamespace("logger")
+  requireNamespace("lgr")
 
   assertthat::assert_that(date_sup > date_inf)
   if (is.null(sirets) && is.null(code_ape)) {
@@ -291,15 +291,15 @@ import_data <- function(
     )
   }
 
-  logger::log_debug(query)
+  lgr::lgr$debug(query)
 
   assertthat::assert_that(
     is.null(fields) || all(c("periode", "siret") %in% fields)
   )
 
-  logger::log_info("Connexion a la collection mongodb {collection} ...")
+  lgr::lgr$info("Connexion a la collection mongodb %s ...", collection)
   df <- database_query_fun(query, database, collection, mongodb_uri)
-  logger::log_info("Import fini.")
+  lgr::lgr$info("Import fini.")
 
 
   df <- replace_missing_data(
@@ -310,7 +310,7 @@ import_data <- function(
 
   n_eta <- dplyr::n_distinct(df$siret)
   n_ent <- dplyr::n_distinct(df$siret %>% stringr::str_sub(1, 9))
-  logger::log_info(
+  lgr::lgr$info(
     "Import de {n_eta} etablissements issus de {n_ent} entreprises."
   )
 
@@ -319,7 +319,7 @@ import_data <- function(
   )
 
   check_valid_data(df)
-  logger::log_info(" Fini.")
+  lgr::lgr$info(" Fini.")
 
   return(df)
 }
@@ -331,13 +331,15 @@ query_database <- function(
   mongodb_uri
   ) {
 
+  requireNamespace("lgr")
+
   dbconnection <- mongolite::mongo(
     collection = collection,
     db = database,
     url = mongodb_uri,
-    verbose = logger::log_threshold() <= logger::INFO
+    verbose = lgr::lgr$threshold >= 400 # Info
   )
-  logger::log_info("Connexion effectuée avec succès. Début de l'import.")
+  lgr::lgr$info("Connexion effectuée avec succès. Début de l'import.")
   df <- dbconnection$aggregate(query)
   return(df)
 }
@@ -381,7 +383,7 @@ replace_missing_data <- function(
   }
 
   if (any(names(replace_missing) %in% colnames(df))) {
-    logger::log_info("Filling missing values with default values.")
+    lgr::lgr$info("Filling missing values with default values.")
   }
 
   df <- df %>%
@@ -401,8 +403,8 @@ add_missing_fields <- function(
     ]
 
   if (length(missing_fields) >= 1) {
-    logger::log_info("Champ(s) manquant(s): {missing_fields}")
-    logger::log_info("Remplacements par NA.")
+    lgr::lgr$info("Champ(s) manquant(s): %s", missing_fields)
+    lgr::lgr$info("Remplacements par NA.")
 
     for (missing_field in missing_fields) {
       df[missing_field] <- rep(NA, nrow(df))

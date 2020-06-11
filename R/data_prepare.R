@@ -71,7 +71,7 @@ subset_data_names_in_task <- function(data_names, task) {
   data_name_is_missing <- ! (data_names %in% names(task))
   if (any(data_name_is_missing)) {
     missing_data_names <- data_names[data_name_is_missing] #nolint
-    logger::log_warn("There is no {missing_data_names} in current task")
+    lgr::lgr$warn("There is no %s in current task", missing_data_names)
   }
   return(data_names[!data_name_is_missing])
 }

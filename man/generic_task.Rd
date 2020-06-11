@@ -6,7 +6,8 @@
 \arguments{
 \item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
-\item{tracker}{\verb{[mlflow::mlflow_run]} \cr Logger of ML experiment}
+\item{tracker}{\verb{[mlflow::mlflow_run]} \cr Logger de l'expérience
+d'apprentissage automatique.}
 
 \item{...}{Not used}
 }

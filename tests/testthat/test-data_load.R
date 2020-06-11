@@ -306,7 +306,6 @@ import_test_data <- function(
     mongodb_uri = "mongodb://localhost:27017",
     batch = batch,
     min_effectif = 10,
-
     date_inf = as.Date("2014-01-01"),
     date_sup = as.Date("2014-02-01"),
     subsample = subsample,

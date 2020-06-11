@@ -12,7 +12,7 @@ Imports:
     assertthat,
     dplyr,
     jsonlite,
-    logger,
+    lgr,
     lubridate,
     mlr3,
     mlr3learners,

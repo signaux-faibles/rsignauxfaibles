@@ -3,7 +3,8 @@
 #' Documentation tâche générique
 #'
 #' @param task `[sf_task]` \cr Objet s3 de type sf_task
-#' @param tracker `[mlflow::mlflow_run]` \cr Logger of ML experiment
+#' @param tracker `[mlflow::mlflow_run]` \cr Logger de l'expérience
+#' d'apprentissage automatique.
 #' @param ... Not used
 #' @name generic_task
 NULL
@@ -85,7 +86,7 @@ print.sf_task <- function(x, ...) {
 check_overwrites <- function(task, field_names) {
   overwrite <- intersect(field_names, names(task))
   if (length(overwrite) > 1) {
-    logger::log_info(
+    lgr::lgr$info(
       'Les champs {paste(overwrite, collapse = ",")} sont ecrases avec
       les nouvelles valeurs.'
     )
