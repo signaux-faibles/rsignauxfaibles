@@ -115,8 +115,4 @@ mock_log_param <- function(task, key, value, ...) {
   assign(key, value, envir = task[["tracker"]])
 }
 
-# Pass an environment to client and it will assign new variables in it.
-mock_log_metric <- function(task, key, value, ...) {
-  assertthat::assert_that(inherits(task[["tracker"]], "environment"))
-  assign(key, value, envir = task[["tracker"]])
-}
+mock_log_metric <- mock_log_param
