@@ -26,15 +26,12 @@ Imports:
     xgboost,
     data.table
 Suggests:
-    DiceKriging,
-    ParamHelpers,
     corrplot,
     ggplot2,
     lhs,
     mlflow,
-    mlr,
-    mlrMBO,
-    rgenoud,
+    mlr3tuning,
+    paradox,
     smoof,
     testthat (>= 2.1.0),
     xgboostExplainer
