@@ -87,7 +87,7 @@ test_that("evaluate works as expected with two measures",  {
 })
 
 
-test_that("evaluate.sf_task returns a task", {
+test_that("evaluate returns a benchmark", {
   test_task <- get_test_task(stage = "evaluate")
-  expect_is(test_task, "sf_task")
+  expect_is(test_task, "data.table")
 })
