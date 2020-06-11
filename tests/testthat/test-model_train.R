@@ -81,8 +81,14 @@ test_that("train.sf_task works with learner as expected", {
 
 test_that(
   "Les logs de la fonction 'train_data' fonctionnent correctement", {
-    task <- get_test_task()
+    task <- get_test_task(
+      processing_pipeline = mlr3pipelines::po(
+        "scale",
+        param_vals = list(center = FALSE)
+      )
+    )
     task[["tracker"]] <- new.env()
+
     with_mock(
       train(task, learner = mlr3::LearnerClassifFeatureless$new()),
       log_param = mock_log_param,
@@ -91,15 +97,24 @@ test_that(
     expect_true(length(ls(task[["tracker"]])) > 0)
     expect_setequal(
       names(task[["tracker"]]),
-      c("model_name", "model_target", "classif.featureless.method")
+      c(
+        "model_target",
+        "scale.center",
+        "classif.featureless.method",
+        "pipeline1"
+      )
     )
     expect_equal(
-      get("model_name", envir = task[["tracker"]]),
-      "classif.featureless"
+      get("pipeline1", envir = task[["tracker"]]),
+      "scale.classif.featureless"
     )
     expect_equal(
       get("classif.featureless.method", envir = task[["tracker"]]),
       "mode"
+    )
+    expect_equal(
+      get("scale.center", envir = task[["tracker"]]),
+      FALSE
     )
     expect_equal(
       get("model_target", envir = task[["tracker"]]),

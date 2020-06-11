@@ -52,13 +52,18 @@ train.sf_task <- function( #nolint
     task[["mlr3model"]] <- graph_learner$train(task[["mlr3task"]])
   }
   logger::log_info("Model trained_successfully")
-  # TODO deal with logging
-  log_param(task, "model_name", learner$id)
+
+  pipeops <- mlr3pipelines::as_graph(task[["mlr3graph_learner"]])$pipeops
   purrr::walk2(
-    names(learner$param_set$values),
-    learner$param_set$values,
-    ~ log_param(task, paste0(learner$id, ".", .x), .y)
+    seq_along(pipeops),
+    names(pipeops),
+    ~ log_param(task, paste0("pipeline", .x), .y)
   )
+  purrr::walk2(
+    names(task[["mlr3graph_learner"]]$param_set$values),
+    task[["mlr3graph_learner"]]$param_set$values,
+    ~ log_param(task, .x, .y)
+    )
   log_param(task, "model_target",  "18 mois, defaut et defaillance")
   return(invisible(task))
 }

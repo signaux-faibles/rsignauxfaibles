@@ -43,7 +43,6 @@ prepare.sf_task <- function( #nolint
   training_fields = get_fields(training = TRUE),
   outcome_field = NULL,
   processing_pipeline = get_default_pipeline(),
-  preprocessing_strategy = NULL,
   ...
   ) {
 
@@ -64,12 +63,6 @@ prepare.sf_task <- function( #nolint
 
   task[["mlr3task"]]$col_roles$feature <- training_fields
 
-  if (is.null(preprocessing_strategy)) {
-    ## Default value
-    preprocessing_strategy <- "Target encoding with fte"
-  }
-  log_param(task, "preprocessing_strategy", preprocessing_strategy)
-
   return(task)
 }
 
@@ -78,7 +71,7 @@ prepare.sf_task <- function( #nolint
 subset_data_names_in_task <- function(data_names, task) {
   data_name_is_missing <- ! (data_names %in% names(task))
   if (any(data_name_is_missing)) {
-    missing_data_names <- data_names[data_name_is_missing]
+    missing_data_names <- data_names[data_name_is_missing] #nolint
     logger::log_warn("There is no {missing_data_names} in current task")
   }
   return(data_names[!data_name_is_missing])
