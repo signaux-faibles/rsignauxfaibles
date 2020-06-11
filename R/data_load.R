@@ -120,6 +120,7 @@ load_hist_data.sf_task <- function(
     backend = mlr3_data,
     target = task[["target"]]
   )
+  mlr3task$positive <- "TRUE"
 
   mlr3task$col_roles$name <- c("siret")
   mlr3task$col_roles$group <- c("siren")
