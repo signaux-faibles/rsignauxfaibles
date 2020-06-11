@@ -22,7 +22,7 @@ test_that("train.sf_task works with learner as expected", {
     learner = mlr3::lrn("classif.featureless")
   )
   expect_equal(
-    trained_task[["mlr3resampled"]]$score(
+    trained_task[["mlr3resample_result"]]$score(
       mlr3::msr("classif.acc")
     )$classif.acc,
     1 / 3
@@ -40,7 +40,7 @@ test_that("train.sf_task works with learner and cv as expected ", {
   )
   expect_equal(
     c(classif.acc = 0.1),
-    trained_task[["mlr3resampled"]]$aggregate(mlr3::msr("classif.acc")),
+    trained_task[["mlr3resample_result"]]$aggregate(mlr3::msr("classif.acc")),
   )
 })
 

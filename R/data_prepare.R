@@ -84,6 +84,7 @@ subset_data_names_in_task <- function(data_names, task) {
   return(data_names[!data_name_is_missing])
 }
 
+#' Creates a PipeOp for impact encoding
 create_fte_pipeline <- function(
    target_encode_fields
   ) {

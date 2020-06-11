@@ -41,7 +41,7 @@ evaluate <- function(
     msg = "Evaluation can only be made on a single data type (new, test) at once"
   )
 
-  resample_results <- purrr::map(tasks, "mlr3resampled")
+  resample_results <- purrr::map(tasks, "mlr3resample_result")
   if (should_remove_strong_signals) {
     logger::log_info("Les 'signaux forts' sont retires des donnees
       d'evaluation (test, validation)")
@@ -66,15 +66,15 @@ check_resample_results <- function(
   task
   ) {
   assertthat::assert_that(
-    "mlr3resampled" %in% names(task),
+    "mlr3resample_result" %in% names(task),
     msg = paste0(
       "to be evaluated, a task must have a resampling strategy",
-      "and the model must be trained, thus having a mlr3resampled property"
+      "and the model must be trained, thus having a mlr3resample_result property"
     )
   )
   assertthat::assert_that(
-    inherits(task[["mlr3resampled"]], "ResampleResult"),
-    msg = "mlr3resampled property should inherit from `ResampleResult`"
+    inherits(task[["mlr3resample_result"]], "ResampleResult"),
+    msg = "mlr3resample_result property should inherit from `ResampleResult`"
     )
 }
 
