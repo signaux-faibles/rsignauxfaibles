@@ -15,14 +15,13 @@ parameters  <- list(
 test_that("train.sf_task works with learner as expected", {
   test_task <- get_test_task()
   test_task[["mlr3pipeline"]] <- mlr3pipelines::po("nop")
-  test_task[["model_parameters"]] <- list()
   trained_task <- train(
     task = test_task,
     outcome = "target",
     learner = mlr3::lrn("classif.featureless")
   )
   expect_equal(
-    trained_task[["mlr3resampled"]]$score(
+    trained_task[["mlr3resample_result"]]$score(
       mlr3::msr("classif.acc")
     )$classif.acc,
     1 / 3
@@ -40,8 +39,13 @@ test_that("train.sf_task works with learner and cv as expected ", {
   )
   expect_equal(
     c(classif.acc = 0.1),
-    trained_task[["mlr3resampled"]]$aggregate(mlr3::msr("classif.acc")),
+    trained_task[["mlr3resample_result"]]$aggregate(mlr3::msr("classif.acc")),
   )
+})
+
+test_that("train.sf_task returns a task", {
+  test_task <- get_test_task(stage = "train")
+  expect_is(test_task, "sf_task")
 })
 
 test_that("processing pipeline is stored in 'mlr3pipeline' property", {
@@ -61,7 +65,6 @@ test_that("processing pipeline is stored in 'mlr3pipeline' property", {
 test_that("train.sf_task works with learner as expected", {
   test_task <- get_test_task()
   test_task[["mlr3pipeline"]] <- mlr3pipelines::po("nop")
-  test_task[["model_parameters"]] <- list()
   test_task[["mlr3rsmp"]] <- NULL
   trained_task <- train(
     task = test_task,
@@ -71,8 +74,8 @@ test_that("train.sf_task works with learner as expected", {
   expect_equal(
     trained_task[["mlr3model"]]$model$
       classif.featureless$model$tab,
-    structure(c(`FALSE` = 5L, `TRUE` = 5L), .Dim = 2L, .Dimnames =
-      structure(list(c("FALSE", "TRUE")), .Names = ""), class = "table")
+    structure(c(`TRUE` = 5L, `FALSE` = 5L), .Dim = 2L, .Dimnames =
+      structure(list(c("TRUE", "FALSE")), .Names = ""), class = "table")
   )
 })
 

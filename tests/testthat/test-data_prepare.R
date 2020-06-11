@@ -98,7 +98,7 @@ test_that("processing pipeline is stored in 'mlr3pipeline' property with cv", {
   )
 })
 
-test_that("prepare filters the requested features", {
+test_that("prepare changes the requested features", {
   test_features <- function(pipe, features, mlr_features = features) {
     prepared_task <- get_test_task(
       stage = "prepare",
@@ -107,14 +107,14 @@ test_that("prepare filters the requested features", {
     )
     expect_equal(prepared_task[["training_fields"]], features)
     expect_equal(prepared_task[["mlr3task"]]$col_roles$feature, mlr_features)
+    # new features are added when training
   }
   test_features(mlr3pipelines::PipeOpNOP$new(), "feature")
   mutate_po <- mlr3pipelines::PipeOpMutate$new()
   mutate_po$param_set$values$mutation <- list(new_feature = ~ feature ^ 2)
   test_features(
     mutate_po,
-    features = c("feature", "new_feature"),
-    mlr_features = "feature" # new features are added when training
+    features = "feature"
   )
 })
 
@@ -142,8 +142,6 @@ test_that("prepare changes the outcome field if requested", {
   )
 })
 
-
-
 create_fte_test_task <- function(processing_pipeline = NULL) {
   test_task <- get_test_task(stage = "load")
   new_data <- test_task[["hist_data"]] %>%
@@ -167,10 +165,34 @@ test_that("fte state works as expected", {
   testthat::skip_on_ci()
   prep_task <- create_fte_test_task(create_fte_pipeline(c("ab", "cd")))
 
-  prep_task[["prepared_test_data"]] <-   expect_known_hash(
+  expect_known_hash(
     get_prepared_data(prep_task, "test"),
-    "e646accbaf"
+    "40734c2555"
     )
+})
+
+test_that("preparing twice with different training fields takes effect", {
+  prep_task <- create_fte_test_task(mlr3pipelines::PipeOpNOP$new())
+
+  check_names <- function(names){
+    expect_setequal(
+      names(get_prepared_data(prep_task, "test")),
+      names
+    )
+  }
+  check_names(c("outcome", "feature", "ab", "cd"))
+  prep_task <- prepare(
+    prep_task,
+    processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
+    training_fields = "feature"
+    )
+  check_names(c("outcome", "feature"))
+  prep_task <- prepare(
+    prep_task,
+    processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
+    training_fields = c("feature", "ab", "cd")
+    )
+  check_names(c("outcome", "feature", "ab", "cd"))
 })
 
 test_that(

@@ -6,7 +6,7 @@
 \usage{
 evaluate(
   ...,
-  measures = NULL,
+  measures = get_default_measure(),
   data_name = "test_data",
   should_remove_strong_signals = TRUE
 )

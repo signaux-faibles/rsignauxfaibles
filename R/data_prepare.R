@@ -61,12 +61,8 @@ prepare.sf_task <- function( #nolint
   }
 
   task[["mlr3pipeline"]] <- processing_pipeline
-  gpo <-  mlr3pipelines::as_graph(task[["mlr3pipeline"]])
 
-  task[["mlr3task"]]$col_roles$feature <- intersect(
-    training_fields,
-    task[["mlr3task"]]$col_roles$feature
-  ) # New features are automatically added when training pipeline
+  task[["mlr3task"]]$col_roles$feature <- training_fields
 
   if (is.null(preprocessing_strategy)) {
     ## Default value
@@ -88,6 +84,7 @@ subset_data_names_in_task <- function(data_names, task) {
   return(data_names[!data_name_is_missing])
 }
 
+#' Creates a PipeOp for impact encoding
 create_fte_pipeline <- function(
    target_encode_fields
   ) {
@@ -98,39 +95,24 @@ create_fte_pipeline <- function(
    )
 }
 
-get_default_pipeline <- function() {
-  return(create_fte_pipeline(c("code_ape_niveau2", "code_ape_niveau3")))
-}
-
-#' Returns a matrix for using xgboost
+#' Construct default pipeline
 #'
-#' @param data_to_shape `data.frame()`
-#' @param options `list`(any)
-#'
-#' @return A matrix
 #' @export
-shape_for_xgboost <- function(
-  data_to_shape,
-  options
-  ) {
-  assert_only_valid_columns(data_to_shape)
-  return(as.matrix(data_to_shape))
-}
-
-#' Check if any column is character or factor
-assert_only_valid_columns <- function(data_to_shape) {
-  column_classes <- purrr::map(data_to_shape, class)
-  class_is_correct <- column_classes != "factor" & column_classes != "character"
-  wrong_column_names <- names(data_to_shape)[!class_is_correct]
-  assertthat::assert_that(
-    all(class_is_correct),
-    msg = paste0("Column ", wrong_column_names, " is of unsupported type
-      factor or character")
+get_default_pipeline <- function() {
+  pipeline <- create_fte_pipeline(
+    c("code_ape_niveau2", "code_ape_niveau3")
+    ) %>>%
+    mlr3pipelines::po(
+      "encode",
+      method = "treatment",
+      affect_columns = mlr3pipelines::selector_type("factor")
     )
-    return()
+  return(pipeline)
 }
 
-# TODO def
+#' Apply preparation pipeline and inspect prepared data
+#'
+#' @export
 get_prepared_data <- function(
   task,
   train_or_test

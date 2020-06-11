@@ -59,12 +59,12 @@ predict.sf_task <- function(
   }
 
 
-  if (any(c("mlr3model", "mlr3resampled") %in% names(task))) {
+  if (any(c("mlr3model", "mlr3resample_result") %in% names(task))) {
 
     if ("test_data" %in% data_names) {
 
-      assertthat::assert_that("mlr3resampled" %in% names(task))
-      task[["prediction_test"]] <- task[["mlr3resampled"]]$prediction()
+      assertthat::assert_that("mlr3resample_result" %in% names(task))
+      task[["prediction_test"]] <- task[["mlr3resample_result"]]$prediction()
 
     } else if ("train_data" %in% data_names) {
 

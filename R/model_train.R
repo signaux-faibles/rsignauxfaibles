@@ -25,8 +25,11 @@ train.sf_task <- function( #nolint
   task,
   seed = 0,
   learner = get_default_learner(),
+  store_models = FALSE,
   ...
   ) {
+
+  require(mlr3learners)
 
   set_verbose_level(task)
 
@@ -36,13 +39,14 @@ train.sf_task <- function( #nolint
     task[["mlr3pipeline"]] %>>% learner
   )
   graph_learner$predict_type <- "prob"
-  task[["mlr3graphlearner"]] <- graph_learner
+  task[["mlr3graph_learner"]] <- graph_learner
 
   if ("mlr3rsmp" %in% names(task)) {
-    task[["mlr3resampled"]] <- mlr3::resample(
+    task[["mlr3resample_result"]] <- mlr3::resample(
       task = task[["mlr3task"]],
-      learner = task[["mlr3graphlearner"]],
-      resampling = task[["mlr3rsmp"]]
+      learner = task[["mlr3graph_learner"]],
+      resampling = task[["mlr3rsmp"]],
+      store_models = store_models
     )
   } else {
     task[["mlr3model"]] <- graph_learner$train(task[["mlr3task"]])

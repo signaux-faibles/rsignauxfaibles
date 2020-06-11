@@ -120,6 +120,7 @@ load_hist_data.sf_task <- function(
     backend = mlr3_data,
     target = task[["target"]]
   )
+  mlr3task$positive <- "TRUE"
 
   mlr3task$col_roles$name <- c("siret")
   mlr3task$col_roles$group <- c("siren")
@@ -446,7 +447,19 @@ update_types <- function(
     mutate_if(lubridate::is.POSIXct, ~ as.character(as.Date(.)))
 
   # colonnes de type facteurs
-  factor_columns <- intersect(c("region", "siret", "siren"), names(df))
+  factor_columns <- intersect(
+    c(
+      "region",
+      "siret",
+      "siren",
+      "code_naf",
+      "code_ape_niveau2",
+      "code_ape_niveau3",
+      "code_ape_niveau4",
+      "code_ape"
+    ),
+    names(df)
+  )
   df <- df %>%
     mutate_at(vars(one_of(factor_columns)),factor)
 
