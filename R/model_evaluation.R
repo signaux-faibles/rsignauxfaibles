@@ -28,7 +28,7 @@
 #' @export
 evaluate <- function(
   ...,
-  measures =  NULL,
+  measures =  get_default_measure(),
   data_name = "test_data",
   should_remove_strong_signals = TRUE
   ) {
@@ -49,6 +49,10 @@ evaluate <- function(
   }
   benchmark <- do.call(c, resample_results)
   return(benchmark$aggregate(measures = measures))
+}
+
+get_default_measure <- function() {
+  return(msrs(c("classif.ce", "classif.fbeta")))
 }
 
 remove_strong_signals <- function(
