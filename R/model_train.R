@@ -53,8 +53,12 @@ train.sf_task <- function( #nolint
   }
   logger::log_info("Model trained_successfully")
   # TODO deal with logging
-  log_param(task, "model_name",  "light gradient boosting")
-  # log_param(task, "model_parameters", parameters)
+  log_param(task, "model_name", learner$id)
+  purrr::walk2(
+    names(learner$param_set$values),
+    learner$param_set$values,
+    ~ log_param(task, paste0(learner$id, ".", .x), .y)
+  )
   log_param(task, "model_target",  "18 mois, defaut et defaillance")
   return(invisible(task))
 }

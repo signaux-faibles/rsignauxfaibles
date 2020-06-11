@@ -91,11 +91,15 @@ test_that(
     expect_true(length(ls(task[["tracker"]])) > 0)
     expect_setequal(
       names(task[["tracker"]]),
-      c("model_name", "model_target")
+      c("model_name", "model_target", "classif.featureless.method")
     )
     expect_equal(
       get("model_name", envir = task[["tracker"]]),
-      "light gradient boosting"
+      "classif.featureless"
+    )
+    expect_equal(
+      get("classif.featureless.method", envir = task[["tracker"]]),
+      "mode"
     )
     expect_equal(
       get("model_target", envir = task[["tracker"]]),
