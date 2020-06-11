@@ -98,7 +98,7 @@ test_that("processing pipeline is stored in 'mlr3pipeline' property with cv", {
   )
 })
 
-test_that("prepare filters the requested features", {
+test_that("prepare changes the requested features", {
   test_features <- function(pipe, features, mlr_features = features) {
     prepared_task <- get_test_task(
       stage = "prepare",
@@ -107,17 +107,16 @@ test_that("prepare filters the requested features", {
     )
     expect_equal(prepared_task[["training_fields"]], features)
     expect_equal(prepared_task[["mlr3task"]]$col_roles$feature, mlr_features)
+    # new features are added when training
   }
   test_features(mlr3pipelines::PipeOpNOP$new(), "feature")
   mutate_po <- mlr3pipelines::PipeOpMutate$new()
   mutate_po$param_set$values$mutation <- list(new_feature = ~ feature ^ 2)
   test_features(
     mutate_po,
-    features = c("feature", "new_feature"),
-    mlr_features = "feature" # new features are added when training
+    features = "feature"
   )
 })
-
 
 test_that("prepare changes the outcome field if requested", {
   prepared_task <- create_prepared_task(test_task)
@@ -142,8 +141,6 @@ test_that("prepare changes the outcome field if requested", {
     "periode"
   )
 })
-
-
 
 create_fte_test_task <- function(processing_pipeline = NULL) {
   test_task <- get_test_task(stage = "load")
@@ -173,7 +170,6 @@ test_that("fte state works as expected", {
     "e646accbaf"
     )
 })
-
 
 test_that("preparing twice with different training fields takes effect", {
   prep_task <- create_fte_test_task(mlr3pipelines::PipeOpNOP$new())

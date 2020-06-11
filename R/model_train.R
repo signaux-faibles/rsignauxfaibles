@@ -25,6 +25,7 @@ train.sf_task <- function( #nolint
   task,
   seed = 0,
   learner = get_default_learner(),
+  store_models = FALSE,
   ...
   ) {
 
@@ -44,7 +45,8 @@ train.sf_task <- function( #nolint
     task[["mlr3resampled"]] <- mlr3::resample(
       task = task[["mlr3task"]],
       learner = task[["mlr3graphlearner"]],
-      resampling = task[["mlr3rsmp"]]
+      resampling = task[["mlr3rsmp"]],
+      store_models = store_models
     )
   } else {
     task[["mlr3model"]] <- graph_learner$train(task[["mlr3task"]])

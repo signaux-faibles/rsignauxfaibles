@@ -61,12 +61,8 @@ prepare.sf_task <- function( #nolint
   }
 
   task[["mlr3pipeline"]] <- processing_pipeline
-  gpo <-  mlr3pipelines::as_graph(task[["mlr3pipeline"]])
 
-  task[["mlr3task"]]$col_roles$feature <- intersect(
-    training_fields,
-    task[["mlr3task"]]$col_roles$feature
-  ) # New features are automatically added when training pipeline
+  task[["mlr3task"]]$col_roles$feature <- training_fields
 
   if (is.null(preprocessing_strategy)) {
     ## Default value
