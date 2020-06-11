@@ -24,111 +24,35 @@
 #'
 optimize_hyperparameters.sf_task <- function( #nolint
   task,
-  fields = get_fields(training = TRUE),
-  n_init = NULL,
-  n_iter = 12,
-  train_pipe = NULL,
-  optim_bounds = NULL,
+  terminator = mlr3tuning::term("evals", n_evals = 10),
+  param_set = get_default_param_set(),
+  tuner = mlr3tuning::tnr("random_search"),
+  measures = get_default_measure(),
   ...
   ) {
+  requireNamespace("paradox")
+  requireNamespace("mlr3tuning")
 
-  requireNamespace("DiceKriging") #nolint
-  requireNamespace("rgenoud")
-  requireNamespace("mlrMBO") #nolint
-  requireNamespace("ParamHelpers") #nolint
+  resampling <- rsmp("holdout")
+  at <- mlr3tuning::AutoTuner$new(
+    learner = task[["mlr3graph_learner"]],
+    resampling = resampling,
+    measures = measures,
+    tune_ps = param_set,
+    terminator = terminator,
+    tuner = tuner
+    )
+  task[["mlr3auto_tuner"]] <- at$train(task$mlr3task)
+  return(task)
+}
 
-  if (is.null(optim_bounds)) {
-    optim_bounds <- ParamHelpers::makeParamSet(
-      ParamHelpers::makeNumericParam("learn_rate",  lower = 0.003, upper = 0.2),
-      ParamHelpers::makeIntegerParam("max_depth", lower = 2L, upper = 12L),
-      ParamHelpers::makeIntegerParam("ntrees", lower = 10L, upper = 300L),
-      ParamHelpers::makeIntegerParam(
-        "min_child_weight",
-        lower = 1L,
-        upper = 9L
+get_default_param_set <- function() {
+  paradox::ParamSet$new(
+    list(
+      paradox::ParamDbl$new("classif.xgboost.eta", lower = 0.001, upper = 0.03),
+      paradox::ParamDbl$new("classif.xgboost.min_child_weight", lower = 0, upper = 100),
+      paradox::ParamDbl$new("classif.xgboost.gamma", lower = 0, upper = 0.03),
+      paradox::ParamInt$new("classif.xgboost.max_depth", lower = 3, upper = 10)
       )
     )
-  }
-
-  if (is.null(train_pipe)) {
-    #1 Objective function
-    train_pipe <- smoof::makeSingleObjectiveFunction(
-      name = "lgb_pipe",
-      fn = function(
-        x
-        ) {
-
-        new_task <- train(
-          task,
-          parameters = as.list(x),
-          fields = fields
-        )
-        new_task <- predict(new_task, data_names = c("test_data"))
-        new_task <- evaluate(
-          new_task,
-          data_name = c("test_data"),
-          plot = FALSE
-        )
-        # TODO: Bayesian optimization criteria should be more flexible
-        # 77d91ced-beac-4e91-9b48-e8fd16e956ee
-        aucpr <- new_task[["model_performance"]] %>% .$evaluation %>% .[[1]]
-        cat(aucpr)
-        return(aucpr)
-      },
-      par.set = optim_bounds,
-      minimize = FALSE
-    )
-  }
-
-  set.seed(159)
-  #2 Initial design
-  if (!is.null(n_init)) {
-    des <- ParamHelpers::generateDesign(n = n_init,
-      par.set = ParamHelpers::getParamSet(train_pipe),
-      fun = lhs::randomLHS)
-  } else {
-    des <- NULL
-  }
-
-  #3 Surrogate model
-  surrogate  <- mlr::makeLearner(
-    "regr.km",
-    predict.type = "se",
-    covtype = "matern3_2",
-    control = list(trace = FALSE)
-  )
-
-  #4 Control
-  control <- mlrMBO::makeMBOControl()
-  control <- mlrMBO::setMBOControlTermination(
-    control,
-    iters = n_iter
-  )
-  control <- mlrMBO::setMBOControlInfill( #nolint
-    control,
-    crit = mlrMBO::makeMBOInfillCritEI() #nolint
-  )
-
-  #5 optimization
-  run <- mlrMBO::mbo(fun = train_pipe,
-    design = des,
-    control = control,
-    show.info = TRUE)
-
-  task[["model_parameters"]] <- as.list(run$x)
-
-  all_res <- run$opt.path$env$path
-  if (is.null(n_init)) {
-    n_init  <- 4 * smoof::getNumberOfParameters(train_pipe)
-  }
-  run$opt.path$env$path  %>%
-    mutate(round = row_number()) %>%
-    mutate(type = case_when(
-        round <= n_init ~ "initial design",
-        TRUE ~ "mlrMBO optimization")) %>%
-    ggplot2::ggplot(ggplot2::aes(x = round, y = y, color = type)) +
-    ggplot2::geom_point() +
-    ggplot2::labs(title = "mlrMBO optimization")
-
-  return(task)
 }
