@@ -4,7 +4,13 @@
 \alias{train.sf_task}
 \title{Entraînement de l'algorithme}
 \usage{
-\method{train}{sf_task}(task, seed = 0, learner = get_default_learner(), ...)
+\method{train}{sf_task}(
+  task,
+  seed = 0,
+  learner = get_default_learner(),
+  store_models = FALSE,
+  ...
+)
 }
 \arguments{
 \item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
