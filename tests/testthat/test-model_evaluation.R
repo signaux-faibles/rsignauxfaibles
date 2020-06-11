@@ -103,7 +103,7 @@ test_that("Les logs de la fonction 'evaluate' fonctionnent correctement", {
   expect_true(length(ls(task[["tracker"]])) > 0)
   expect_setequal(
     names(task[["tracker"]]),
-    c("classif.ce", "classif.fbeta")
+    c("classif.ce", "classif.fbeta", "should_remove_strong_signals")
   )
   expect_equal(
     get("classif.ce", envir = task[["tracker"]]),
@@ -138,11 +138,11 @@ test_that("Les logs de la fonction 'evaluate' fonctionnent correctement avec deu
   expect_true(length(ls(other_task[["tracker"]])) > 0)
   expect_setequal(
     names(trained_task[["tracker"]]),
-    c("classif.ce", "classif.fbeta")
+    c("classif.ce", "classif.fbeta", "should_remove_strong_signals")
   )
   expect_setequal(
     names(other_task[["tracker"]]),
-    c("classif.ce", "classif.fbeta")
+    c("classif.ce", "classif.fbeta", "should_remove_strong_signals")
   )
 
   expect_equal(

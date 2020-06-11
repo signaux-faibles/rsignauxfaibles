@@ -17,6 +17,9 @@ get_test_task <- function(
   measures = msr("classif.acc")
 ) {
 
+  previous_threshold <- lgr::lgr$threshold
+  lgr::lgr$set_threshold("error")
+
   admissible_stages <- c(
     "load",
     "split",
@@ -106,6 +109,8 @@ get_test_task <- function(
   task <- evaluate(task, measures = measures)
 
   return(task)
+
+  lgr::lgr$set_threshold(previous_threshold)
 }
 
 # Pass an environment to client and it will assign new variables in it.
