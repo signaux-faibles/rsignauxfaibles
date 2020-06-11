@@ -10,7 +10,6 @@
   training_fields = get_fields(training = TRUE),
   outcome_field = NULL,
   processing_pipeline = get_default_pipeline(),
-  preprocessing_strategy = NULL,
   ...
 )
 }
@@ -23,10 +22,6 @@ Doivent-être des noms de champs valides de \code{task}.}
 \item{training_fields}{\code{character()} \cr Les champs qui doivent être
 conservées pour l'entraînement, après toutes les phases de préparation,
 notamment le target encoding.}
-
-\item{preprocessing_strategy}{character() \cr
-Description en langage naturel de la stratégie de préparation des données
-pour le logging de l'expérience.}
 
 \item{...}{Unused.}
 
@@ -42,6 +37,10 @@ preparation_map :: any) -> data.frame \cr
 A function that uses the preparation map to prepare further data (test,
 validation data etc.). Defaults to \code{prepare_test_frame_xgboost}.
 /!\ Beware, this function is not yet generic !}
+
+\item{preprocessing_strategy}{character() \cr
+Description en langage naturel de la stratégie de préparation des données
+pour le logging de l'expérience.}
 }
 \value{
 \verb{[sf_task]} \cr

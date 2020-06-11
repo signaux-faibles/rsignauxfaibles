@@ -9,11 +9,10 @@ optimize_hyperparameters(task, ...)
 
 \method{optimize_hyperparameters}{sf_task}(
   task,
-  fields = get_fields(training = TRUE),
-  n_init = NULL,
-  n_iter = 12,
-  train_pipe = NULL,
-  optim_bounds = NULL,
+  terminator = mlr3tuning::term("evals", n_evals = 10),
+  param_set = get_default_param_set(),
+  tuner = mlr3tuning::tnr("random_search"),
+  measures = get_default_measure(),
   ...
 )
 }
