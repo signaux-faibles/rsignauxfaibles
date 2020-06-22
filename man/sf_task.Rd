@@ -10,8 +10,7 @@ sf_task(
   collection = "Features",
   id = "Signaux-faibles",
   target = "outcome",
-  tracker = NULL,
-  verbose
+  tracker = NULL
 )
 }
 \arguments{
@@ -28,9 +27,6 @@ exporter. Par défaut, celle stockée dans \code{task}.}
 Un mlflow_run pour tracker les modèles et expériences. Les logs
 utiliseront la propriété \code{tracker$run_id}.}
 
-\item{verbose}{\code{logical(1)} \cr
-Active ou désactive le log des actions ultérieures.}
-
 \item{experiment_name}{\code{character()} \cr
 Quel est l'objet de cette tâche ?}
 
@@ -39,9 +35,7 @@ Descriptions supplémentaires sur l'expérimentation en cours.}
 }
 \value{
 \verb{[rsignauxfaibles::sf_task]} \cr
-Un objet sf_task avec un attribut de type \code{logical} "verbose", qui
-définit le niveau de log, ainsi qu'un attribut "to_log" de type \code{list}
-dans lequel seront stockés des informations spécifiques pour le log.
+Un objet sf_task
 }
 \description{
 Un objet s3 de type sf_task est défini, dans lequel seront défini et

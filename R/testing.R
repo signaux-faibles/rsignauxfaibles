@@ -17,6 +17,9 @@ get_test_task <- function(
   measures = msr("classif.acc")
 ) {
 
+  previous_threshold <- lgr::lgr$threshold
+  lgr::lgr$set_threshold("error")
+
   admissible_stages <- c(
     "load",
     "split",
@@ -52,8 +55,7 @@ get_test_task <- function(
     database = "fake_database",
     collection = "fake_collection",
     id = "Fake task",
-    target = fake_target,
-    verbose = FALSE
+    target = fake_target
   )
 
   mock_query_database <- function(...) {
@@ -107,6 +109,8 @@ get_test_task <- function(
   task <- evaluate(task, measures = measures)
 
   return(task)
+
+  lgr::lgr$set_threshold(previous_threshold)
 }
 
 # Pass an environment to client and it will assign new variables in it.
@@ -115,8 +119,4 @@ mock_log_param <- function(task, key, value, ...) {
   assign(key, value, envir = task[["tracker"]])
 }
 
-# Pass an environment to client and it will assign new variables in it.
-mock_log_metric <- function(task, key, value, ...) {
-  assertthat::assert_that(inherits(task[["tracker"]], "environment"))
-  assign(key, value, envir = task[["tracker"]])
-}
+mock_log_metric <- mock_log_param

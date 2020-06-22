@@ -194,24 +194,3 @@ test_that("preparing twice with different training fields takes effect", {
     )
   check_names(c("outcome", "feature", "ab", "cd"))
 })
-
-test_that(
-  "Les logs de la fonction 'prepare_data' fonctionnent correctement", {
-    test_task <- get_test_task(stage = "split")
-    test_task[["tracker"]] <- new.env()
-    with_mock(
-      create_prepared_task(test_task),
-      log_param = mock_log_param,
-      log_metric = mock_log_metric
-    )
-    expect_true(length(ls(test_task[["tracker"]])) > 0)
-    expect_setequal(
-      names(test_task[["tracker"]]),
-      c("preprocessing_strategy")
-    )
-    expect_equal(
-      get("preprocessing_strategy", envir = test_task[["tracker"]]),
-      "Target encoding with fte"
-    )
-  }
-)

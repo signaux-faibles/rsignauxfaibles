@@ -31,9 +31,8 @@ train.sf_task <- function( #nolint
 
   require(mlr3learners)
 
-  set_verbose_level(task)
 
-  logger::log_info("Model is being trained.")
+  lgr::lgr$info("Model is being trained.")
 
   graph_learner <- mlr3pipelines::GraphLearner$new(
     task[["mlr3pipeline"]] %>>% learner
@@ -51,10 +50,19 @@ train.sf_task <- function( #nolint
   } else {
     task[["mlr3model"]] <- graph_learner$train(task[["mlr3task"]])
   }
-  logger::log_info("Model trained_successfully")
-  # TODO deal with logging
-  log_param(task, "model_name",  "light gradient boosting")
-  # log_param(task, "model_parameters", parameters)
+  lgr::lgr$info("Model trained_successfully")
+
+  pipeops <- mlr3pipelines::as_graph(task[["mlr3graph_learner"]])$pipeops
+  purrr::walk2(
+    seq_along(pipeops),
+    names(pipeops),
+    ~ log_param(task, paste0("pipeline", .x), .y)
+  )
+  purrr::walk2(
+    names(task[["mlr3graph_learner"]]$param_set$values),
+    task[["mlr3graph_learner"]]$param_set$values,
+    ~ log_param(task, .x, .y)
+    )
   log_param(task, "model_target",  "18 mois, defaut et defaillance")
   return(invisible(task))
 }

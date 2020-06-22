@@ -25,17 +25,16 @@ predict.sf_task <- function(
   ) {
 
   task  <- object
-  set_verbose_level(task)
 
   predict_on_given_data <- function(data_name, task) {
 
     prepared_data_name <- paste0("prepared_", data_name)
     if (!prepared_data_name %in% names(task)) {
-      logger::log_warn("{data_name} is missing or has not been prepared yet")
+      lgr::lgr$warn("%s is missing or has not been prepared yet", data_name)
       return(task)
     }
 
-    logger::log_info("Model is being applied on {prepared_data_name}")
+    lgr::lgr$info("Model is being applied on %s", prepared_data_name)
 
     prediction <- predict_fun(
       model = task[["model"]],
@@ -54,7 +53,7 @@ predict.sf_task <- function(
       task[[data_name]][["score"]]  <- prediction
     }
 
-    logger::log_info("Prediction successfully done.")
+    lgr::lgr$info("Prediction successfully done.")
     return(task)
   }
 

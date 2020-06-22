@@ -27,14 +27,12 @@ explain.sf_task <- function(
     msg = "Waterfall plots are currently only available for local explainations"
   )
 
-  set_verbose_level(task)
-
   explainer <- switch(type,
     "global" = xgboost_global_explainer,
     "local" = xgboost_local_explainer
   )
 
-  logger::log_info("Predictions are being explained")
+  lgr::lgr$info("Predictions are being explained")
   res <- explainer(
     task = task,
     aggregation_matrix = aggregation_matrix,
@@ -43,7 +41,7 @@ explain.sf_task <- function(
     ...
   )
 
-  logger::log_info("Prediction breakdown completed.")
+  lgr::lgr$info("Prediction breakdown completed.")
   if (!plot_waterfall) {
     return(res)
   } else {

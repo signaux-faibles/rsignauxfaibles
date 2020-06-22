@@ -12,7 +12,7 @@ test_replace_missing_data <- function(
                                       expected) {
   testthat::test_that("replace_missing_data " %>% paste0(description), {
     expect_equal(
-      replace_missing_data(df, fields, replace_missing, FALSE),
+      replace_missing_data(df, fields, replace_missing),
       expected
     )
   })
@@ -306,15 +306,12 @@ import_test_data <- function(
     mongodb_uri = "mongodb://localhost:27017",
     batch = batch,
     min_effectif = 10,
-
     date_inf = as.Date("2014-01-01"),
     date_sup = as.Date("2014-02-01"),
     subsample = subsample,
     fields = fields,
     sirets = sirets,
-    code_ape = code_ape,
-    verbose = FALSE,
-    debug = FALSE
+    code_ape = code_ape
   )
   return(data_import)
 }

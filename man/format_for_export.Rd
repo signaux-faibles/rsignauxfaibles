@@ -11,8 +11,7 @@ format_for_export(
   collection,
   mongodb_uri,
   last_batch,
-  known_sirens_full_path,
-  verbose
+  known_sirens_full_path
 )
 }
 \arguments{
@@ -37,9 +36,6 @@ les données.}
 
 \item{known_sirens_full_path}{\code{character()} \cr Chemins absolus des
 fichiers contenant des listes de sirens connus.}
-
-\item{verbose}{\code{logical()} \cr Faut-il imprimer des informations sur le
-chargement des données supplémentaires ?}
 }
 \value{
 \code{data.frame()}\cr

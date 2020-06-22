@@ -19,7 +19,6 @@
   sirets = NULL,
   code_ape = NULL,
   database_query_fun = query_database,
-  debug = FALSE,
   ...
 )
 
@@ -64,8 +63,6 @@ données.}
 
 \item{database_query_fun}{\code{function} \cr Fonction qui permet de requêter la
 base de données.}
-
-\item{debug}{\code{logical(1)} \cr si \code{TRUE}, alors la requête est affichée.}
 
 \item{...}{Additional parameters depending on class of task}
 }
