@@ -64,6 +64,9 @@ evaluate <- function(
   return(evaluation)
 }
 
+#' Get defaults mlr3 measures.
+#'
+#' @export
 get_default_measure <- function() {
   return(msrs(c("classif.ce", "classif.fbeta")))
 }

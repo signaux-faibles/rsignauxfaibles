@@ -1,29 +1,14 @@
 #' Préparation des échantillons pour l'entraînement et l'évaluation
 #'
-#' Prépare les échantillons souhaités (listés dans `data_names`) pour
-#' l'entraînement ou la prédiction de l'algorithme. Cf `[prepare_data]` pour
-#' la nature de cette préparation.
+#' Prépare les données pour l'entraînement ou la prédiction de l'algorithme.
 #'
 #' @inheritParams generic_task
-#' @param data_names `character()` \cr Vecteur de noms des données à préparer.
-#'   Doivent-être des noms de champs valides de `task`.
-#' @param prepare_train_function :: (data_to_prepare :: data.frame) ->
-#'   list(data :: data.frame, preparation_map :: any) \cr
-#'   A function that prepares the training data and gives a preparation_map to
-#'   be applied for further data preparation. Defaults to
-#'   `prepare_train_frame_xgboost`.
-#'   /!\ Beware, this function is not yet generic !
-#' @param prepare_test_function :: (data_to_prepare :: data.frame,
-#' preparation_map :: any) -> data.frame \cr
-#'   A function that uses the preparation map to prepare further data (test,
-#'   validation data etc.). Defaults to `prepare_test_frame_xgboost`.
-#'   /!\ Beware, this function is not yet generic !
-#' @param preprocessing_strategy character() \cr
-#'   Description en langage naturel de la stratégie de préparation des données
-#'   pour le logging de l'expérience.
-#' @param training_fields `character()` \cr Les champs qui doivent être
-#'   conservées pour l'entraînement, après toutes les phases de préparation,
-#'   notamment le target encoding.
+#' @param processing_pipeline `mlr3pipelines::PipeOp` \cr
+#'   Pipeline de préparation des données
+#' @param outcome_field `character(1)` \cr
+#'   Champ de la variable à prédire.
+#' @param training_fields `character()` \cr
+#'   Les champs qui doivent être conservées pour l'entraînement.
 #' @param ... Unused.
 #'
 #' @return `[sf_task]` \cr
@@ -35,20 +20,12 @@
 #' @export
 prepare.sf_task <- function( #nolint
   task,
-  data_names = c(
-    "train_data",
-    "test_data",
-    "new_data"
-    ),
   training_fields = get_fields(training = TRUE),
   outcome_field = NULL,
   processing_pipeline = get_default_pipeline(),
   ...
   ) {
 
-  data_names <- subset_data_names_in_task(data_names, task)
-
-  ## Core ##
   task[["training_fields"]] <- training_fields
 
   if (is.null(outcome_field)) {
@@ -63,17 +40,6 @@ prepare.sf_task <- function( #nolint
   task[["mlr3task"]]$col_roles$feature <- training_fields
 
   return(task)
-}
-
-#' Keeps only the data_names that are indeed present in the task, warns if some
-#' are missing.
-subset_data_names_in_task <- function(data_names, task) {
-  data_name_is_missing <- ! (data_names %in% names(task))
-  if (any(data_name_is_missing)) {
-    missing_data_names <- data_names[data_name_is_missing] #nolint
-    lgr::lgr$warn("There is no %s in current task", missing_data_names)
-  }
-  return(data_names[!data_name_is_missing])
 }
 
 #' Creates a PipeOp for impact encoding

@@ -439,7 +439,7 @@ update_types <- function(
     names(df)
   )
   df <- df %>%
-    mutate_at(vars(one_of(factor_columns)),factor)
+    mutate_at(vars(one_of(factor_columns)), factor)
 
   return(df)
 }
