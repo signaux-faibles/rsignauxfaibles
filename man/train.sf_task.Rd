@@ -18,22 +18,20 @@
 \item{seed}{\code{integer()}\cr Graîne pour que les calculs aléatoires soient
 reproductibles.}
 
+\item{learner}{\code{mlr3::ClassifLearner} \cr
+Un modèle de classification mlr3 (les paramètres sont directement
+spécifiés dans le modèle).}
+
+\item{store_models}{\code{logical(1)} \cr
+Faut-il sauvegardé tous les modèles entraînés pour référence ultérieure ?}
+
 \item{...}{Not used}
-
-\item{parameters}{\code{list(any())} \cr Paramètres du modèle. Cf
-\verb{[train_light_gradient_boosting]}. Si \code{NULL}, alors des paramètres par
-défaut sont sélectionnés.}
-
-\item{train_fun}{\code{training_data} \cr Training_function, or "xgboost" or
-"linear"}
-
-\item{outcome}{\code{character()} \cr Nom de la colonne dans laquelle on trouve
-l'objectif d'apprentissage.}
 }
 \value{
 \verb{[sf_task]} \cr L'objet \code{task} donné en entré, auquel a été ajouté
-(ou écrasé) le champs "model", dans lequel est stocké un modèle compatible
-avec la fonction \verb{[prepare.sf_task]}.
+(ou écrasé) le champs "mlr3resample_result" si les données ont été
+échantillonnées, "mlr3model" sinon, dans lequel est stocké un modèle
+compatible avec la fonction \verb{[predict.sf_task]}.
 }
 \description{
 Entraîne un algorithme sur les données \code{task[["train_data"]]}. Cf

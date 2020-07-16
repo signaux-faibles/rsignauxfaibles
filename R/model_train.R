@@ -5,20 +5,18 @@
 #' entraîné.
 #'
 #' @inheritParams generic_task
-#' @param parameters `list(any())` \cr Paramètres du modèle. Cf
-#' `[train_light_gradient_boosting]`. Si `NULL`, alors des paramètres par
-#' défaut sont sélectionnés.
 #' @param seed `integer()`\cr Graîne pour que les calculs aléatoires soient
 #' reproductibles.
-#' @param train_fun `training_data` \cr Training_function, or "xgboost" or
-#' "linear"
-#' @param outcome `character()` \cr Nom de la colonne dans laquelle on trouve
-#' l'objectif d'apprentissage.
-#'
+#' @param learner `mlr3::ClassifLearner` \cr
+#'   Un modèle de classification mlr3 (les paramètres sont directement
+#'   spécifiés dans le modèle).
+#' @param store_models `logical(1)` \cr
+#'   Faut-il sauvegardé tous les modèles entraînés pour référence ultérieure ?
 #'
 #' @return `[sf_task]` \cr L'objet `task` donné en entré, auquel a été ajouté
-#' (ou écrasé) le champs "model", dans lequel est stocké un modèle compatible
-#' avec la fonction `[prepare.sf_task]`.
+#' (ou écrasé) le champs "mlr3resample_result" si les données ont été
+#' échantillonnées, "mlr3model" sinon, dans lequel est stocké un modèle
+#' compatible avec la fonction `[predict.sf_task]`.
 #'
 #' @export
 train.sf_task <- function( #nolint
