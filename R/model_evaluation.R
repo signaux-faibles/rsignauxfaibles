@@ -68,7 +68,7 @@ evaluate <- function(
 #'
 #' @export
 get_default_measure <- function() {
-  return(msrs(c("classif.ce", "classif.fbeta")))
+  return(mlr3::msrs(c("classif.ce", "classif.fbeta")))
 }
 
 remove_strong_signals <- function(
