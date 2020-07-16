@@ -389,5 +389,5 @@ test_that(
 test_that(
   "get_fields has not inadvertedly changed", {
     # Mostly for coverage.
-    expect_length(get_fields(TRUE), 267)
+    expect_length(get_fields(TRUE), 265)
   })

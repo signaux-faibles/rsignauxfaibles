@@ -25,6 +25,9 @@ predict.sf_task <- function(
   ) {
 
   task  <- object
+  assertthat::assert_that(
+    all(data_names %in% c("new_data", "train_data", "test_data"))
+    )
 
   predict_on_given_data <- function(data_name, task) {
 
@@ -81,35 +84,6 @@ predict.sf_task <- function(
       task  <- predict_on_given_data(name, task)
     }
   }
-  return(task)
-}
-
-#' Predict model on new data for a cross-validated task
-#'
-#' Predict on new data for each cross-validated fold.
-#'
-#' @inheritParams predict.sf_task
-#' @return A task where each cross-validated fold has predictions
-#' @export
-predict.cv_task <- function(
-  object,
-  data_names = c(
-    "new_data",
-    "train_data",
-    "test_data"
-    ),
-  predict_fun = predict_model,
-  ...
-  ) {
-
-  requireNamespace("purrr")
-  task <- object
-  task[["cross_validation"]] <- purrr::map(
-    task[["cross_validation"]],
-    predict.sf_task,
-    data_names = data_names,
-    predict_fun = predict_fun
-  )
   return(task)
 }
 
