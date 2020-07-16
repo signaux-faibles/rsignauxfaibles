@@ -749,8 +749,6 @@ build_sector_match_stage <- function(
 #'
 #' @param interim `0 | 1 | 2` \cr Niveau de détail des données interim. cf
 #' Détails.
-#' @param target_encode `0 | 1 | 2` \cr Target encoding. Uniquement
-#' disponibles si `training`= `TRUE`.
 #' @param info `0 | 1 | 2`\cr Année des
 #' exercices Diane & Bdf
 #'
@@ -771,7 +769,6 @@ get_fields <- function(
   apart = 2,
   procol = 2,
   interim = 0,
-  target_encode =2,
   info = 0
 ) {
 
@@ -1138,13 +1135,6 @@ get_fields <- function(
     )
   }
 
-  if (target_encode >= 1 && training) {
-    fields <- c(
-      fields,
-      "target_encode_code_ape_niveau2",
-      "target_encode_code_ape_niveau3"
-    )
-  }
   if (info >= 1 && !training) {
     fields <- c(
       fields,
