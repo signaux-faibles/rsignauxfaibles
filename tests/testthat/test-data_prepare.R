@@ -116,6 +116,10 @@ test_that("prepare changes the requested features", {
     mutate_po,
     features = "feature"
   )
+  test_features(
+    mutate_po,
+    features = "feature" # new_feature is not computed before training
+  )
 })
 
 test_that("prepare changes the outcome field if requested", {
