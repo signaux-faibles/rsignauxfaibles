@@ -65,6 +65,11 @@ train.sf_task <- function( #nolint
   return(invisible(task))
 }
 
+#' Get default mlr3 learner
+#'
+#' Returns a default learner to train.
+#'
+#' @export
 get_default_learner <- function() {
   require(mlr3learners)
   learner <- mlr3::lrn("classif.xgboost")
