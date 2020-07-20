@@ -91,7 +91,7 @@ test_that("evaluate works as expected on two sf_tasks",  {
 })
 
 
-test_that("evaluate works as expected on two sf_tasks without strong signals",  {
+test_that("evaluate works as expected on two sf_tasks without strong signals", {
   requireNamespace("mlr3measures")
   trained_task <- get_test_task(
     stage = "train",
@@ -114,7 +114,7 @@ test_that("evaluate works as expected on two sf_tasks without strong signals",  
   expect_equal(benchmark_result$classif.acc, c(1, 1))
 })
 
-test_that("evaluate works as expected on two sf_tasks with mixed cv and holdout",  {
+test_that("evaluate works as expected on two sf_tasks with mixed cv and holdout", {
   requireNamespace("mlr3measures")
   trained_task <- get_test_task(
     stage = "train",
