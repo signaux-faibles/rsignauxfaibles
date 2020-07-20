@@ -33,7 +33,7 @@ optimize_hyperparameters.sf_task <- function( #nolint
   requireNamespace("paradox")
   requireNamespace("mlr3tuning")
 
-  resampling <- rsmp("holdout")
+  resampling <- mlr3::rsmp("holdout")
   at <- mlr3tuning::AutoTuner$new(
     learner = task[["mlr3graph_learner"]],
     resampling = resampling,
@@ -46,6 +46,13 @@ optimize_hyperparameters.sf_task <- function( #nolint
   return(task)
 }
 
+#' Default xgboost parameters to be tuned
+#'
+#' This gives a default set of parameters to be tuned for the xgboost model.
+#' To be used with `optimize_hyperparameters`.
+#'
+#' @return a paradox::ParamSet
+#' @export
 get_default_param_set <- function() {
   paradox::ParamSet$new(
     list(

@@ -78,7 +78,7 @@ test_that("evaluate works as expected with two measures",  {
   )
   benchmark_result <- evaluate(
     trained_task,
-    measures = msrs(c("classif.acc", "classif.ce"))
+    measures = mlr3::msrs(c("classif.acc", "classif.ce"))
   )
   expect_is(benchmark_result, "data.table")
   expect_true("classif.acc" %in% names(benchmark_result))
