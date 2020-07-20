@@ -6,7 +6,11 @@ test_that("evaluate works as expected on sf_tasks",  {
     stage = "train",
     learner = mlr3::LearnerClassifFeatureless$new()
   )
-  benchmark_result <- evaluate(trained_task, measures = msr("classif.acc"))
+  benchmark_result <- evaluate(
+    trained_task,
+    measures = msr("classif.acc"),
+    should_remove_strong_signals = FALSE
+  )
   expect_is(benchmark_result, "data.table")
   expect_true("classif.acc" %in% names(benchmark_result))
   expect_equal(benchmark_result$classif.acc, 1 / 3)
@@ -19,7 +23,11 @@ test_that("evaluate works as expected on sf_tasks with cv",  {
     resampling_strategy = "cv",
     learner = mlr3::LearnerClassifFeatureless$new()
   )
-  benchmark_result <- evaluate(trained_task, measures = msr("classif.acc"))
+  benchmark_result <- evaluate(
+    trained_task,
+    measures = msr("classif.acc"),
+    should_remove_strong_signals = FALSE
+  )
   expect_is(benchmark_result, "data.table")
   expect_true("classif.acc" %in% names(benchmark_result))
   expect_equal(benchmark_result$classif.acc, 0.1)
@@ -39,7 +47,8 @@ test_that("evaluate works as expected on two sf_tasks",  {
   benchmark_result <- evaluate(
     other_task,
     trained_task,
-    measures = msr("classif.acc")
+    measures = msr("classif.acc"),
+    should_remove_strong_signals = FALSE
   )
   expect_is(benchmark_result, "data.table")
   expect_true("classif.acc" %in% names(benchmark_result))
@@ -62,7 +71,8 @@ test_that("evaluate works as expected on two sf_tasks with mixed cv and holdout"
   benchmark_result <- evaluate(
     other_task,
     trained_task,
-    measures = msr("classif.acc")
+    measures = msr("classif.acc"),
+    should_remove_strong_signals = FALSE
   )
   expect_is(benchmark_result, "data.table")
   expect_true("classif.acc" %in% names(benchmark_result))
@@ -78,7 +88,8 @@ test_that("evaluate works as expected with two measures",  {
   )
   benchmark_result <- evaluate(
     trained_task,
-    measures = mlr3::msrs(c("classif.acc", "classif.ce"))
+    measures = mlr3::msrs(c("classif.acc", "classif.ce")),
+    should_remove_strong_signals = FALSE
   )
   expect_is(benchmark_result, "data.table")
   expect_true("classif.acc" %in% names(benchmark_result))
@@ -96,7 +107,7 @@ test_that("Les logs de la fonction 'evaluate' fonctionnent correctement", {
   task <- get_test_task(stage = "train")
   task[["tracker"]] <- new.env()
   with_mock(
-    evaluate(task),
+    evaluate(task, should_remove_strong_signals = FALSE),
     log_metric = mock_log_metric,
     log_param = mock_log_param
     )
@@ -130,7 +141,7 @@ test_that("Les logs de la fonction 'evaluate' fonctionnent correctement avec deu
   trained_task[["tracker"]] <- new.env()
   other_task[["tracker"]] <- new.env()
   with_mock(
-    evaluate(trained_task, other_task),
+    evaluate(trained_task, other_task, should_remove_strong_signals = FALSE),
     log_metric = mock_log_metric,
     log_param = mock_log_param
     )

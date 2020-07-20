@@ -106,7 +106,7 @@ get_test_task <- function(
     return(task)
   }
 
-  task <- evaluate(task, measures = measures)
+  task <- evaluate(task, measures = measures, should_remove_strong_signals = FALSE)
 
   return(task)
 

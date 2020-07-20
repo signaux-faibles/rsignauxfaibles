@@ -44,6 +44,10 @@ evaluate <- function(
       )
   )
 
+  purrr::walk(
+    tasks,
+    ~ log_param(., "should_remove_strong_signals", should_remove_strong_signals)
+  )
   resample_results <- purrr::map(tasks, "mlr3resample_result")
 
   if (should_remove_strong_signals) {
@@ -51,10 +55,6 @@ evaluate <- function(
       "Les 'signaux forts' sont retires des donnees d'evaluation (test, validation)"
     )
     resample_results <- purrr::map(tasks, remove_strong_signals)
-    purrr::walk(
-      tasks,
-      ~ log_param(., "should_remove_strong_signals", "not yet implemented")
-    )
   }
   benchmark <- do.call(c, resample_results) # Automatically converted to
   # BenchmarkResult
