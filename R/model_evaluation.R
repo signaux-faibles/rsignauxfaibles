@@ -45,14 +45,19 @@ evaluate <- function(
   )
 
   resample_results <- purrr::map(tasks, "mlr3resample_result")
+
   if (should_remove_strong_signals) {
     lgr::lgr$info(
-      "Les 'signaux forts' sont retires des donneesd'evaluation (test, validation)"
+      "Les 'signaux forts' sont retires des donnees d'evaluation (test, validation)"
     )
-    resample_results <- purrr::map(resample_results, remove_strong_signals)
-    purrr::walk(tasks, ~ log_param(., "should_remove_strong_signals", "not yet implemented"))
+    resample_results <- purrr::map(tasks, remove_strong_signals)
+    purrr::walk(
+      tasks,
+      ~ log_param(., "should_remove_strong_signals", "not yet implemented")
+    )
   }
-  benchmark <- do.call(c, resample_results)
+  benchmark <- do.call(c, resample_results) # Automatically converted to
+  # BenchmarkResult
   evaluation <- benchmark$aggregate(measures = measures)
 
   for (i in seq_len(nrow(evaluation))) {
@@ -72,15 +77,21 @@ get_default_measure <- function() {
 }
 
 remove_strong_signals <- function(
-  resample_result
+  task
   ) {
-  filtered_resample_results <- resample_result
+  filtered_resample_results <- task$mlr3resample_result$clone()
+  assertthat::assert_that("time_til_outcome" %in% names(task[["hist_data"]]))
+  weak_rows <- task[["hist_data"]] %>%
+    mutate(row_id = 1:n()) %>%
+    dplyr::filter(is.na(time_til_outcome) | time_til_outcome > 0) %>%
+    .$row_id
+
+  filtered_resample_results$data$prediction <- purrr::map(
+    filtered_resample_results$data$prediction,
+      ~ list(test = filter_mlr3_prediction(.$test, weak_rows))
+    )
 
  return(filtered_resample_results)
- # TODO: implement
-  # assertthat::assert_that("time_til_outcome" %in% names(evaluation_data))
-  # evaluation_data  <- evaluation_data %>%
-  #   dplyr::filter(is.na(time_til_outcome) | time_til_outcome > 0)
 }
 
 check_resample_results <- function(
@@ -99,4 +110,16 @@ check_resample_results <- function(
     inherits(task[["mlr3resample_result"]], "ResampleResult"),
     msg = "mlr3resample_result property should inherit from `ResampleResult`"
     )
+}
+
+filter_mlr3_prediction <- function(prediction, rows) {
+ prediction_dt <- data.table::as.data.table(prediction)
+ prediction_filtered_dt <- prediction_dt[rows, ]
+ real_rows <- rows[rows %in% prediction$row_ids]
+ prediction_filtered <- PredictionClassif$new(
+   row_ids = real_rows,
+   truth = prediction_filtered_dt$truth[real_rows],
+   response = prediction_filtered_dt$response[real_rows]
+   )
+ return(prediction_filtered)
 }
