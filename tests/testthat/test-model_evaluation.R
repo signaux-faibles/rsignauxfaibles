@@ -16,7 +16,24 @@ test_that("evaluate works as expected on sf_tasks",  {
   expect_equal(benchmark_result$classif.acc, 1 / 3)
 })
 
-test_that("evaluate works as expected on sf_tasks with cv",  {
+test_that("evaluate works as expected on sf_tasks without strong signals",  {
+  requireNamespace("mlr3measures")
+  trained_task <- get_test_task(
+    stage = "train",
+    learner = mlr3::LearnerClassifFeatureless$new()
+  )
+  trained_task[["hist_data"]]$time_til_outcome <- c(0:8, NA)
+  benchmark_result <- evaluate(
+    trained_task,
+    measures = msr("classif.acc"),
+    should_remove_strong_signals = TRUE
+  )
+  expect_is(benchmark_result, "data.table")
+  expect_true("classif.acc" %in% names(benchmark_result))
+  expect_equal(benchmark_result$classif.acc, 0)
+})
+
+test_that("evaluate works as expected on sf_tasks with cv", {
   requireNamespace("mlr3measures")
   trained_task <- get_test_task(
     stage = "train",
@@ -31,6 +48,24 @@ test_that("evaluate works as expected on sf_tasks with cv",  {
   expect_is(benchmark_result, "data.table")
   expect_true("classif.acc" %in% names(benchmark_result))
   expect_equal(benchmark_result$classif.acc, 0.1)
+})
+
+test_that("evaluate works as expected on sf_tasks with cv with strong signals", {
+  requireNamespace("mlr3measures")
+  trained_task <- get_test_task(
+    stage = "train",
+    resampling_strategy = "cv",
+    learner = mlr3::LearnerClassifFeatureless$new()
+  )
+  trained_task[["hist_data"]]$time_til_outcome <- c(rep(1, 5), 0, rep(1, 4))
+  benchmark_result <- evaluate(
+    trained_task,
+    measures = msr("classif.acc"),
+    should_remove_strong_signals = TRUE
+  )
+  expect_is(benchmark_result, "data.table")
+  expect_true("classif.acc" %in% names(benchmark_result))
+  expect_equal(benchmark_result$classif.acc, 0)
 })
 
 test_that("evaluate works as expected on two sf_tasks",  {
@@ -55,6 +90,29 @@ test_that("evaluate works as expected on two sf_tasks",  {
   expect_equal(benchmark_result$classif.acc, c(1 / 3, 1 / 3))
 })
 
+
+test_that("evaluate works as expected on two sf_tasks without strong signals",  {
+  requireNamespace("mlr3measures")
+  trained_task <- get_test_task(
+    stage = "train",
+    learner = mlr3::LearnerClassifFeatureless$new()
+  )
+  other_task <- get_test_task(
+    stage = "train",
+    learner = mlr3::LearnerClassifFeatureless$new()
+  )
+  trained_task[["hist_data"]]$time_til_outcome <- c(rep(1, 5), rep(0, 5))
+  other_task[["hist_data"]]$time_til_outcome <- c(rep(1, 5), rep(0, 5))
+  benchmark_result <- evaluate(
+    other_task,
+    trained_task,
+    measures = msr("classif.acc"),
+    should_remove_strong_signals = TRUE
+  )
+  expect_is(benchmark_result, "data.table")
+  expect_true("classif.acc" %in% names(benchmark_result))
+  expect_equal(benchmark_result$classif.acc, c(1, 1))
+})
 
 test_that("evaluate works as expected on two sf_tasks with mixed cv and holdout",  {
   requireNamespace("mlr3measures")

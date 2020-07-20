@@ -109,17 +109,18 @@ check_resample_results <- function(
   assertthat::assert_that(
     inherits(task[["mlr3resample_result"]], "ResampleResult"),
     msg = "mlr3resample_result property should inherit from `ResampleResult`"
-    )
+  )
 }
 
 filter_mlr3_prediction <- function(prediction, rows) {
  prediction_dt <- data.table::as.data.table(prediction)
- prediction_filtered_dt <- prediction_dt[rows, ]
  real_rows <- rows[rows %in% prediction$row_ids]
+ filter <- prediction_dt$row_id %in% real_rows
+   prediction_filtered_dt <- prediction_dt[filter, ]
  prediction_filtered <- PredictionClassif$new(
    row_ids = real_rows,
-   truth = prediction_filtered_dt$truth[real_rows],
-   response = prediction_filtered_dt$response[real_rows]
+   truth = prediction_filtered_dt$truth,
+   response = prediction_filtered_dt$response
    )
  return(prediction_filtered)
 }
