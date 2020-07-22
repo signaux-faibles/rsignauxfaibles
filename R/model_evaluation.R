@@ -117,7 +117,7 @@ filter_mlr3_prediction <- function(prediction, rows) {
  real_rows <- rows[rows %in% prediction$row_ids]
  filter <- prediction_dt$row_id %in% real_rows
    prediction_filtered_dt <- prediction_dt[filter, ]
- prediction_filtered <- PredictionClassif$new(
+ prediction_filtered <- mlr3::PredictionClassif$new(
    row_ids = real_rows,
    truth = prediction_filtered_dt$truth,
    response = prediction_filtered_dt$response
