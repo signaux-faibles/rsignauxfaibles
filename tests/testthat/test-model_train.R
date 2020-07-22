@@ -114,11 +114,12 @@ test_that(
     )
     expect_equal(
       get("scale.center", envir = task[["tracker"]]),
-      FALSE
+      "FALSE"
     )
     expect_equal(
       get("model_target", envir = task[["tracker"]]),
       "18 mois, defaut et defaillance"
     )
+    # TODO: test with closure parameter
   }
 )

@@ -58,11 +58,19 @@ train.sf_task <- function( #nolint
   )
   purrr::walk2(
     names(task[["mlr3graph_learner"]]$param_set$values),
-    task[["mlr3graph_learner"]]$param_set$values,
+    convert_to_character(task[["mlr3graph_learner"]]$param_set$values),
     ~ log_param(task, .x, .y)
     )
   log_param(task, "model_target",  "18 mois, defaut et defaillance")
   return(invisible(task))
+}
+
+convert_to_character <- function(x) {
+  if (typeof(x) == "closure") {
+    return(paste0(as.character(quote(x))))
+  } else {
+    return(as.character(x))
+  }
 }
 
 #' Get default mlr3 learner
