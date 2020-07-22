@@ -156,7 +156,7 @@ load_new_data.sf_task <- function(
   fields = get_fields(training = FALSE),
   min_effectif = 10L,
   rollback_months = 1L,
-  database_query_fun = query_database,
+  database_query_fun = database_query_fun,
   ...) {
 
   lgr::lgr$info("Loading data from last batch")
