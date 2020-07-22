@@ -83,8 +83,8 @@ get_default_learner <- function() {
   learner <- mlr3::lrn("classif.xgboost")
   learner$predict_type <- "prob"
   learner$param_set$values$max_depth <- 7
-  learner$param_set$values$min_child_weight <- 3
+  learner$param_set$values$min_child_weight <- 20
   learner$param_set$values$ntreelimit <- 240
-  learner$param_set$values$eta <- 0.0446
+  learner$param_set$values$eta <- 0.01
   return(learner)
 }
