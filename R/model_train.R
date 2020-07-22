@@ -27,6 +27,9 @@ train.sf_task <- function( #nolint
   ...
   ) {
 
+  # TODO: Log before training, to fail early if tracker should have been
+  # changed
+
   require(mlr3learners)
 
 

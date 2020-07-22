@@ -47,6 +47,7 @@ evaluate <- function(
   purrr::walk(
     tasks,
     ~ log_param(., "should_remove_strong_signals", should_remove_strong_signals)
+  # TODO: should not be blocking to log both with and without strong signals
   )
   resample_results <- purrr::map(tasks, "mlr3resample_result")
 
