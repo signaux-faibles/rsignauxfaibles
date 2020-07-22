@@ -311,7 +311,9 @@ import_data <- function(
   n_eta <- dplyr::n_distinct(df$siret)
   n_ent <- dplyr::n_distinct(df$siret %>% stringr::str_sub(1, 9))
   lgr::lgr$info(
-    "Import de {n_eta} etablissements issus de {n_ent} entreprises."
+    "Import de %s etablissements issus de %s entreprises.",
+    n_eta,
+    n_ent
   )
 
   df <- update_types(
