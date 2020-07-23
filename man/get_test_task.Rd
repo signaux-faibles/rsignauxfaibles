@@ -12,7 +12,7 @@ get_test_task(
   resampling_strategy = "holdout",
   processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
   learner = mlr3::LearnerClassifFeatureless$new(),
-  measures = msr("classif.acc")
+  measures = mlr3::msr("classif.acc")
 )
 }
 \arguments{
