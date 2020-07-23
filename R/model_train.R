@@ -39,6 +39,7 @@ train.sf_task <- function( #nolint
     task[["mlr3pipeline"]] %>>% learner
   )
   graph_learner$predict_type <- "prob"
+  graph_learner$predict_sets <- c("test", "train")
   task[["mlr3graph_learner"]] <- graph_learner
 
   if ("mlr3rsmp" %in% names(task)) {
