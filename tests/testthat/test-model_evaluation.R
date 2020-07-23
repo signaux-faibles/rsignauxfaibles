@@ -1,14 +1,13 @@
 context("Test model evaluation")
 
-test_that("evaluate works as expected on sf_tasks",  {
-  requireNamespace("mlr3measures")
+test_that("evaluate works as expected on sf_tasks", {
   trained_task <- get_test_task(
     stage = "train",
     learner = mlr3::LearnerClassifFeatureless$new()
   )
   benchmark_result <- evaluate(
     trained_task,
-    measures = msr("classif.acc"),
+    measures = mlr3::msr("classif.acc"),
     should_remove_strong_signals = FALSE
   )
   expect_is(benchmark_result, "data.table")
@@ -16,8 +15,7 @@ test_that("evaluate works as expected on sf_tasks",  {
   expect_equal(benchmark_result$classif.acc, 1 / 3)
 })
 
-test_that("evaluate works as expected on sf_tasks without strong signals",  {
-  requireNamespace("mlr3measures")
+test_that("evaluate works as expected on sf_tasks without strong signals", {
   trained_task <- get_test_task(
     stage = "train",
     learner = mlr3::LearnerClassifFeatureless$new()
@@ -25,7 +23,7 @@ test_that("evaluate works as expected on sf_tasks without strong signals",  {
   trained_task[["hist_data"]]$time_til_outcome <- c(0:8, NA)
   benchmark_result <- evaluate(
     trained_task,
-    measures = msr("classif.acc"),
+    measures = mlr3::msr("classif.acc"),
     should_remove_strong_signals = TRUE
   )
   expect_is(benchmark_result, "data.table")
@@ -34,7 +32,6 @@ test_that("evaluate works as expected on sf_tasks without strong signals",  {
 })
 
 test_that("evaluate works as expected on sf_tasks with cv", {
-  requireNamespace("mlr3measures")
   trained_task <- get_test_task(
     stage = "train",
     resampling_strategy = "cv",
@@ -42,7 +39,7 @@ test_that("evaluate works as expected on sf_tasks with cv", {
   )
   benchmark_result <- evaluate(
     trained_task,
-    measures = msr("classif.acc"),
+    measures = mlr3::msr("classif.acc"),
     should_remove_strong_signals = FALSE
   )
   expect_is(benchmark_result, "data.table")
@@ -50,8 +47,7 @@ test_that("evaluate works as expected on sf_tasks with cv", {
   expect_equal(benchmark_result$classif.acc, 0.1)
 })
 
-test_that("evaluate works as expected on sf_tasks with cv with strong signals", {
-  requireNamespace("mlr3measures")
+test_that("evaluate works as expected on sf_tasks with cv without strong signals", {
   trained_task <- get_test_task(
     stage = "train",
     resampling_strategy = "cv",
@@ -60,7 +56,7 @@ test_that("evaluate works as expected on sf_tasks with cv with strong signals", 
   trained_task[["hist_data"]]$time_til_outcome <- c(rep(1, 5), 0, rep(1, 4))
   benchmark_result <- evaluate(
     trained_task,
-    measures = msr("classif.acc"),
+    measures = mlr3::msr("classif.acc"),
     should_remove_strong_signals = TRUE
   )
   expect_is(benchmark_result, "data.table")
@@ -69,7 +65,6 @@ test_that("evaluate works as expected on sf_tasks with cv with strong signals", 
 })
 
 test_that("evaluate works as expected on two sf_tasks",  {
-  requireNamespace("mlr3measures")
   trained_task <- get_test_task(
     stage = "train",
     learner = mlr3::LearnerClassifFeatureless$new()
@@ -82,7 +77,7 @@ test_that("evaluate works as expected on two sf_tasks",  {
   benchmark_result <- evaluate(
     other_task,
     trained_task,
-    measures = msr("classif.acc"),
+    measures = mlr3::msr("classif.acc"),
     should_remove_strong_signals = FALSE
   )
   expect_is(benchmark_result, "data.table")
@@ -92,7 +87,6 @@ test_that("evaluate works as expected on two sf_tasks",  {
 
 
 test_that("evaluate works as expected on two sf_tasks without strong signals", {
-  requireNamespace("mlr3measures")
   trained_task <- get_test_task(
     stage = "train",
     learner = mlr3::LearnerClassifFeatureless$new()
@@ -106,7 +100,7 @@ test_that("evaluate works as expected on two sf_tasks without strong signals", {
   benchmark_result <- evaluate(
     other_task,
     trained_task,
-    measures = msr("classif.acc"),
+    measures = mlr3::msr("classif.acc"),
     should_remove_strong_signals = TRUE
   )
   expect_is(benchmark_result, "data.table")
@@ -115,7 +109,6 @@ test_that("evaluate works as expected on two sf_tasks without strong signals", {
 })
 
 test_that("evaluate works as expected on two sf_tasks with mixed cv and holdout", {
-  requireNamespace("mlr3measures")
   trained_task <- get_test_task(
     stage = "train",
     resampling_strategy = "cv",
@@ -129,7 +122,7 @@ test_that("evaluate works as expected on two sf_tasks with mixed cv and holdout"
   benchmark_result <- evaluate(
     other_task,
     trained_task,
-    measures = msr("classif.acc"),
+    measures = mlr3::msr("classif.acc"),
     should_remove_strong_signals = FALSE
   )
   expect_is(benchmark_result, "data.table")
@@ -139,7 +132,6 @@ test_that("evaluate works as expected on two sf_tasks with mixed cv and holdout"
 
 
 test_that("evaluate works as expected with two measures",  {
-  requireNamespace("mlr3measures")
   trained_task <- get_test_task(
     stage = "train",
     learner = mlr3::LearnerClassifFeatureless$new()

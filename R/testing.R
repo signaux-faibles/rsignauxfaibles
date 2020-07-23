@@ -14,7 +14,7 @@ get_test_task <- function(
   resampling_strategy = "holdout",
   processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
   learner = mlr3::LearnerClassifFeatureless$new(),
-  measures = msr("classif.acc")
+  measures = mlr3::msr("classif.acc")
 ) {
 
   previous_threshold <- lgr::lgr$threshold

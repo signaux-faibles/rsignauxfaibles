@@ -33,6 +33,7 @@ Suggests:
     mlr3tuning,
     paradox,
     smoof,
+    rpart,
     testthat (>= 2.1.0),
     xgboostExplainer
 Remotes:
