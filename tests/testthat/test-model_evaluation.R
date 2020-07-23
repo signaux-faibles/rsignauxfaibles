@@ -172,7 +172,7 @@ test_that("Les logs de la fonction 'evaluate' fonctionnent correctement", {
   expect_true(length(ls(task[["tracker"]])) > 0)
   expect_setequal(
     names(task[["tracker"]]),
-    c("classif.ce", "classif.fbeta", "should_remove_strong_signals")
+    c("classif.ce", "classif.fbeta")
   )
   expect_equal(
     get("classif.ce", envir = task[["tracker"]]),
@@ -183,6 +183,33 @@ test_that("Les logs de la fonction 'evaluate' fonctionnent correctement", {
     0.5
   )
 })
+
+
+test_that("Les logs de la fonction 'evaluate' fonctionnent correctement avec should_remove_strong_signals", {
+  task <- get_test_task(stage = "train")
+  task[["tracker"]] <- new.env()
+  task[["hist_data"]]$time_til_outcome <- c(rep(1, 5), rep(0, 5))
+  with_mock(
+    evaluate(task, should_remove_strong_signals = TRUE),
+    log_metric = mock_log_metric,
+    log_param = mock_log_param
+    )
+  expect_true(length(ls(task[["tracker"]])) > 0)
+  expect_setequal(
+    names(task[["tracker"]]),
+    c("classif.ce.weaksignals", "classif.fbeta.weaksignals")
+  )
+  expect_equal(
+    get("classif.ce.weaksignals", envir = task[["tracker"]]),
+    0
+  )
+  expect_equal(
+    get("classif.fbeta.weaksignals", envir = task[["tracker"]]),
+    1
+  )
+})
+
+
 
 
 test_that("Les logs de la fonction 'evaluate' fonctionnent correctement avec deux tâches", {
@@ -207,11 +234,11 @@ test_that("Les logs de la fonction 'evaluate' fonctionnent correctement avec deu
   expect_true(length(ls(other_task[["tracker"]])) > 0)
   expect_setequal(
     names(trained_task[["tracker"]]),
-    c("classif.ce", "classif.fbeta", "should_remove_strong_signals")
+    c("classif.ce", "classif.fbeta")
   )
   expect_setequal(
     names(other_task[["tracker"]]),
-    c("classif.ce", "classif.fbeta", "should_remove_strong_signals")
+    c("classif.ce", "classif.fbeta")
   )
 
   expect_equal(

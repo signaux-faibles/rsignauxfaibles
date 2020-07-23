@@ -43,12 +43,6 @@ evaluate <- function(
       sep = " "
       )
   )
-
-  purrr::walk(
-    tasks,
-    ~ log_param(., "should_remove_strong_signals", should_remove_strong_signals)
-  # TODO: should not be blocking to log both with and without strong signals
-  )
   resample_results <- purrr::map(tasks, "mlr3resample_result")
 
   if (should_remove_strong_signals) {
@@ -64,7 +58,11 @@ evaluate <- function(
   for (i in seq_len(nrow(evaluation))) {
     purrr::walk(
       7:length(evaluation),
-      ~ log_metric(tasks[[i]], names(evaluation)[.], evaluation[i][[.]])
+      ~ log_metric(
+        tasks[[i]],
+        paste0(names(evaluation)[.], ifelse(should_remove_strong_signals, ".weaksignals", "")),
+        evaluation[i][[.]]
+      )
     )
   }
   return(evaluation)
