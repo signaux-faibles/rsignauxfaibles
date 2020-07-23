@@ -4,7 +4,16 @@
 \alias{get_test_task}
 \title{Get a fake task}
 \usage{
-get_test_task(fake_data = NULL, fake_target = "target", stage = "prepare")
+get_test_task(
+  fake_data = NULL,
+  fake_target = "target",
+  training_fields = "feature",
+  stage = "prepare",
+  resampling_strategy = "holdout",
+  processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
+  learner = mlr3::LearnerClassifFeatureless$new(),
+  measures = mlr3::msr("classif.acc")
+)
 }
 \arguments{
 \item{fake_data}{Data that is stored as "hist_data". If none is provided,

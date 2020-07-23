@@ -16,10 +16,8 @@ import_data(
   sirets = NULL,
   code_ape = NULL,
   subsample = NULL,
-  verbose = FALSE,
   replace_missing = NULL,
-  database_query_fun = query_database,
-  debug
+  database_query_fun = query_database
 )
 }
 \arguments{
@@ -57,9 +55,6 @@ permis de mélanger des codes de différents niveaux.}
 
 \item{subsample}{\code{integer(1)} \cr Nombre d'objets (c'est-à-dire de couples
 siret x periode) à échantillonner.}
-
-\item{verbose}{\code{logical(1)} \cr Faut-il afficher dans le terminal des
-informations sur l'évolution du chargement des données?}
 
 \item{replace_missing}{\code{list()} \cr Liste nommée, dont les noms sont les
 noms de variables et les valeurs sont les valeurs de remplacement des NA.

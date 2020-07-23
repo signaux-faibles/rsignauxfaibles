@@ -6,35 +6,32 @@
 \usage{
 \method{train}{sf_task}(
   task,
-  outcome = "outcome",
-  parameters = NULL,
   seed = 0,
-  train_fun = "xgboost",
+  learner = get_default_learner(),
+  store_models = FALSE,
   ...
 )
 }
 \arguments{
 \item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
-\item{outcome}{\code{character()} \cr Nom de la colonne dans laquelle on trouve
-l'objectif d'apprentissage.}
-
-\item{parameters}{\code{list(any())} \cr Paramètres du modèle. Cf
-\verb{[train_light_gradient_boosting]}. Si \code{NULL}, alors des paramètres par
-défaut sont sélectionnés.}
-
 \item{seed}{\code{integer()}\cr Graîne pour que les calculs aléatoires soient
 reproductibles.}
 
-\item{train_fun}{\code{training_data} \cr Training_function, or "xgboost" or
-"linear"}
+\item{learner}{\code{mlr3::ClassifLearner} \cr
+Un modèle de classification mlr3 (les paramètres sont directement
+spécifiés dans le modèle).}
+
+\item{store_models}{\code{logical(1)} \cr
+Faut-il sauvegardé tous les modèles entraînés pour référence ultérieure ?}
 
 \item{...}{Not used}
 }
 \value{
 \verb{[sf_task]} \cr L'objet \code{task} donné en entré, auquel a été ajouté
-(ou écrasé) le champs "model", dans lequel est stocké un modèle compatible
-avec la fonction \verb{[prepare.sf_task]}.
+(ou écrasé) le champs "mlr3resample_result" si les données ont été
+échantillonnées, "mlr3model" sinon, dans lequel est stocké un modèle
+compatible avec la fonction \verb{[predict.sf_task]}.
 }
 \description{
 Entraîne un algorithme sur les données \code{task[["train_data"]]}. Cf

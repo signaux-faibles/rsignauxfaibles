@@ -15,7 +15,6 @@ get_fields(
   apart = 2,
   procol = 2,
   interim = 0,
-  target_encode = 2,
   info = 0
 )
 }
@@ -49,14 +48,11 @@ Détails.}
 \item{interim}{\code{0 | 1 | 2} \cr Niveau de détail des données interim. cf
 Détails.}
 
-\item{target_encode}{\code{0 | 1 | 2} \cr Target encoding. Uniquement
-disponibles si \code{training}= \code{TRUE}.}
-
 \item{info}{\code{0 | 1 | 2}\cr Année des
 exercices Diane & Bdf}
 }
 \value{
-\code{character()} \cr Vecteur de noms de variables @export
+\code{character()} \cr Vecteur de noms de variables
 }
 \description{
 Fonction utilitaire pour récupérer rapidement une liste de noms de

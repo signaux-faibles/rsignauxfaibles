@@ -27,6 +27,11 @@ log_param <- function(task, key, value, ...) {
 log_metric <- function(task, key, value, ...) {
   assertthat::assert_that(is.numeric(value))
   if (!is.null(task[["tracker"]]) && requireNamespace("mlflow")) {
-    mlflow::mlflow_log_metric(key, value, run_id =  task[["tracker"]]$run_id, ...)
+    mlflow::mlflow_log_metric(
+      key,
+      value,
+      run_id = task[["tracker"]]$run_id,
+      ...
+    )
   }
 }

@@ -15,8 +15,7 @@
   fields = get_fields(training = FALSE),
   min_effectif = 10L,
   rollback_months = 1L,
-  database_query_fun = query_database,
-  debug = FALSE,
+  database_query_fun = database_query_fun,
   ...
 )
 
@@ -52,6 +51,9 @@ charge tous les champs disponibles.}
 \item{rollback_months}{\code{integer(1)}\cr Nombre de mois précédant le premier
 mois de \code{periods} à charger. Permet d'effectuer des calculs de différences
 ou de moyennes glissantes pour les périodes d'intérêt.}
+
+\item{database_query_fun}{\code{function} \cr Fonction qui permet de requêter la
+base de données.}
 
 \item{...}{Additional parameters depending on class of task}
 }

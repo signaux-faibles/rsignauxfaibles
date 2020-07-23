@@ -28,171 +28,98 @@
 #' @export
 evaluate <- function(
   ...,
-  eval_function =  NULL,
+  measures =  get_default_measure(),
   data_name = "test_data",
-  plot = TRUE,
-  prediction_names = NULL,
-  target_names = "outcome",
-  segment_names = NULL,
-  remove_strong_signals = TRUE
+  should_remove_strong_signals = TRUE
   ) {
+
   tasks <- list(...)
+  purrr::walk(tasks, check_resample_results)
   assertthat::assert_that(length(tasks) >= 1)
   assertthat::assert_that(
     length(data_name) == 1,
-    msg = "Evaluation can only be made on a single data.frame at once"
+    msg = paste0("Evaluation can only be made on a single data type",
+      "(new, test) at once",
+      sep = " "
+      )
   )
+  resample_results <- purrr::map(tasks, "mlr3resample_result")
 
-  if (is.null(eval_function)) {
-    default_eval_fun <- TRUE
-    eval_function <- MLsegmentr::eval_precision_recall()
-  } else {
-    default_eval_fun <- FALSE
+  if (should_remove_strong_signals) {
+    lgr::lgr$info(
+      "Les 'signaux forts' sont retires des donnees d'evaluation (test, validation)"
+    )
+    resample_results <- purrr::map(tasks, remove_strong_signals)
   }
+  benchmark <- do.call(c, resample_results) # Automatically converted to
+  # BenchmarkResult
+  evaluation <- benchmark$aggregate(measures = measures)
 
-  evaluation_data  <- purrr::invoke(consolidate, tasks, data_name = data_name)
-
-  if (is.null(prediction_names)) {
-    model_names <- make.names(purrr::map(tasks, "name"))
-    prediction_names <- grep(
-      paste0("^", model_names, collapse = "|"),
-      names(evaluation_data),
-      value = TRUE
+  for (i in seq_len(nrow(evaluation))) {
+    purrr::walk(
+      7:length(evaluation),
+      ~ log_metric(
+        tasks[[i]],
+        paste0(names(evaluation)[.], ifelse(should_remove_strong_signals, ".weaksignals", "")),
+        evaluation[i][[.]]
+      )
     )
   }
-
-  if (remove_strong_signals) {
-    logger::log_info("Les 'signaux forts' sont retires des donnees
-      d'evaluation (test, validation)")
-      # TODO add to log
-      # task a7368366-ad3c-4dcb-b8d9-2e23de616bf0
-      assertthat::assert_that("time_til_outcome" %in% names(evaluation_data))
-      evaluation_data  <- evaluation_data %>%
-        dplyr::filter(is.na(time_til_outcome) | time_til_outcome > 0)
-  }
-
-  requireNamespace("MLsegmentr")
-  assesser <- MLsegmentr::Assesser$new(
-    evaluation_data
-  )
-  assesser$set_predictions(prediction_names)
-  assesser$set_targets(target_names)
-  if (!is.null(segment_names)) {
-    assesser$set_segments(segment_names)
-  }
-  assesser$evaluation_funs <- eval_function
-
-  aux <- assesser$assess_model(plot = plot)
-
-  task <- tasks[[1]]
-
-  perf  <- aux[["performance_frame"]]
-  task[["plot"]] <- aux[["plot"]]
-
-  if (default_eval_fun) {
-    task[["model_performance"]] <- perf %>%
-      filter(evaluation_name != "prcurve")
-  } else {
-    task[["model_performance"]] <- perf
-  }
-
-  log_metric(task, "model_performance", task[["model_performance"]])
-  return(task)
-  ## Log model performance.
+  return(evaluation)
 }
 
-#' Consolidate several tasks into a frame for evaluation
+#' Get defaults mlr3 measures.
 #'
-#' @param ... `sf_tasks | cv_tasks` \cr Tasks to consolidate
-#' @param data_name `character()` \cr Name of the type of data to consolidate
-#' ("train_data", "test_data")
-#'
-consolidate <- function(..., data_name) {
-  postfix <- ".cv"
-  tasks <- list(...)
-  assertthat::assert_that(length(tasks) >= 1)
-  if (length(tasks) == 1) {
-    task <- tasks[[1]]
-    name <- make.names(task[["name"]])
-    if (inherits(task, "cv_task")) {
-      # Recursively consolidate cross_validated tasks.
-      names <- paste0(
-        name,
-        postfix,
-        seq_along(task[["cross_validation"]])
-      )
-      task[["cross_validation"]] <- purrr::map2(
-        task[["cross_validation"]],
-        names,
-        function(my_task, my_name) {
-          my_task[["name"]] <- my_name
-          return(my_task)
-        }
-      )
-      consolidated_frame <- purrr::invoke(
-        consolidate,
-        task[["cross_validation"]],
-        data_name = data_name
-      )
-    } else if (inherits(task, "sf_task")) {
-      consolidated_frame <- task[[data_name]] %>%
-        rename(!!name := score)
-    } else {
-      stop("Class not handled by consolidate function")
-    }
-  } else {
-    # Rename tasks to have valid names
-    names <- make.names(purrr::map(tasks, "name"), unique = TRUE)
-    tasks <- purrr::map2(
-      tasks,
-      names,
-      function(my_task, my_name) {
-        my_task[["name"]] <- my_name
-        return(my_task)
-      }
-    )
-    # Computed consolidated frames for each task
-    consolidated_tasks <- purrr::map(
-      tasks,
-      consolidate,
-      data_name = data_name
-    )
-    # Consolidate at last
-    consolidated_frame <- purrr::invoke(
-      join_frames,
-      consolidated_tasks
-    )
-  }
-  return(consolidated_frame)
+#' @export
+get_default_measure <- function() {
+  return(mlr3::msrs(c("classif.fbeta", "classif.ce")))
 }
 
-
-#' Join several frames
-#'
-#'
-#' Joins the frames by all fields that are present in all the frames.
-#'
-#' @param ... :: `data.frame` \cr Frames to join
-#'
-#' @return `data.frame` \cr Joined frame
-join_frames <- function(
-  ...
+remove_strong_signals <- function(
+  task
   ) {
-  list_data <- list(...)
-  assertthat::assert_that(length(list_data) >= 1)
+  filtered_resample_results <- task$mlr3resample_result$clone()
+  assertthat::assert_that("time_til_outcome" %in% names(task[["hist_data"]]))
+  weak_rows <- task[["hist_data"]] %>%
+    mutate(row_id = 1:n()) %>%
+    dplyr::filter(is.na(time_til_outcome) | time_til_outcome > 0) %>%
+    .$row_id
 
-  shared_names <- purrr::reduce(
-    list_data,
-    ~ intersect(.x, names(.y)),
-    .init = names(list_data[[1]])
+  filtered_resample_results$data$prediction <- purrr::map(
+    filtered_resample_results$data$prediction,
+      ~ list(test = filter_mlr3_prediction(.$test, weak_rows))
+    )
+
+ return(filtered_resample_results)
+}
+
+check_resample_results <- function(
+  task
+  ) {
+  assertthat::assert_that(
+    "mlr3resample_result" %in% names(task),
+    msg = paste0(
+      "to be evaluated, a task must have a resampling strategy",
+      "and the model must be trained, thus having a mlr3resample_result",
+      "property",
+      sep = " "
+    )
   )
-
-  assertthat::assert_that(length(shared_names) > 1)
-
-  combined_data  <- purrr::reduce(
-    list_data,
-    dplyr::full_join,
-    by = shared_names
+  assertthat::assert_that(
+    inherits(task[["mlr3resample_result"]], "ResampleResult"),
+    msg = "mlr3resample_result property should inherit from `ResampleResult`"
   )
-  return(combined_data)
+}
+
+filter_mlr3_prediction <- function(prediction, rows) {
+ prediction_dt <- data.table::as.data.table(prediction)
+ real_rows <- rows[rows %in% prediction$row_ids]
+ filter <- prediction_dt$row_id %in% real_rows
+   prediction_filtered_dt <- prediction_dt[filter, ]
+ prediction_filtered <- mlr3::PredictionClassif$new(
+   row_ids = real_rows,
+   truth = prediction_filtered_dt$truth,
+   response = prediction_filtered_dt$response
+   )
+ return(prediction_filtered)
 }

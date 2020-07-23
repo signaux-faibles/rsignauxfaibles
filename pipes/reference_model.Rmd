@@ -29,8 +29,7 @@ connect_to_h2o()
 task <- sf_task(
   database,
   collection,
-  id = "Reference evaluation canvas",
-  verbose = TRUE
+  id = "Reference evaluation canvas"
 )
 
 task <- load_hist_data(

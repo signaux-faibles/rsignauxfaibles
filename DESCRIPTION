@@ -9,38 +9,36 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
-    MLsegmentr,
     assertthat,
     dplyr,
-    fte,
     jsonlite,
-    logger,
+    lgr,
     lubridate,
     mlr3,
+    mlr3learners,
+    mlr3measures,
+    mlr3pipelines,
     mongolite,
     purrr,
-    rlang,
     stringr,
     tibble,
     tidyr,
-    xgboost
+    xgboost,
+    data.table
 Suggests:
-    DiceKriging,
-    ParamHelpers,
     corrplot,
     ggplot2,
     lhs,
     mlflow,
-    mlr,
-    mlrMBO,
-    rgenoud,
+    mlr3tuning,
+    paradox,
     smoof,
+    rpart,
     testthat (>= 2.1.0),
     xgboostExplainer
 Remotes:
     AppliedDataSciencePartners/xgboostExplainer,
-    signaux-faibles/MLsegmentr,
-    signaux-faibles/fte
+    mlr-org/mlr3pipelines,
 RoxygenNote: 7.1.0
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/signaux-faibles/rsignauxfaibles

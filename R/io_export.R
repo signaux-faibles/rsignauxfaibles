@@ -89,7 +89,7 @@ export.sf_task <- function(
   if (!is.null(export_type)) {
     assertthat::assert_that(all(export_type %in% c("csv", "mongodb")))
 
-    logger::log_info("Adding additional fields for export")
+    lgr::lgr$info("Adding additional fields for export")
 
     res <- task[["new_data"]] %>%
       format_for_export(
@@ -98,11 +98,10 @@ export.sf_task <- function(
         collection = collection_features,
         mongodb_uri = mongodb_uri,
         last_batch = batch,
-        known_sirens_full_path = known_sirens_full_path,
-        verbose = attr(task, "verbose")
+        known_sirens_full_path = known_sirens_full_path
         )
 
-    logger::log_info(
+    lgr::lgr$info(
       "Data is exported to {paste(export_type, collapse = ' and ')}"
     )
     purrr::walk(
@@ -127,7 +126,7 @@ export.sf_task <- function(
       algo = algo_name
       )
   }
-  logger::log_info("Data exported with success to
+  lgr::lgr$info("Data exported with success to
     {paste(export_type, collapse = ' and ')}")
     return(task)
 }
@@ -147,8 +146,6 @@ export.sf_task <- function(
 #'   les données.
 #' @param known_sirens_full_path `character()` \cr Chemins absolus des
 #'   fichiers contenant des listes de sirens connus.
-#' @param verbose `logical()` \cr Faut-il imprimer des informations sur le
-#'   chargement des données supplémentaires ?
 #'
 #' @return `data.frame()`\cr
 #'   Données formatées avec les champs "siret", "periode", "score",
@@ -162,15 +159,10 @@ format_for_export <- function(
   collection,
   mongodb_uri,
   last_batch,
-  known_sirens_full_path,
-  verbose) {
+  known_sirens_full_path
+  ) {
 
-  requireNamespace("logger")
-  if (verbose) {
-    logger::log_threshold(logger::TRACE)
-  } else {
-    logger::log_threshold(logger::WARN)
-  }
+  requireNamespace("lgr")
 
   prediction <- data_to_export %>%
     select(siret, periode, score)
@@ -181,7 +173,7 @@ format_for_export <- function(
     unique()
 
   if (length(all_periods) < 2) {
-    logger::log_warn(
+    lgr::lgr$warn(
       "Less than two periods do not allow to compute score variations,
       or to monitor company appearing since last period. You can add more
       periods with the rollback_months parameter from load_new_data function"
@@ -209,8 +201,8 @@ format_for_export <- function(
 
   first_period <- min(all_periods)
   last_period <- max(all_periods)
-  logger::log_info("Preparation a l'export ... ")
-  logger::log_info("Derniere periode connue: {last_period}")
+  lgr::lgr$info("Preparation a l'export ... ")
+  lgr::lgr$info("Derniere periode connue: %s", last_period)
 
   donnees <- import_data(
     database = database,
@@ -250,7 +242,7 @@ format_for_export <- function(
   }
 
   all_names <- names(donnees)
-  logger::log_info("Les variables suivantes sont absentes du dataframe:
+  lgr::lgr$info("Les variables suivantes sont absentes du dataframe:
     {export_fields[!(export_fields %in% all_names)]}")
     export_fields <- export_fields[export_fields %in% all_names]
 

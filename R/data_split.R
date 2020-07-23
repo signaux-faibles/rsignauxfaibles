@@ -7,10 +7,12 @@
 #' pour éviter la fuite d'information d'un échantillon vers l'autre.
 #'
 #' @inheritParams generic_task
-#' @param ratio `numeric(1)` \cr Ratio of data
-#' used for training.
-#' @param resampling_strategy `character(1)` \cr Either "holdout"
-#' or "cross_validation"
+#' @param ratio `numeric(1)` \cr Ratio des données utilisées pour
+#' l'entraînement. Ignoré si 'resampling_strategy != "holdout"'
+#' @param nfolds `numeric(1)` \cr Nombre d'échantillons de validation croisé.
+#' Ignoré si 'resampling_strategy != "cv"'.
+#' @param resampling_strategy `character(1)` \cr Ou bien "holdout"
+#' ou "cv". Toute autre valeur n'occasionne aucun échantillonnage.
 #'
 #' @describeIn split_data
 #'
@@ -20,16 +22,28 @@
 #' sous-ensemble (possiblement vide) de ses lignes.
 #'
 #' @export
-split_data.sf_task <- function(
+split_data.sf_task <- function( #nolint
   task,
   ratio = 2 / 3,
+  nfolds = 5,
   resampling_strategy = "holdout",
   ...
 ) {
 
-  set_verbose_level(task)
+  allowable_strategies <- mlr3::mlr_resamplings$keys()
 
-  logger::log_info(paste0("Les donnees historiques sont scindes en ",
+  if (is.null(resampling_strategy) ||
+    !resampling_strategy %in% allowable_strategies) {
+    lgr::lgr$info(paste(
+        "Les données ne sont pas échantillonnées car le paramètre",
+        "'resampling_strategy' n'est pas valide. Les paramètres valides sont:",
+        paste(allowable_strategies, collapse = ", ")
+        ))
+    task[["train_data"]] <- task[["hist_data"]]
+    return(task)
+  }
+
+  lgr::lgr$info(paste0("Les donnees historiques sont scindes en ",
       "echantillons d'entrainement et de test"))
 
   assertthat::assert_that("hist_data" %in% names(task),
@@ -37,45 +51,31 @@ split_data.sf_task <- function(
       "échanillonner avec 'load_hist_data()'")
   )
 
-  assertthat::assert_that(ratio > 0 && ratio <= 1)
-
-  # creating mlr3task
-  mlr3_data <- task[["hist_data"]]
-
-  mlr3_data[[task[["target"]]]] <- as.factor(mlr3_data[[task[["target"]]]])
-
-  if (!c("siren") %in% names(mlr3_data)) {
-    mlr3_data$siren <- substr(mlr3_data$siret, 1, 9)
-  }
-
-  mlr3task <- mlr3::TaskClassif$new(
-    id = "signaux-faibles",
-    backend = mlr3_data,
-    target = task[["target"]]
+  assertthat::assert_that(
+    ratio > 0 && ratio <= 1,
+    msg = "ratio doit être un nombre entre 0 exclu et 1 inclus"
   )
-
-  mlr3task$col_roles$name <- c("siret")
-  mlr3task$col_roles$group <- c("siren")
-  mlr3task$col_roles$feature <- setdiff(
-    mlr3task$col_roles$feature,
-    c("siret", "siren")
+  assertthat::assert_that(
+    nfolds >= 2,
+    msg = "'nfolds' doit être supérieur à 2"
   )
 
   mlr3resampling <- mlr3::rsmp(resampling_strategy)
   if (resampling_strategy == "holdout") {
     mlr3resampling$param_set$values[["ratio"]] <- ratio
+  } else if (resampling_strategy == "cv") {
+    mlr3resampling$param_set$values[["folds"]] <- nfolds
   }
 
   set.seed(3)
-  mlr3resampling$instantiate(mlr3task)
+  mlr3resampling$instantiate(task[["mlr3task"]])
 
-  task[["mlr3task"]] <- mlr3task
   task[["mlr3rsmp"]] <- mlr3resampling
 
+  # Temp: saving train_data, test_data to task
   task[["train_data"]] <- task[["hist_data"]][mlr3resampling$train_set(1), ]
   task[["test_data"]] <- task[["hist_data"]][mlr3resampling$test_set(1), ]
 
-  # Temp: saving train_data, test_data to task
   log_param(task, "resampling_strategy", resampling_strategy)
   log_param(task, "train_test_ratio", ratio)
 

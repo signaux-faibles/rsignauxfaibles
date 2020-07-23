@@ -6,22 +6,18 @@
 \usage{
 evaluate(
   ...,
-  eval_function = NULL,
+  measures = get_default_measure(),
   data_name = "test_data",
-  plot = TRUE,
-  prediction_names = NULL,
-  target_names = "outcome",
-  segment_names = NULL,
-  remove_strong_signals = TRUE
+  should_remove_strong_signals = TRUE
 )
 }
 \arguments{
 \item{...}{\code{tasks} \cr Tasks to be evaluated.}
 
+\item{data_name}{\code{character(1)} \cr Sur quelles données évaluer ?}
+
 \item{eval_function}{\code{MLsegmentr::eval_function()} \cr Objet s3
 d'évaluation.}
-
-\item{data_name}{\code{character(1)} \cr Sur quelles données évaluer ?}
 
 \item{plot}{\code{logical(1)} \cr Faut-il tracer la figure avec la fonction de
 l'\code{eval_function} (si disponible)}

@@ -12,7 +12,7 @@ test_replace_missing_data <- function(
                                       expected) {
   testthat::test_that("replace_missing_data " %>% paste0(description), {
     expect_equal(
-      replace_missing_data(df, fields, replace_missing, FALSE),
+      replace_missing_data(df, fields, replace_missing),
       expected
     )
   })
@@ -192,6 +192,10 @@ test_that("assemble_stages_to_query ignores NULLs", {
       assemble_stages_to_query(NULL, list(a = 1)) %>% toString(),
       '[{"a":1}]'
      )
+   expect_equal(
+      assemble_stages_to_query(list(b = NULL), list(a = 1)) %>% toString(),
+      '[{"a":1}]'
+     )
 })
 
 test_that("build_standard_query builds a valid query", {
@@ -277,6 +281,13 @@ test_that("build_siret_match_stage builds a valid match stage", {
 # import_data
 #
 
+test_that(
+  "La propriété 'mlr3task' est créée", {
+    expect_error(test_task <- get_test_task(stage = "load"), NA)
+    expect_true("mlr3task" %in% names(test_task))
+    expect_true(inherits(test_task$mlr3task, "TaskClassif"))
+})
+
 import_test_data <- function(
                              batch,
                              fields,
@@ -295,15 +306,12 @@ import_test_data <- function(
     mongodb_uri = "mongodb://localhost:27017",
     batch = batch,
     min_effectif = 10,
-
     date_inf = as.Date("2014-01-01"),
     date_sup = as.Date("2014-02-01"),
     subsample = subsample,
     fields = fields,
     sirets = sirets,
-    code_ape = code_ape,
-    verbose = FALSE,
-    debug = FALSE
+    code_ape = code_ape
   )
   return(data_import)
 }
@@ -321,7 +329,7 @@ test_that(
   })
 
 test_that(
-  "On arrive à récupérer les éléments de la base avec une requête standard", {
+  "On récupére les éléments de la base avec une requête standard", {
 
   testthat::skip_on_ci()
   fields <- c("siret", "periode")
@@ -349,7 +357,7 @@ test_that(
 })
 
 test_that(
-  "On arrive à récupérer les éléments de la base avec une requête par siret", {
+  "On récupére les éléments de la base avec une requête par siret", {
   testthat::skip_on_ci()
   fields <- c("siret", "periode")
   test_object <- import_test_data(
@@ -364,7 +372,7 @@ test_that(
 })
 
 test_that(
-  "On arrive à récupérer les éléments de la base avec une requête par code ape", {
+  "On récupére les éléments de la base avec une requête par code ape", {
   testthat::skip_on_ci()
   fields <- c("siret", "periode")
   test_object <- import_test_data(
@@ -377,3 +385,9 @@ test_that(
   expect_equal(as.character(test_object$siret), "01234567891011")
   expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
 })
+
+test_that(
+  "get_fields has not inadvertedly changed", {
+    # Mostly for coverage.
+    expect_length(get_fields(TRUE), 265)
+  })

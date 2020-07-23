@@ -9,13 +9,31 @@
 get_test_task <- function(
   fake_data = NULL,
   fake_target = "target",
-  stage = "prepare"
+  training_fields = "feature",
+  stage = "prepare",
+  resampling_strategy = "holdout",
+  processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
+  learner = mlr3::LearnerClassifFeatureless$new(),
+  measures = mlr3::msr("classif.acc")
 ) {
 
+  previous_threshold <- lgr::lgr$threshold
+  lgr::lgr$set_threshold("error")
+
+  admissible_stages <- c(
+    "load",
+    "split",
+    "prepare",
+    "train",
+    "evaluate"
+  )
   assertthat::assert_that(
-    stage %in% c("load", "split", "prepare"),
-    msg = "Stage should be either 'load', 'split' or 'prepare'"
+    stage %in% admissible_stages,
+    msg = paste0(
+      "Stage should be either ",
+      paste0(admissible_stages, collapse = ", ")
     )
+  )
 
   if (is.null(fake_data)) {
     fake_data <- data.frame(
@@ -37,9 +55,9 @@ get_test_task <- function(
     database = "fake_database",
     collection = "fake_collection",
     id = "Fake task",
-    target = fake_target,
-    verbose = FALSE
+    target = fake_target
   )
+
   mock_query_database <- function(...) {
     return(fake_data)
   }
@@ -51,47 +69,48 @@ get_test_task <- function(
     database_query_fun = mock_query_database
   )
 
+  task <- load_new_data(
+    task,
+    periods = as.Date("2014-10-01"),
+    batch = "0000",
+    fields = names(fake_data),
+    database_query_fun = mock_query_database
+    )
+
   if (stage == "load") {
     return(task)
   }
-  task  <- split_data(task, ratio = 2 / 3, resampling_strategy = "holdout")
+
+  task  <- split_data(
+    task,
+    resampling_strategy = resampling_strategy
+  )
+
   if (stage == "split") {
     return(task)
   }
 
-  task[["new_data"]]  <- task[["hist_data"]]
-  task[["prepared_train_data"]]  <- task[["train_data"]]
-  task[["prepared_test_data"]]  <- task[["test_data"]]
-  task[["outcome_field"]] <- "target"
+  task <- prepare(
+    task,
+    training_fields = training_fields,
+    processing_pipeline = processing_pipeline
+  )
 
-  # stage == "prepare"
+  if (stage == "prepare") {
+    return(task)
+  }
+
+  task <- train(task, learner = learner)
+
+  if (stage == "train") {
+    return(task)
+  }
+
+  task <- evaluate(task, measures = measures, should_remove_strong_signals = FALSE)
+
   return(task)
-}
 
-
-get_cv_test_task <- function() {
-  sf_task <- get_test_task()
-
-  cv_task <-  sf_task[c(
-    "name",
-    "database",
-    "collection",
-    "mongodb_uri",
-    "tracker",
-    "hist_data",
-    "new_data"
-    )]
-
-  class(cv_task) <- c("cv_task", "sf_task")
-  cv_task[["cross_validation"]] <- rep(list(get_test_task()), 4)
-  cv_task[["cross_validation"]] <- purrr::map2(
-    cv_task[["cross_validation"]],
-    1:4,
-    function(task, holdout) {
-      task[["train_data"]] <- task[["train_data"]][-holdout, ]
-      return(task)
-    })
-  return(cv_task)
+  lgr::lgr$set_threshold(previous_threshold)
 }
 
 # Pass an environment to client and it will assign new variables in it.
@@ -100,8 +119,4 @@ mock_log_param <- function(task, key, value, ...) {
   assign(key, value, envir = task[["tracker"]])
 }
 
-# Pass an environment to client and it will assign new variables in it.
-mock_log_metric <- function(task, key, value, ...) {
-  assertthat::assert_that(inherits(task[["tracker"]], "environment"))
-  assign(key, value, envir = task[["tracker"]])
-}
+mock_log_metric <- mock_log_param

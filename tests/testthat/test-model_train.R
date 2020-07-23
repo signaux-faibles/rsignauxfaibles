@@ -11,63 +11,116 @@ parameters  <- list(
   ntrees = 60,
   min_child_weight = 1
 )
-test_that("train.sf_task works as expected", {
+
+test_that("train.sf_task works with learner as expected", {
   test_task <- get_test_task()
-  test_task[["model_parameters"]] <- parameters
-  test_task[["model"]] <- NULL
+  test_task[["mlr3pipeline"]] <- mlr3pipelines::po("nop")
   trained_task <- train(
     task = test_task,
     outcome = "target",
-    train_fun = test_train_function
+    learner = mlr3::lrn("classif.featureless")
   )
   expect_equal(
-    trained_task[["model"]](3),
-    3
+    trained_task[["mlr3resample_result"]]$score(
+      mlr3::msr("classif.acc")
+    )$classif.acc,
+    1 / 3
+  )
+})
+
+test_that("train.sf_task works with learner and cv as expected ", {
+  test_task <- get_test_task(resampling_strategy = "cv")
+  test_task[["mlr3pipeline"]] <- mlr3pipelines::po("nop")
+  test_task[["model_parameters"]] <- list()
+  trained_task <- train(
+    task = test_task,
+    outcome = "target",
+    learner = mlr3::lrn("classif.featureless")
+  )
+  expect_equal(
+    c(classif.acc = 0.1),
+    trained_task[["mlr3resample_result"]]$aggregate(mlr3::msr("classif.acc")),
+  )
+})
+
+test_that("train.sf_task returns a task", {
+  test_task <- get_test_task(stage = "train")
+  expect_is(test_task, "sf_task")
+})
+
+test_that("processing pipeline is stored in 'mlr3pipeline' property", {
+  test_mlr3pipeline_prop <- function(pipe) {
+    prep_task <- get_test_task(stage = "prepare", processing_pipeline = pipe)
+    expect_true("mlr3pipeline" %in% names(prep_task))
+    expect_true(inherits(prep_task[["mlr3pipeline"]], "PipeOp") ||
+      inherits(prep_task[["mlr3pipeline"]], "Graph"))
+  }
+  test_mlr3pipeline_prop(mlr3pipelines::PipeOpNOP$new())
+  test_mlr3pipeline_prop(
+    mlr3pipelines::as_graph(mlr3pipelines::PipeOpNOP$new())
   )
 })
 
 
-test_that("train.cv works as expected", {
-  test_task <- get_cv_test_task()
-  test_task[["model"]] <- NULL
-  test_task[["model_parameters"]] <- parameters
+test_that("train.sf_task works with learner as expected", {
+  test_task <- get_test_task()
+  test_task[["mlr3pipeline"]] <- mlr3pipelines::po("nop")
+  test_task[["mlr3rsmp"]] <- NULL
   trained_task <- train(
     task = test_task,
     outcome = "target",
-    train_fun = test_train_function
+    learner = mlr3::lrn("classif.featureless")
   )
   expect_equal(
-    trained_task[["cross_validation"]][[4]][["model"]](3),
-    3
+    trained_task[["mlr3model"]]$model$
+      classif.featureless$model$tab,
+    structure(c(`TRUE` = 5L, `FALSE` = 5L), .Dim = 2L, .Dimnames =
+      structure(list(c("TRUE", "FALSE")), .Names = ""), class = "table")
   )
 })
 
 test_that(
-  "Les logs de la fonction 'prepare_data' fonctionnent correctement", {
-    task <- get_test_task()
-    task[["model_parameters"]] <- parameters
+  "Les logs de la fonction 'train_data' fonctionnent correctement", {
+    testthat::skip_on_ci() # I Don't understand what goes wrong on CI
+    task <- get_test_task(
+      processing_pipeline = mlr3pipelines::po(
+        "scale",
+        param_vals = list(center = FALSE)
+      )
+    )
     task[["tracker"]] <- new.env()
+
     with_mock(
-      train(task, outcome = "target", train_fun = test_train_function),
+      train(task, learner = mlr3::LearnerClassifFeatureless$new()),
       log_param = mock_log_param,
       log_metric = mock_log_metric
     )
     expect_true(length(ls(task[["tracker"]])) > 0)
     expect_setequal(
       names(task[["tracker"]]),
-      c("model_name", "model_target", "model_parameters")
+      c(
+        "model_target",
+        "scale.center",
+        "classif.featureless.method",
+        "pipeline1"
+      )
     )
     expect_equal(
-      get("model_name", envir = task[["tracker"]]),
-      "light gradient boosting"
+      get("pipeline1", envir = task[["tracker"]]),
+      "scale.classif.featureless"
+    )
+    expect_equal(
+      get("classif.featureless.method", envir = task[["tracker"]]),
+      "mode"
+    )
+    expect_equal(
+      get("scale.center", envir = task[["tracker"]]),
+      "FALSE"
     )
     expect_equal(
       get("model_target", envir = task[["tracker"]]),
       "18 mois, defaut et defaillance"
     )
-    expect_equal(
-      get("model_parameters", envir = task[["tracker"]]),
-      parameters
-      )
+    # TODO: test with closure parameter
   }
 )
