@@ -58,15 +58,11 @@ get_test_task <- function(
     target = fake_target
   )
 
-  mock_query_database <- function(...) {
-    return(fake_data)
-  }
-
   task <-  load_hist_data(
     task,
     batch = "0000",
     fields = names(fake_data),
-    database_query_fun = mock_query_database
+    database_query_fun = mock_query_database(fake_data)
   )
 
   task <- load_new_data(
@@ -74,7 +70,7 @@ get_test_task <- function(
     periods = as.Date("2014-10-01"),
     batch = "0000",
     fields = names(fake_data),
-    database_query_fun = mock_query_database
+    database_query_fun = mock_query_database(fake_data)
     )
 
   if (stage == "load") {
