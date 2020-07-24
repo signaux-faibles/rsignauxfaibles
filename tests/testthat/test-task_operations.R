@@ -15,7 +15,7 @@ test_that("reset_for_new_run makes a new task", {
 
 test_that("reset_for_new_run does not copy data", {
   task <- get_test_task(stage = "train")
-  task$hist_data <- data.frame(a = rep(1, 1000000))
+  task$hist_data <- data.frame(periode = 1, siret = 1:100000, target = c(T, F))
   new_task <- reset_for_new_run(task)
   expect_true(pryr::object_size(c(task, new_task)) < 11000000)
 })
@@ -28,3 +28,10 @@ test_that("replace_hist_data works as expected", {
   expect_equal(mlr3task_copy$data(), repaired_task$mlr3task$data())
 })
 
+test_that("replace_new_data works as expected", {
+  task <- get_test_task(stage = "split")
+  expect_error(
+    new_task <- replace_new_data(task, task$hist_data),
+    NA
+    )
+})
