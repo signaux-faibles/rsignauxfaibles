@@ -35,3 +35,19 @@ test_that("replace_new_data works as expected", {
     NA
     )
 })
+
+test_that("filter_task works as expected", {
+  task <- get_test_task(stage = "train")
+  task <- filter_task(task, c(3, 4))
+  expect_equal(as.character(task$hist_data$siret), c("3", "4"))
+  expect_equal(
+    nrow(data.table::as.data.table(task$mlr3task)),
+    2
+  )
+  task <- filter_task(task, c(3, 4)) # Can be repeated
+  expect_equal(as.character(task$hist_data$siret), c("3", "4"))
+  expect_equal(
+    nrow(data.table::as.data.table(task$mlr3task)),
+    2
+  )
+})

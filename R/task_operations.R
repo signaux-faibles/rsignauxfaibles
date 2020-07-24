@@ -90,7 +90,20 @@ replace_new_data <- function(task, data) {
   return(task)
 }
 
-filter_task <- function(sirets) {
+#' Filtre la tâche d'apprentissage aux sirets désirés
+#'
+#' @export
+filter_task <- function(task, sirets) {
+  # Filter mlr3task
+  ids <- task$hist_data %>%
+    filter(siret %in% sirets) %>%
+    .$ids
 
+  task[["hist_data"]] <- task[["hist_data"]] %>%
+    filter(siret %in% sirets)
 
+  # Filter hist_data
+  task[["mlr3task"]]$filter(ids)
+  reset_task <- reset_for_new_run(task, keep_resampling = FALSE)
+  return(reset_task)
 }

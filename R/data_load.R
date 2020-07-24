@@ -98,7 +98,8 @@ load_hist_data.sf_task <- function(
       requete.")
   }
   check_overwrites(task, "hist_data")
-  task[["hist_data"]] <- hist_data
+  task[["hist_data"]] <- hist_data %>%
+    mutate(ids = 1:n())
 
   # creating mlr3task
   mlr3_data <- task[["hist_data"]]
