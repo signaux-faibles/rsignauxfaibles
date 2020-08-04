@@ -95,7 +95,8 @@ load_hist_data.sf_task <- function(
     lgr::lgr$info("Les donnees ont ete chargees avec succes.")
   } else {
     lgr::lgr$warn("Aucune donnee n'a ete chargee. Veuillez verifier la
-      requete.")
+      requete; notamment les paramètres `database`, `collection`,
+      `mongodburi` et `batch`")
   }
   check_overwrites(task, "hist_data")
   task[["hist_data"]] <- hist_data %>%
