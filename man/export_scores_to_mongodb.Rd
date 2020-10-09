@@ -16,7 +16,7 @@ export_scores_to_mongodb(
 }
 \arguments{
 \item{formatted_data}{\code{data.frame()} \cr Données avec les champs "siret",
-"periode", "score" et "score_diff". C'est le cas des données formatées par
+"periode", "score". C'est le cas des données formatées par
 \code{\link{format_for_export}}.}
 
 \item{algo}{\code{character(1)} \cr Nom de l'algo qui figurera dans les objets
@@ -44,7 +44,7 @@ champs:
 \item "_id" (ObjectId générés),
 \item "alert", qui peut prendre les valeurs \emph{Alerte seuil F1}, \emph{Alerte seuil F2} et \emph{Pas d'alerte},
 \item "algo" et "batch" tel qu'entrés en paramètres,
-\item "siret", "periode", "score" et "score_diff" tel qu'extraits de la table \code{formatted_data},
+\item "siret", "periode", "score" tel qu'extraits de la table \code{formatted_data},
 \item "timestamp" qui donne la date et l'heure.
 }
 }

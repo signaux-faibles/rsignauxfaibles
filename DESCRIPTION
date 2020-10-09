@@ -40,7 +40,7 @@ Suggests:
 Remotes:
     AppliedDataSciencePartners/xgboostExplainer,
     mlr-org/mlr3pipelines,
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/signaux-faibles/rsignauxfaibles
 BugReports: https://github.com/signaux-faibles/rsignauxfaibles/issues

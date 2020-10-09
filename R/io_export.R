@@ -261,7 +261,7 @@ format_for_export <- function(
 #' \code{\link{format_for_export}}.
 #'
 #' @param formatted_data `data.frame()` \cr Données avec les champs "siret",
-#'   "periode", "score" et "score_diff". C'est le cas des données formatées par
+#'   "periode", "score". C'est le cas des données formatées par
 #'   \code{\link{format_for_export}}.
 #' @param algo `character(1)` \cr Nom de l'algo qui figurera dans les objets
 #'   exportés
@@ -280,7 +280,7 @@ format_for_export <- function(
 #'   * "_id" (ObjectId générés),
 #'   * "alert", qui peut prendre les valeurs _Alerte seuil F1_, _Alerte seuil F2_ et _Pas d'alerte_,
 #'   * "algo" et "batch" tel qu'entrés en paramètres,
-#'   * "siret", "periode", "score" et "score_diff" tel qu'extraits de la table \code{formatted_data},
+#'   * "siret", "periode", "score" tel qu'extraits de la table \code{formatted_data},
 #'   * "timestamp" qui donne la date et l'heure.
 #'
 #' @export
@@ -294,7 +294,17 @@ export_scores_to_mongodb <- function(
   mongodb_uri
   ) {
 
-  exported_columns <- c("siret", "periode", "score", "score_diff")
+  exported_columns <- c(
+    "siret",
+    "periode",
+    "score",
+    "end_score",
+    "end_ct_score",
+    "rent_score",
+    "siz_score",
+    "sect_score",
+    "cotis_score"
+  )
   assertthat::assert_that(
     all(exported_columns %in% names(formatted_data)),
     msg = paste(
