@@ -57,10 +57,10 @@ Pour une correction de bug en production
 Un commit doit idéalement respecter ce format:
 
 ```
-git commit -m '(TYPE) MESSAGE'
+git commit -m '{TYPE}: MESSAGE'
 ```
 
-- `TYPE`: decrit le type de commit;
+- `{TYPE}`: decrit le type de commit;
   - _`fix`_ _bug fix_
   - _`feat`_ _rajout d'une feature_
   - _`enhance`_ _une amélioration (refacto, factorisation, simplification, sécurité, etc.)_
@@ -73,13 +73,13 @@ git commit -m '(TYPE) MESSAGE'
 Il est possible de rajouter un BODY et un FOOTER à ses messages de commit 
 
 ```shell
-git commit -m '(TYPE) MESSAGE' -m 'BODY' -m 'FOOTER'
+git commit -m '{TYPE}: {MESSAGE}' -m '{BODY}' -m '{FOOTER}'
 ```
 
 Qui peuvent servir a rajouter des information utiles à l'automatisation de taches par GitHub (par exemple, fermer des issues):
 
 ```shell
-git commit -m '(feat) change test train proportion' \
+git commit -m 'feat: change test train proportion' \
  -m 'move value from .5 to .75' \
  -m 'closes #17 and #19'
 ```
