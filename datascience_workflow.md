@@ -17,7 +17,7 @@ Nous utilisons une version simplifiée du Git Flow:
 - `dev` est la branche sur laquelle les data scientists travaillent ensemble. Elle est moins stable que `main` et contient la prochaine release du modèle (dont elle peut être considerée comme une version "beta"). Une fois qu'assez de changements ont été apportés à `dev`, elle est mergée dans `main` (et taggée!). Cette branche doit être:
   - **_relativement_ stable**: cette branche est testée, la chaine d'intégration continue doit passer, le modèle qu'elle contient doit être utilisable et documenté.
   - **protégée** : il est impossible de pousser des changements directement dans `dev` — le seul moyen de la faire évoluer et de merger une pull request ayant été revue et validée par un.e pair.e — *idéalement* depuis les feature branches (voir ci-dessous).
-  - **par défault** : le repo GitHub doit être configuré pour que la branche par défault du repo (pour les pull requests par exemple) soit `dev` et non pas `master`
+  - **par défault** : le repo GitHub doit être configuré pour que la branche par défault du repo (pour les pull requests par exemple) soit `dev` et non pas `main`
 
 ### branches de `feature`
 - `feat/<nom_de_la_feature>` sont les branches de travail pour les data scientists. Elle peuvent contenir des améliorations/évolutions du modèle, du code, des tests, etc. Elle doivent être:
@@ -32,7 +32,7 @@ Nous utilisons une version simplifiée du Git Flow:
   - ne doit (évidemment) pas introduire de nouveaux bugs ou de régression, et doit donc à minima passer la CI/CD
 
 ### Resumé
-Ce schéma résume notre git flow (NB: [l'utilisation du terme `main` est aujourd'hui préféré à celui, plus connoté, de `master`](https://www.techrepublic.com/article/github-to-replace-master-with-main-starting-in-october-what-developers-need-to-know/)):
+Ce schéma résume notre git flow (NB: [l'utilisation du terme `main` est aujourd'hui préféré à celui, plus connoté, de `main`](https://www.techrepublic.com/article/github-to-replace-main-with-main-starting-in-october-what-developers-need-to-know/)):
 
 ![GitFlow simplifié](https://marcgg.com/assets/blog/git-flow-before.jpg)
 
@@ -153,7 +153,7 @@ Everything should be up to date.
 ### Creating and working on a branch
 
 You should create a new branch for each major feature that you are developping.
-To do so simply create a branch called `dev-feature-name` (where `feature-name` is the name of your feature) by running the commands:
+To do so simply create a branch called `feat/<feature-name>` (where `feature-name` is the name of your feature) by running the commands:
 
 ```shell
 # go to the dev branch and make sure you are up to date
@@ -203,51 +203,6 @@ git add -p <filename>
 
 This functionnality is a bit advanced but pretty useful to make clean commits. You can read more [here](https://nuclearsquid.com/writings/git-add/) or [here](https://git-scm.com/docs/git-add).
 
-#### Commit message
-
-Once you've added one or more files you will have to commit them with a message describing your modifications.
-
-Here is a structural example of a commit message:
-```shell
-git commit -m '[TYPE](SCOPE) MESSAGE' -m 'BODY' -m 'FOOTER'
-```
-_(the body and footer part are optional)_
-
-
-The commit message should contain the following structural elements, to communicate intents:
-- `TYPE`: describe the type of commit using one of the following;
-  - _`BF`_ _when fixing a bug or issue_
-  - _`FE`_ _when adding a new feature_
-  - _`ENH`_ _when refactoring, factorizing, simplifying, enhancing security_
-  - _`CLEAN`_ _when formatting, removing comment or print_
-  - _`DOC`_ _writing either a technical documentation or user manual_
-  - _`CONFIG`_ _editing the configuration, adding a new package_
-  - _`TEST`_ _when developing new tests_
-  - _`M`_ _for major turn-point (initial commit, major security patch, fix repository bug)_
-
-- `SCOPE` (optional): In a mono-repository of a webapp you could have 2 major parts: _front_ and _server_. On another project you could also have multiple package folders in the same repository and thus require to specify the name of the package you are working on.
-- `MESSAGE`: should be as descriptive and simple as possible. Use the imperative, present tense: 'change' not 'changed' nor 'changes'. No comma / dot at the end of the sentence.
-- `BODY` (optional): used to add a more descriptive text to your commit if required
-- `FOOTER` (optional): used to cite issue closed by the commit
-
-So for example you could have:
-
-```shell
-git commit -m '[ENH] Add functionnality to the dynamic filtering'
-```
-
-or for a multiline example with a body an a footer:
-
-```shell
-git commit -m '[CONFIG](server) Update the deployment files
-
-Update of the app.yaml file to support the new appengine configuration
-
-Close #014 and #022
-'
-```
-
-Note that if you have a linter and a beautifier installed with a git hook configuration as mentionned above, this will be the point at which your files will be cleaned and linted, which means you may be forced to fix errors and recommit the same message.
 
 ### Pushing code
 
@@ -256,13 +211,13 @@ Once you're done working on a functionnality, you can publish your code by pushi
 First make sure that your current code is up to date:
 
 ```shell
-git pull --rebase dev-my-feature
+git pull --rebase origin/feat/my-feature
 ```
 
 Once that's done and you've fixed the possible conflicts, push your code:
 
 ```shell
-git push origin dev-my-feature
+git push origin feat/my-feature
 ```
 
 >Note that it is not mandatory to specify the branch's name but you should always do so to avoid any mistake if you forgot to checkout
@@ -270,8 +225,8 @@ git push origin dev-my-feature
 
 ### Pull request
 
-Note that only the administrator of the repository should (and should be able) to merge `dev` branch into `master`.
-However anyone should be able to merge someone else feature branch in `dev` after a meticular review of its content.
+Note that only the administrator of the repository should (and should be able) to merge `dev` branch into `main`.
+However anyone should be able to merge someone else's feature branch in `dev` after a meticular review of its content.
 
 Once you are done on your branch create a new pull request. Most of the time it is way better to directly use the repository interface to create your pull request as you have a better view of the different tickets, comments and conflicts in one glance.
 
@@ -295,7 +250,7 @@ Without the `-p` parameter you will only see the result of your request but it w
 You can also simply specify the branches:
 
 ```shell
-git -p request-pull origin/master git@github.com:myusername/my-project.git origin/dev
+git -p request-pull origin/main git@github.com:myusername/my-project.git origin/dev
 ```
 
 Once your pull request is made, someone else should review it and merge it.
@@ -311,10 +266,10 @@ Here's how it work:
 
 #### 11 issues to look for
 
-##### 1 - Readability a.k.a. Understandability
+#### 1 - Readability a.k.a. Understandability
 Readability in software means that the code is easy to understand. In this case, understanding code means being able to easily see the code’s inputs and outputs, what each line of code is doing, and how it fits into the bigger picture. When reading through the code, it should be relatively easy for you to discern the role of specific functions, methods, or classes.
 
-##### 2 - Maintainability
+#### 2 - Maintainability
 One of the most common reasons that code eventually becomes painful to work with is because it isn’t written to be easily extendable and changeable.
 
 Here are some warning signs that code may not be easy to maintain in the future:
@@ -324,7 +279,7 @@ Here are some warning signs that code may not be easy to maintain in the future:
 - It contributes to tech debt by increasing investment in a technology that the team wants to phase out
 - It relies on old code that has been slated for refactoring
 
-##### 3 - Security
+#### 3 - Security
 Security vulnerabilities often enter codebases because developers write code without thinking about security. This might mean that they write insecure code that introduces vulnerabilities into the system, or use libraries and tools that are out-of-date or have known security issues.
 
 Some things to check:
@@ -333,7 +288,7 @@ Some things to check:
 - when making request to a database using user inputs, are those sanitized correctly? 
 
 
-##### 4 - Speed and Performance
+#### 4 - Speed and Performance
 Consider performance across two dimensions: performance for users and resource consumption. Performance for users reflects a focus on how quickly your code performs for the end user. Lengthy database queries, unoptimized assets, and multiple API requests can all work to make your code feel slow.
 
 When possible, code should use lazy loading, as well as asynchronous and parallel processing. It should use caching as much as possible and shouldn't load anything that isn't used.
@@ -342,7 +297,7 @@ The other dimension of performance is resource consumption. This means not commi
 
 Do not take this need for speed too far, though. Doing so leads to optimizations that aren't noticeable to the user or aren’t worth the time investment. Be practical and focus on the 20% of optimizations that produce 80% of results.
 
-##### 5 - Test Coverage and Test Quality
+#### 5 - Test Coverage and Test Quality
 
 Code review is as important for tests as it is for the code that is tested. This is because a flawed test is more dangerous than having no test. Passing tests allows the developer to feel secure and willing to push new code to production, but what if one of the tests is passing for the wrong reason, or isn’t testing what it is supposed to test?
 
@@ -350,21 +305,21 @@ Tests should be readable, maintainable, performant, and adhere to established pa
 
 Lastly, don’t stop at reviewing the tests that are there. Think through whether there are tests that are missing. Are there edge cases that haven’t been tested?
 
-##### 6 - Documentation
+#### 6 - Documentation
 Check whether the code you’re reviewing requires extra documentation to go along with it. 
 
 Is the code commented?
 If a new API is implemented, is the technical documentation updated?
 
-##### 7 - Simplicty a.k.a. Reinventing the Wheel
+#### 7 - Simplicty a.k.a. Reinventing the Wheel
 Does the code use the right language features to get the job done? 
 
 The code shouldn’t re-implement functions that already exist in the language or libraries that the project uses.
 
-##### 8 - Reliability
+#### 8 - Reliability
 Reliable code is written on the assumption that things will fail, that assets will sometimes not load, API requests will occasionally return 500 errors, and database records will be missing. When a certain level of failure is anticipated, it can be handled elegantly.
 
-##### 9 - Scalability
+#### 9 - Scalability
 Consider scalability by imagining what might happen to the code you’re reviewing if it were put under unexpected load.
 
 If you are ingesting daily data, what would happens in case of a sudden peak of data?
@@ -373,13 +328,13 @@ What would happens if instead of 10 users account your applications suddenly get
 Think of it in terms of both performance as well as storage.
 
 
-##### 10 - Reusability
+#### 10 - Reusability
 Check that the code is written with likely future use-cases in mind. For example, if you're reviewing code for a marketplace that is rapidly expanding its product range, make sure that the code can easily be updated to support new kinds of products in the future.
 By the same token, make sure that the code doesn’t take this too far by trying to account for use cases which are unlikely to eventuate.
 
 Remember that code that is never used is immediately legacy code; check [Yagni principle](https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it).
 
-##### 11 - Homogeneity
+#### 11 - Homogeneity
 Another consideration when adding new code to a codebase is whether it matches the code style established by the team.
 Since you are using both a cleaner and a linter, it should by default not deviate from the codebase.
 
@@ -387,14 +342,14 @@ Since you are using both a cleaner and a linter, it should by default not deviat
 
 ### Merging
 
-To merge `dev-crawler` into `dev` just run the command:
+To merge `feat/new_test_train_split` into `dev` just run the command:
 
 ```shell
 # make sure you are on dev
 git checkout dev
 
 # start the merge
-git merge dev-crawler
+git merge feat/new_test_train_split
 
 # if no conflict, push the modifications on the server
 git push origin dev
@@ -403,8 +358,8 @@ git push origin dev
 #### When to use merge VS rebase
 
 There are 2 ways to update a branch:
-- `git merge` which merge a branch in an other
-- `git pull --rebase` which takes all commits on a distant branch and add them to the current branch transparently. This means that the git history will always look flat as if no merge ever happened.
+- `git merge` which merges a branch into another
+- `git pull --rebase` which takes all commits on a distant branch and adds them to the current branch transparently. This means that the git history will always look flat as if no merge ever happened.
 
 Given our current git flow you should stay away from `git pull --rebase`.
 Note that `git merge` is not always better than `git pull --rebase`, both just have different use.
@@ -442,13 +397,13 @@ Tagging is a way to set a release tag on a branch, allowing you to identify a sp
 When all your merge are done (especially if you are merging multiple features branch) in dev wait for your CI pipeline to validate the viability of your pre-release.
 
 
-Once that's done, merge `dev` and `hotfix` into `master` and then tag master with the release version of your software.
+Once that's done, merge `dev` and `hotfix` into `main` and then tag main with the release version of your software.
 
 For example, if it is version `1.0.0` type:
 
 ```shell
-# make sure that you are on master
-git checkout master
+# make sure that you are on main
+git checkout main
 git tag -a 1.0.0
 git push origin 1.0.0
 ```
@@ -459,11 +414,11 @@ Note that you can also add a message using the `-m` parameter.
 
 All minor and major releases should be tagged.
 What’s a minor release ?
-- When the `hotfix` branch is merged in `master` tt should be of the form `x.x.1`, then `x.x.2`, then `x.x.3` etc
+- When the `hotfix` branch is merged in `main` it should be of the form `x.x.1`, then `x.x.2`, then `x.x.3` etc
   
   
 What’s a major release ?
-- When the `dev` branch is merged in `master` it should be of the form `1.0.0`, then `1.1.0`, then `1.2.0` etc
+- When the `dev` branch is merged in `main` it should be of the form `1.0.0`, then `1.1.0`, then `1.2.0` etc
 
 Moving from `1.0.0` to an upper version `2.0.0` should be made only for release with majors modifications removing most backward compatibilities, or with a new API, or radical UI evolutions etc.
 
