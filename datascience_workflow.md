@@ -54,6 +54,9 @@ Pour une correction de bug en production
 `hotfix/<description>`
 
 ### Commits
+
+Dans l'esprit, se référer à : [conventionalcommits](https://www.conventionalcommits.org/en/v1.0.0-beta.2/)
+
 Un commit doit idéalement respecter ce format:
 
 ```
@@ -63,7 +66,7 @@ git commit -m '{TYPE}: MESSAGE'
 - `{TYPE}`: decrit le type de commit;
   - _`fix`_ _bug fix_
   - _`feat`_ _rajout d'une feature_
-  - _`enhance`_ _une amélioration (refacto, factorisation, simplification, sécurité, etc.)_
+  - _`refactor`_ _une amélioration (refacto, factorisation, simplification, etc.)_
   - _`clean`_ _nettoyage du code_
   - _`doc`_ _ajout de documentation_
   - _`config`_ _changement de la configuration du projet_
@@ -91,13 +94,14 @@ Certains outils permettent de s'assurer de la pérénité et de la stabilité du
 
 ### Tests
 
-L'outil standard pour tester en R est le package `assertthat`.
+L'outil standard pour tester en R est le package `testthat`.
 
 ### Formattage de code
 
 L'intérêt d'utiliser un outil de formattage automatique de code est qu'il permet d'assurer une cohérence au sein du repo en termes de style et de règles. Cela permet une meilleure compréhension du code, moins d'erreurs, et des revues de code plus rapides.
 
 - le package [`styler`](https://github.com/r-lib/styler) semble être un bon outil
+- NB: le comportement de styler crée parfois des surprises, éviter de l'utiliser en mode automatique.
 
 
 ### Linter
@@ -105,6 +109,7 @@ L'intérêt d'utiliser un outil de formattage automatique de code est qu'il perm
 Un linter s'assure que le code produit adhère aux bonnes pratiques de style et de syntaxe.
 
 - le package [`lintr`](https://github.com/jimhester/lintr) est top et s'intègre bien avec `styler`
+- comme sur `opensignauxfaibles`, il tournera dans la CI.
 
 ### Documentation
 
@@ -123,3 +128,5 @@ Les git hooks permettent de s'assurer que certains scripts tournent automatiquem
 
 
 ## Securité et Configuration :construction_worker:
+
+- Note importante : **Le code poussé dans `rsignauxfaibles` ne doit jamais contenir l'URI MongoDb**
