@@ -76,8 +76,8 @@ test_that(
     resampling_strategy = "holdout"
   )
   expect_true(all(c("train_data", "test_data") %in% names(splitted_task)))
-  expect_known_hash(splitted_task[["train_data"]], "25fd8d612c")
-  expect_known_hash(splitted_task[["test_data"]], "31a06a4f91")
+  expect_known_hash(splitted_task[["train_data"]], "0eb867dcee")
+  expect_known_hash(splitted_task[["test_data"]], "1112962206")
 })
 
 test_that("Les échantillons ont les bonnes proportions", {
