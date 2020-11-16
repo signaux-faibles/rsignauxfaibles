@@ -32,6 +32,7 @@ Suggests:
     mlflow,
     mlr3tuning,
     paradox,
+    pryr,
     smoof,
     rpart,
     testthat (>= 2.1.0),
