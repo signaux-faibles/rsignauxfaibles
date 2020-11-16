@@ -91,7 +91,7 @@ get_test_task <- function(
     training_fields = training_fields,
     processing_pipeline = processing_pipeline
   )
-
+  
   if (stage == "prepare") {
     return(task)
   }
