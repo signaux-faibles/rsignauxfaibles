@@ -90,3 +90,9 @@ if (full_path) {
   return(file_name)
 }
 }
+
+mock_query_database <- function(data) {
+  return(function(...) {
+    return(data)
+  })
+}

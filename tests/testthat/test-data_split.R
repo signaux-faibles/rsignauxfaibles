@@ -70,15 +70,14 @@ test_that("'cv' respects 'nfold' parameter", {
 
 test_that(
   "split_data est reproductible et crée des champs train_data et test_data", {
-    testthat::skip_on_ci()
   splitted_task  <- split_data(
     test_task,
     ratio = 2 / 3,
     resampling_strategy = "holdout"
   )
   expect_true(all(c("train_data", "test_data") %in% names(splitted_task)))
-  expect_known_hash(splitted_task[["train_data"]], "f73807fd07")
-  expect_known_hash(splitted_task[["test_data"]], "9882b045c5")
+  expect_known_hash(splitted_task[["train_data"]], "0eb867dcee")
+  expect_known_hash(splitted_task[["test_data"]], "1112962206")
 })
 
 test_that("Les échantillons ont les bonnes proportions", {

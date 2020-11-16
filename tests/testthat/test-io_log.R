@@ -3,6 +3,8 @@ context("Text log functions")
 test_that(
   "Log functions write to mlflow", {
 
+   # mlflow should be of same version than R "mlflow" library.
+   # Use mlflow::install_mlflow() if not.
    testthat::skip_on_ci()
    tdir <- tempdir(check = TRUE)
    task <- get_test_task()

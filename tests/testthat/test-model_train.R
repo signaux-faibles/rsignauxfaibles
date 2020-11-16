@@ -81,7 +81,6 @@ test_that("train.sf_task works with learner as expected", {
 
 test_that(
   "Les logs de la fonction 'train_data' fonctionnent correctement", {
-    testthat::skip_on_ci() # I Don't understand what goes wrong on CI
     task <- get_test_task(
       processing_pipeline = mlr3pipelines::po(
         "scale",
@@ -96,15 +95,15 @@ test_that(
       log_metric = mock_log_metric
     )
     expect_true(length(ls(task[["tracker"]])) > 0)
-    expect_setequal(
-      names(task[["tracker"]]),
+    expect_true(all(
       c(
         "model_target",
         "scale.center",
         "classif.featureless.method",
         "pipeline1"
-      )
-    )
+      ) %in%
+      names(task[["tracker"]])
+    ))
     expect_equal(
       get("pipeline1", envir = task[["tracker"]]),
       "scale.classif.featureless"
@@ -121,6 +120,5 @@ test_that(
       get("model_target", envir = task[["tracker"]]),
       "18 mois, defaut et defaillance"
     )
-    # TODO: test with closure parameter
   }
 )

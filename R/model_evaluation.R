@@ -16,7 +16,7 @@
 #'   l'objectif d'apprentissage.
 #' @param segment_names :: character() \cr Nom de la colonne qui permet de
 #'   segmenter l'évaluation.
-#' @param remove_strong_signals :: `logical(1)`\cr Faut-il retirer des
+#' @param should_remove_strong_signals :: `logical(1)`\cr Faut-il retirer des
 #' échantillons de test ou de validation les entrerprises qui présentent des
 #' signaux forts, c'est-à-dire 3 mois de défaut, ou une procédure collective
 #' en cours ? Nécessite que les données contenues dans
@@ -46,6 +46,7 @@ evaluate <- function(
   resample_results <- purrr::map(tasks, "mlr3resample_result")
 
   if (should_remove_strong_signals) {
+    stop("This functionality needs to be repaired")
     lgr::lgr$info(
       "Les 'signaux forts' sont retires des donnees d'evaluation (test, validation)"
     )

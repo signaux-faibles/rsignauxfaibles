@@ -283,6 +283,7 @@ format_for_export <- function(
 #'   * "siret", "periode", "score" et "score_diff" tel qu'extraits de la table \code{formatted_data},
 #'   * "timestamp" qui donne la date et l'heure.
 #'
+#' @export
 export_scores_to_mongodb <- function(
   formatted_data,
   algo,
