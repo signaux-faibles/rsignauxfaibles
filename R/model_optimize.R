@@ -7,7 +7,8 @@
 #' @param fields `character()` \cr Liste des variables pour l'entraînement. Cf
 #' `[get_fields]` pour les variables par défaut.
 #' @param n_init `integer(1)` \cr Nombre d'évaluations aléatoires initiales.
-#' @param n_iter `integer(1)` \cr Nombre d'itérations (d'évaluations) d'optimisation.
+#' @param n_iter `integer(1)` \cr Nombre d'itérations (d'évaluations)
+#' d'optimisation.
 #' @param train_pipe `function` \cr Fonction d'entraînement et d'évaluation
 #'   compatible avec l'optimisation avec "mlrMBO" (donc avec des attributs
 #'   spécifiques), notamment comme celles créées avec
@@ -24,10 +25,10 @@
 #'
 optimize_hyperparameters.sf_task <- function( #nolint
   task,
-  terminator = mlr3tuning::term("evals", n_evals = 10),
+  terminator = bbotk::trm("evals", n_evals = 10),
   param_set = get_default_param_set(),
   tuner = mlr3tuning::tnr("random_search"),
-  measures = get_default_measure(),
+  measure = get_default_measure()[[1]],
   ...
   ) {
   requireNamespace("paradox")
@@ -37,8 +38,8 @@ optimize_hyperparameters.sf_task <- function( #nolint
   at <- mlr3tuning::AutoTuner$new(
     learner = task[["mlr3graph_learner"]],
     resampling = resampling,
-    measures = measures,
-    tune_ps = param_set,
+    measure = measure,
+    search_space = param_set,
     terminator = terminator,
     tuner = tuner
     )
@@ -57,7 +58,11 @@ get_default_param_set <- function() {
   paradox::ParamSet$new(
     list(
       paradox::ParamDbl$new("classif.xgboost.eta", lower = 0.001, upper = 0.03),
-      paradox::ParamDbl$new("classif.xgboost.min_child_weight", lower = 0, upper = 100),
+      paradox::ParamDbl$new(
+        "classif.xgboost.min_child_weight",
+        lower = 0,
+        upper = 100
+      ),
       paradox::ParamDbl$new("classif.xgboost.gamma", lower = 0, upper = 0.03),
       paradox::ParamInt$new("classif.xgboost.max_depth", lower = 3, upper = 10)
       )

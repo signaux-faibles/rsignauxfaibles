@@ -26,6 +26,7 @@ Imports:
     xgboost,
     data.table
 Suggests:
+    bbotk,
     corrplot,
     ggplot2,
     lhs,
