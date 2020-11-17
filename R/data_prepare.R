@@ -41,6 +41,11 @@ prepare.sf_task <- function( # nolint
 }
 
 #' Creates a PipeOp for impact encoding
+#'
+#' @param target_encode_fields `character()` Name of fields to "feature target
+#' encode (fte)" (or "impact encode")
+#'
+#' @return `mlr3pipelines::PipeOp`
 create_fte_pipeline <- function(target_encode_fields) {
   poe <- mlr3pipelines::po("encodeimpact",
     param_vals = list(
