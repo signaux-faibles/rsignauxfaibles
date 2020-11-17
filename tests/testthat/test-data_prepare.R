@@ -164,7 +164,6 @@ create_fte_test_task <- function(processing_pipeline = NULL) {
 }
 
 test_that("fte state works as expected", {
-  testthat::skip_on_ci()
   prep_task <- create_fte_test_task(create_fte_pipeline(c("ab", "cd")))
 
   expect_known_hash(
