@@ -9,10 +9,10 @@ optimize_hyperparameters(task, ...)
 
 \method{optimize_hyperparameters}{sf_task}(
   task,
-  terminator = mlr3tuning::term("evals", n_evals = 10),
+  terminator = bbotk::trm("evals", n_evals = 10),
   param_set = get_default_param_set(),
   tuner = mlr3tuning::tnr("random_search"),
-  measures = get_default_measure(),
+  measure = get_default_measure()[[1]],
   ...
 )
 }
@@ -26,7 +26,8 @@ optimize_hyperparameters(task, ...)
 
 \item{n_init}{\code{integer(1)} \cr Nombre d'évaluations aléatoires initiales.}
 
-\item{n_iter}{\code{integer(1)} \cr Nombre d'itérations (d'évaluations) d'optimisation.}
+\item{n_iter}{\code{integer(1)} \cr Nombre d'itérations (d'évaluations)
+d'optimisation.}
 
 \item{train_pipe}{\code{function} \cr Fonction d'entraînement et d'évaluation
 compatible avec l'optimisation avec "mlrMBO" (donc avec des attributs
