@@ -16,7 +16,7 @@ L'installation se fait avec le package `devtools`:
 devtools::install_github("signaux-faibles/rsignauxfaibles")
 ```
 
-## Exemple de code
+## Entraîner le modèle et prédire 
 
 Il faut connaître les identifiants de la base de données.
 
@@ -70,24 +70,27 @@ load_new_data(
 
 # Prédiction sur les nouvelles données
 task <- predict(task, data_names = "new_data")
+# Les prédictions sont au format mlr3 
+
+require(data.table)
+prediction <- as.data.table(task$prediction_new)
 ```
 
-Pour explorer les modèles, on peut remplacer `"none"` par `"cv"` ou `"holdout"` 
-pour faire de la validation croisée. On peut alors utiliser en plus la fonction 
-`evaluate` qui permet de mesurer la performance et de comparer les modèles, ou 
-encore `optimize_hyperparameters` qui permet de faire un grid_search sur les 
+# Évaluer et comparer les modèles
+
+Pour explorer les modèles, on peut utiliser `split_data` pour faire de la 
+validation croisée. On peut alors utiliser en plus la fonction `evaluate` qui 
+permet de mesurer la performance et de comparer les modèles, ou encore 
+`optimize_hyperparameters` qui permet de faire un grid_search sur les 
 paramètres du modèle. 
 
- 
+# Documentation
 
+Les fonctions sont documentées, mais comme une `sf_task` est un type `S3`, 
+l'accès à la documentation de certaines fonctions se fait en ajoutant le 
+suffixe ".sf_task" au nom de la fonction; par exemple: 
 
-
-
-
-
- 
-
-
-
-
-
+```r
+?train.sf_task
+?predict.sf_task
+```
