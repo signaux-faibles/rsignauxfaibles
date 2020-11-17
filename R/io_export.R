@@ -182,12 +182,9 @@ format_for_export <- function(
     dplyr::group_by(siret) %>%
     dplyr::arrange(siret, periode) %>%
     dplyr::mutate(
-      last_score = dplyr::lag(score) # ,
-      # last_periode = dplyr::lag(periode),
-      # next_periode = dplyr::lead(periode),
+      last_score = dplyr::lag(score)
     ) %>%
     dplyr::ungroup() %>%
-    # select(-c(last_periode, next_periode)) %>%
     dplyr::mutate(score_diff = score - last_score) %>%
     dplyr::select(-c(last_score))
 
@@ -396,9 +393,7 @@ export_scores_to_csv <- function(
 #'
 #' @export
 #'
-mark_known_sirets <- function(
-                              df,
-                              full_paths) {
+mark_known_sirets <- function(df, full_paths) {
   sirens <- c()
   for (full_path in full_paths) {
     sirets <- readLines(full_path)

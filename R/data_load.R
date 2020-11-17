@@ -431,8 +431,7 @@ add_missing_fields <- function(
 }
 
 
-update_types <- function(
-                         df) {
+update_types <- function(df) {
 
   # Dates de type character
   df <- df %>%
@@ -460,8 +459,7 @@ update_types <- function(
   return(df)
 }
 
-check_valid_data <- function(
-                             df) {
+check_valid_data <- function(df) {
   assertthat::assert_that(
     all(c("periode", "siret") %in% names(df)),
     msg = "Les données importées ne contiennent pas la clé (siret x période)"

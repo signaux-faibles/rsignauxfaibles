@@ -41,8 +41,7 @@ prepare.sf_task <- function( # nolint
 }
 
 #' Creates a PipeOp for impact encoding
-create_fte_pipeline <- function(
-                                target_encode_fields) {
+create_fte_pipeline <- function(target_encode_fields) {
   poe <- mlr3pipelines::po("encodeimpact",
     param_vals = list(
       affect_columns = mlr3pipelines::selector_name(target_encode_fields)
@@ -68,9 +67,7 @@ get_default_pipeline <- function() {
 #' Apply preparation pipeline and inspect prepared data
 #'
 #' @export
-get_prepared_data <- function(
-                              task,
-                              train_or_test) {
+get_prepared_data <- function(task, train_or_test) {
   assertthat::assert_that(train_or_test %in% c("train", "test"))
   assertthat::assert_that(
     "mlr3pipeline" %in% names(task),

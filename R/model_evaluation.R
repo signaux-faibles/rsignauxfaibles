@@ -74,8 +74,7 @@ get_default_measure <- function() {
   return(mlr3::msrs(c("classif.fbeta", "classif.ce")))
 }
 
-remove_strong_signals <- function(
-                                  task) {
+remove_strong_signals <- function(task) {
   filtered_resample_results <- task$mlr3resample_result$clone()
   assertthat::assert_that("time_til_outcome" %in% names(task[["hist_data"]]))
   weak_rows <- task[["hist_data"]] %>%
@@ -91,8 +90,7 @@ remove_strong_signals <- function(
   return(filtered_resample_results)
 }
 
-check_resample_results <- function(
-                                   task) {
+check_resample_results <- function(task) {
   assertthat::assert_that(
     "mlr3resample_result" %in% names(task),
     msg = paste0(
