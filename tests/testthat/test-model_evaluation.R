@@ -66,7 +66,7 @@ test_that("evaluate works as expected on sf_tasks with cv without strong signals
   expect_equal(benchmark_result$classif.acc, 0)
 })
 
-test_that("evaluate works as expected on two sf_tasks",  {
+test_that("evaluate works as expected on two sf_tasks", {
   trained_task <- get_test_task(
     stage = "train",
     learner = mlr3::LearnerClassifFeatureless$new()
@@ -134,7 +134,7 @@ test_that("evaluate works as expected on two sf_tasks with mixed cv and holdout"
 })
 
 
-test_that("evaluate works as expected with two measures",  {
+test_that("evaluate works as expected with two measures", {
   trained_task <- get_test_task(
     stage = "train",
     learner = mlr3::LearnerClassifFeatureless$new()
@@ -163,7 +163,7 @@ test_that("Les logs de la fonction 'evaluate' fonctionnent correctement", {
     evaluate(task, should_remove_strong_signals = FALSE),
     log_metric = mock_log_metric,
     log_param = mock_log_param
-    )
+  )
   expect_true(length(ls(task[["tracker"]])) > 0)
   expect_setequal(
     names(task[["tracker"]]),
@@ -189,7 +189,7 @@ test_that("Les logs de la fonction 'evaluate' fonctionnent correctement avec sho
     evaluate(task, should_remove_strong_signals = TRUE),
     log_metric = mock_log_metric,
     log_param = mock_log_param
-    )
+  )
   expect_true(length(ls(task[["tracker"]])) > 0)
   expect_setequal(
     names(task[["tracker"]]),
@@ -209,7 +209,6 @@ test_that("Les logs de la fonction 'evaluate' fonctionnent correctement avec sho
 
 
 test_that("Les logs de la fonction 'evaluate' fonctionnent correctement avec deux tâches", {
-
   trained_task <- get_test_task(
     stage = "train",
     resampling_strategy = "cv",
@@ -225,7 +224,7 @@ test_that("Les logs de la fonction 'evaluate' fonctionnent correctement avec deu
     evaluate(trained_task, other_task, should_remove_strong_signals = FALSE),
     log_metric = mock_log_metric,
     log_param = mock_log_param
-    )
+  )
   expect_true(length(ls(trained_task[["tracker"]])) > 0)
   expect_true(length(ls(other_task[["tracker"]])) > 0)
   expect_setequal(

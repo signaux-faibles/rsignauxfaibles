@@ -3,11 +3,9 @@ context("Test preparation functions")
 test_task <- get_test_task(stage = "split")
 
 create_prepared_task <- function(
-  test_task,
-  processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
-  target = "target"
-) {
-
+                                 test_task,
+                                 processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
+                                 target = "target") {
   prepared_task <- prepare(
     test_task,
     data_names = c("train_data", "test_data"),
@@ -24,7 +22,7 @@ test_that("no error is thrown with a valid 'processing_pipeline'", {
       stage = "prepare",
       processing_pipeline = mlr3pipelines::PipeOpNOP$new()
     ),
-  NA
+    NA
   )
 })
 
@@ -35,7 +33,7 @@ test_that("no error is thrown with a valid 'processing_pipeline' with cv", {
       resampling_strategy = "cv",
       processing_pipeline = mlr3pipelines::PipeOpNOP$new()
     ),
-  NA
+    NA
   )
 })
 
@@ -53,7 +51,7 @@ test_that("'processing_pipeline' is correctly applied", {
     expect_equal(
       mean_or_sd(
         get_prepared_data(prep_task, test_or_train)$feature
-        ),
+      ),
       expected,
       tolerance = 10e-3
     )
@@ -111,7 +109,7 @@ test_that("prepare changes the requested features", {
   }
   test_features(mlr3pipelines::PipeOpNOP$new(), "feature")
   mutate_po <- mlr3pipelines::PipeOpMutate$new()
-  mutate_po$param_set$values$mutation <- list(new_feature = ~ feature ^ 2)
+  mutate_po$param_set$values$mutation <- list(new_feature = ~ feature^2)
   test_features(
     mutate_po,
     features = "feature"
@@ -172,13 +170,13 @@ test_that("fte state works as expected", {
   expect_known_hash(
     get_prepared_data(prep_task, "test"),
     "40734c2555"
-    )
+  )
 })
 
 test_that("preparing twice with different training fields takes effect", {
   prep_task <- create_fte_test_task(mlr3pipelines::PipeOpNOP$new())
 
-  check_names <- function(names){
+  check_names <- function(names) {
     expect_setequal(
       names(get_prepared_data(prep_task, "test")),
       names
@@ -189,12 +187,12 @@ test_that("preparing twice with different training fields takes effect", {
     prep_task,
     processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
     training_fields = "feature"
-    )
+  )
   check_names(c("outcome", "feature"))
   prep_task <- prepare(
     prep_task,
     processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
     training_fields = c("feature", "ab", "cd")
-    )
+  )
   check_names(c("outcome", "feature", "ab", "cd"))
 })

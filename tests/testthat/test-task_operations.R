@@ -4,9 +4,9 @@ test_that("reset_for_new_run makes a new task", {
   task <- get_test_task(stage = "train")
   new_task <- reset_for_new_run(task)
   expect_true(all(
-      c("mlr3task", "mlr3rsmp", "hist_data", "new_data", "tracker") %in%
-        names(new_task))
-    )
+    c("mlr3task", "mlr3rsmp", "hist_data", "new_data", "tracker") %in%
+      names(new_task)
+  ))
   expect_true(!"mlr3resample_result" %in% names(new_task))
 
   new_task2 <- reset_for_new_run(task, keep_resampling = FALSE)
@@ -33,7 +33,7 @@ test_that("replace_new_data works as expected", {
   expect_error(
     new_task <- replace_new_data(task, task$hist_data),
     NA
-    )
+  )
 })
 
 test_that("filter_task works as expected", {
