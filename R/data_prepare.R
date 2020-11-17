@@ -18,14 +18,12 @@
 #'   "prepared_train_data" correspond aux données de "train_data" préparées).
 #'
 #' @export
-prepare.sf_task <- function( #nolint
-  task,
-  training_fields = get_fields(training = TRUE),
-  outcome_field = NULL,
-  processing_pipeline = get_default_pipeline(),
-  ...
-  ) {
-
+prepare.sf_task <- function( # nolint
+                            task,
+                            training_fields = get_fields(training = TRUE),
+                            outcome_field = NULL,
+                            processing_pipeline = get_default_pipeline(),
+                            ...) {
   task[["training_fields"]] <- training_fields
 
   if (is.null(outcome_field)) {
@@ -44,13 +42,12 @@ prepare.sf_task <- function( #nolint
 
 #' Creates a PipeOp for impact encoding
 create_fte_pipeline <- function(
-   target_encode_fields
-  ) {
+                                target_encode_fields) {
   poe <- mlr3pipelines::po("encodeimpact",
     param_vals = list(
       affect_columns = mlr3pipelines::selector_name(target_encode_fields)
-      )
-   )
+    )
+  )
 }
 
 #' Construct default pipeline
@@ -59,7 +56,7 @@ create_fte_pipeline <- function(
 get_default_pipeline <- function() {
   pipeline <- create_fte_pipeline(
     c("code_ape_niveau2", "code_ape_niveau3")
-    ) %>>%
+  ) %>>%
     mlr3pipelines::po(
       "encode",
       method = "treatment",
@@ -72,9 +69,8 @@ get_default_pipeline <- function() {
 #'
 #' @export
 get_prepared_data <- function(
-  task,
-  train_or_test
-  ) {
+                              task,
+                              train_or_test) {
   assertthat::assert_that(train_or_test %in% c("train", "test"))
   assertthat::assert_that(
     "mlr3pipeline" %in% names(task),

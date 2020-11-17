@@ -52,22 +52,20 @@ NULL
 #'
 #' @export
 load_hist_data.sf_task <- function(
-  task,
-  batch,
-  database = task[["database"]],
-  collection = task[["collection"]],
-  mongodb_uri = task[["mongodb_uri"]],
-  subsample = NULL,
-  fields = get_fields(training = FALSE),
-  date_inf = as.Date("2015-01-01"),
-  date_sup = as.Date("2017-01-01"),
-  min_effectif = 10L,
-  sirets = NULL,
-  code_ape = NULL,
-  database_query_fun = query_mongodb,
-  ...
-  ) {
-
+                                   task,
+                                   batch,
+                                   database = task[["database"]],
+                                   collection = task[["collection"]],
+                                   mongodb_uri = task[["mongodb_uri"]],
+                                   subsample = NULL,
+                                   fields = get_fields(training = FALSE),
+                                   date_inf = as.Date("2015-01-01"),
+                                   date_sup = as.Date("2017-01-01"),
+                                   min_effectif = 10L,
+                                   sirets = NULL,
+                                   code_ape = NULL,
+                                   database_query_fun = query_mongodb,
+                                   ...) {
   lgr::lgr$info("Chargement des données historiques.")
 
 
@@ -172,18 +170,17 @@ load_hist_data.sf_task <- function(
 #'   unique siret x periode.
 #' @export
 load_new_data.sf_task <- function(
-  task,
-  periods,
-  batch,
-  database = task[["database"]],
-  collection = task[["collection"]],
-  mongodb_uri = task[["mongodb_uri"]],
-  fields = get_fields(training = FALSE),
-  min_effectif = 10L,
-  rollback_months = 1L,
-  database_query_fun = query_mongodb,
-  ...) {
-
+                                  task,
+                                  periods,
+                                  batch,
+                                  database = task[["database"]],
+                                  collection = task[["collection"]],
+                                  mongodb_uri = task[["mongodb_uri"]],
+                                  fields = get_fields(training = FALSE),
+                                  min_effectif = 10L,
+                                  rollback_months = 1L,
+                                  database_query_fun = query_mongodb,
+                                  ...) {
   lgr::lgr$info("Loading data from last batch")
   task[["new_data"]] <- import_data(
     database = database,
@@ -263,21 +260,19 @@ load_new_data.sf_task <- function(
 #'
 #' @export
 import_data <- function(
-  database,
-  collection,
-  mongodb_uri,
-  batch,
-  min_effectif,
-  date_inf = NULL,
-  date_sup = NULL,
-  fields = NULL,
-  sirets = NULL,
-  code_ape = NULL,
-  subsample = NULL,
-  replace_missing = NULL,
-  database_query_fun = query_mongodb
-  ) {
-
+                        database,
+                        collection,
+                        mongodb_uri,
+                        batch,
+                        min_effectif,
+                        date_inf = NULL,
+                        date_sup = NULL,
+                        fields = NULL,
+                        sirets = NULL,
+                        code_ape = NULL,
+                        subsample = NULL,
+                        replace_missing = NULL,
+                        database_query_fun = query_mongodb) {
   requireNamespace("lgr")
 
   assertthat::assert_that(date_sup > date_inf)
@@ -352,12 +347,10 @@ import_data <- function(
 }
 
 query_mongodb <- function(
-  query,
-  database,
-  collection,
-  mongodb_uri
-  ) {
-
+                          query,
+                          database,
+                          collection,
+                          mongodb_uri) {
   requireNamespace("lgr")
 
   dbconnection <- mongolite::mongo(
@@ -372,11 +365,9 @@ query_mongodb <- function(
 }
 
 replace_missing_data <- function(
-  df,
-  fields,
-  replace_missing
-  ) {
-
+                                 df,
+                                 fields,
+                                 replace_missing) {
   df <- add_missing_fields(
     df = df,
     fields = fields
@@ -422,12 +413,11 @@ replace_missing_data <- function(
 
 
 add_missing_fields <- function(
-  df,
-  fields
-  ) {
+                               df,
+                               fields) {
   missing_fields <- fields[
     !fields %in% names(df)
-    ]
+  ]
 
   if (length(missing_fields) >= 1) {
     lgr::lgr$info("Champ(s) manquant(s): %s", missing_fields)
@@ -442,8 +432,7 @@ add_missing_fields <- function(
 
 
 update_types <- function(
-  df
-  ) {
+                         df) {
 
   # Dates de type character
   df <- df %>%
@@ -472,7 +461,7 @@ update_types <- function(
 }
 
 check_valid_data <- function(
-  df) {
+                             df) {
   assertthat::assert_that(
     all(c("periode", "siret") %in% names(df)),
     msg = "Les données importées ne contiennent pas la clé (siret x période)"
@@ -493,9 +482,9 @@ check_valid_data <- function(
 #' @return vector of unique sirets
 #' @export
 get_sirets_of_detected <- function(
-  database = "test_signauxfaibles",
-  collection = "Scores",
-  mongodb_uri) {
+                                   database = "test_signauxfaibles",
+                                   collection = "Scores",
+                                   mongodb_uri) {
   dbconnection <- mongolite::mongo(
     collection = collection,
     db = database,
@@ -539,14 +528,12 @@ date_query <- function(date, gte_or_lt) {
 
 
 build_standard_query <- function(
-  batch,
-  date_inf,
-  date_sup,
-  min_effectif,
-  subsample,
-  fields
-  ) {
-
+                                 batch,
+                                 date_inf,
+                                 date_sup,
+                                 min_effectif,
+                                 subsample,
+                                 fields) {
   match_stage <- build_standard_match_stage(
     batch,
     date_inf,
@@ -570,13 +557,11 @@ build_standard_query <- function(
 }
 
 build_siret_query <- function(
-  batch,
-  date_inf,
-  date_sup,
-  sirets,
-  fields
-  ) {
-
+                              batch,
+                              date_inf,
+                              date_sup,
+                              sirets,
+                              fields) {
   match_stage <- build_siret_match_stage(
     batch,
     date_inf,
@@ -596,13 +581,12 @@ build_siret_query <- function(
 }
 
 build_sector_query <- function(
-  batch,
-  date_inf,
-  date_sup,
-  code_ape,
-  min_effectif,
-  fields) {
-
+                               batch,
+                               date_inf,
+                               date_sup,
+                               code_ape,
+                               min_effectif,
+                               fields) {
   match_ape <- build_sector_match_stage(batch, date_inf, date_sup, code_ape)
   replace_root <- build_replace_root_stage()
   projection <- build_projection_stage(fields)
@@ -615,7 +599,7 @@ build_sector_query <- function(
 }
 
 assemble_stages_to_query <- function(...) {
-  query <- list(...)  %>%
+  query <- list(...) %>%
     .[!purrr::map_lgl(., ~ is.null(.) || is.null(.[[1]]))] %>%
     jsonlite::toJSON(auto_unbox = TRUE)
   return(query)
@@ -632,7 +616,7 @@ build_limit_stage <- function(subsample) {
 }
 
 build_replace_root_stage <- function() {
-  list("$replaceRoot" = list("newRoot" =  "$value"))
+  list("$replaceRoot" = list("newRoot" = "$value"))
 }
 
 build_projection_stage <- function(fields) {
@@ -649,13 +633,12 @@ build_projection_stage <- function(fields) {
 }
 
 build_standard_match_stage <- function(
-  batch,
-  date_inf,
-  date_sup,
-  min_effectif
-  ) {
+                                       batch,
+                                       date_inf,
+                                       date_sup,
+                                       min_effectif) {
   ## Construction de la requete ##
-  match_batch <- list("_id.batch"  = batch)
+  match_batch <- list("_id.batch" = batch)
   match_date_inf <- date_query(date_inf, "gte")
   match_date_sup <- date_query(date_sup, "lt")
   if (is.null(min_effectif)) {
@@ -677,13 +660,10 @@ build_standard_match_stage <- function(
 }
 
 build_siret_match_stage <- function(
-  batch,
-  date_inf,
-  date_sup,
-  sirets
-  ) {
-
-
+                                    batch,
+                                    date_inf,
+                                    date_sup,
+                                    sirets) {
   library(lubridate)
   n_periods <- interval(date_inf, date_sup) %/% months(1)
   if (n_periods == 0) {
@@ -700,7 +680,7 @@ build_siret_match_stage <- function(
       ~ list(
         batch = batch,
         siret = siret,
-        periode = list("$date" =  paste0(., "T00:00:00Z"))
+        periode = list("$date" = paste0(., "T00:00:00Z"))
       )
     )
     return(id_objects)
@@ -723,13 +703,11 @@ build_siret_match_stage <- function(
 
 
 build_sector_match_stage <- function(
-  batch,
-  date_inf,
-  date_sup,
-  code_ape
-  ) {
-
-  match_batch <- list("_id.batch"  = batch)
+                                     batch,
+                                     date_inf,
+                                     date_sup,
+                                     code_ape) {
+  match_batch <- list("_id.batch" = batch)
   match_date_inf <- date_query(date_inf, "gte")
   match_date_sup <- date_query(date_sup, "lt")
   match_ape <- list("value.code_ape" = list("$in" = I(code_ape)))
@@ -786,26 +764,27 @@ build_sector_match_stage <- function(
 #' @return `character()` \cr Vecteur de noms de variables
 #' @export
 get_fields <- function(
-  training,
-  siren = 2,
-  urssaf = 2,
-  delai = 2,
-  effectif =2,
-  diane = 2,
-  bdf = 2,
-  apart = 2,
-  procol = 2,
-  interim = 0,
-  info = 0
-) {
-
+                       training,
+                       siren = 2,
+                       urssaf = 2,
+                       delai = 2,
+                       effectif = 2,
+                       diane = 2,
+                       bdf = 2,
+                       apart = 2,
+                       procol = 2,
+                       interim = 0,
+                       info = 0) {
   fields <- c()
   if (siren >= 1 && !training) {
-    fields <- c( fields, "siret",
-    "siren", "periode", "code_ape", "code_ape_niveau2", "code_ape_niveau3",
-    "code_naf", "libelle_naf", "libelle_ape5", "departement") }
+    fields <- c(
+      fields, "siret",
+      "siren", "periode", "code_ape", "code_ape_niveau2", "code_ape_niveau3",
+      "code_naf", "libelle_naf", "libelle_ape5", "departement"
+    )
+  }
   if (siren >= 1) {
-    fields <- c( fields, "age_entreprise", "region")
+    fields <- c(fields, "age_entreprise", "region")
   }
 
   if (urssaf >= 1) {

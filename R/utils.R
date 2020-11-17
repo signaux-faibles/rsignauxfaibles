@@ -18,11 +18,11 @@ alert_levels <- function(prediction, f1, f2) {
   alert <- .bincode(
     x = prediction,
     breaks = c(-1e-4, f2, f1, 1 + 1e-4),
-    ) %>%
-  factor(
-    levels = 1:3,
-    labels = c("Pas d'alerte", "Alerte seuil F2", "Alerte seuil F1")
-  )
+  ) %>%
+    factor(
+      levels = 1:3,
+      labels = c("Pas d'alerte", "Alerte seuil F2", "Alerte seuil F1")
+    )
 }
 
 
@@ -48,11 +48,10 @@ alert_levels <- function(prediction, f1, f2) {
 #'
 #' @export
 name_file <- function(
-  absolute_path,
-  file_detail,
-  file_extension = "",
-  full_path = FALSE) {
-
+                      absolute_path,
+                      file_detail,
+                      file_extension = "",
+                      full_path = FALSE) {
   full_dir_path <- absolute_path
 
   assertthat::assert_that(dir.exists(full_dir_path),
@@ -66,29 +65,29 @@ name_file <- function(
     paste0(
       "^", Sys.Date(), "_v[0-9]*_",
       file_detail, "\\.", file_extension, "$"
-      ),
+    ),
     file_list
-    ) %>%
-  sum()
+  ) %>%
+    sum()
 
 
-file_name <- paste0(
-  Sys.Date(),
-  "_v",
-  n_different + 1,
-  "_",
-  file_detail,
-  ".",
-  file_extension
-)
+  file_name <- paste0(
+    Sys.Date(),
+    "_v",
+    n_different + 1,
+    "_",
+    file_detail,
+    ".",
+    file_extension
+  )
 
-if (full_path) {
-  full_file_path <- file.path(full_dir_path, file_name)
+  if (full_path) {
+    full_file_path <- file.path(full_dir_path, file_name)
 
-  return(full_file_path)
-} else {
-  return(file_name)
-}
+    return(full_file_path)
+  } else {
+    return(file_name)
+  }
 }
 
 mock_query_database <- function(data) {

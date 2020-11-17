@@ -7,16 +7,14 @@
 #'
 #' @export
 get_test_task <- function(
-  fake_data = NULL,
-  fake_target = "target",
-  training_fields = "feature",
-  stage = "prepare",
-  resampling_strategy = "holdout",
-  processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
-  learner = mlr3::LearnerClassifFeatureless$new(),
-  measures = mlr3::msr("classif.acc")
-) {
-
+                          fake_data = NULL,
+                          fake_target = "target",
+                          training_fields = "feature",
+                          stage = "prepare",
+                          resampling_strategy = "holdout",
+                          processing_pipeline = mlr3pipelines::PipeOpNOP$new(),
+                          learner = mlr3::LearnerClassifFeatureless$new(),
+                          measures = mlr3::msr("classif.acc")) {
   previous_threshold <- lgr::lgr$threshold
   lgr::lgr$set_threshold("error")
 
@@ -44,7 +42,7 @@ get_test_task <- function(
           to = as.Date("2014-10-01"),
           length.out = 10
         )
-        ),
+      ),
       target = rep(c(T, F), length.out = 10),
       feature = c(0.48, 0.08, 0.74, 0.27, 0.68, 0.54, 0.54, 0.61, 0.5, 0.69)
     )
@@ -58,7 +56,7 @@ get_test_task <- function(
     target = fake_target
   )
 
-  task <-  load_hist_data(
+  task <- load_hist_data(
     task,
     batch = "0000",
     fields = names(fake_data),
@@ -71,13 +69,13 @@ get_test_task <- function(
     batch = "0000",
     fields = names(fake_data),
     database_query_fun = mock_query_database(fake_data)
-    )
+  )
 
   if (stage == "load") {
     return(task)
   }
 
-  task  <- split_data(
+  task <- split_data(
     task,
     resampling_strategy = resampling_strategy
   )
@@ -91,7 +89,7 @@ get_test_task <- function(
     training_fields = training_fields,
     processing_pipeline = processing_pipeline
   )
-  
+
   if (stage == "prepare") {
     return(task)
   }

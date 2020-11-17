@@ -22,33 +22,35 @@
 #' sous-ensemble (possiblement vide) de ses lignes.
 #'
 #' @export
-split_data.sf_task <- function( #nolint
-  task,
-  ratio = 2 / 3,
-  nfolds = 5,
-  resampling_strategy = "holdout",
-  ...
-) {
-
+split_data.sf_task <- function( # nolint
+                               task,
+                               ratio = 2 / 3,
+                               nfolds = 5,
+                               resampling_strategy = "holdout",
+                               ...) {
   allowable_strategies <- mlr3::mlr_resamplings$keys()
 
   if (is.null(resampling_strategy) ||
     !resampling_strategy %in% allowable_strategies) {
     lgr::lgr$info(paste(
-        "Les données ne sont pas échantillonnées car le paramètre",
-        "'resampling_strategy' n'est pas valide. Les paramètres valides sont:",
-        paste(allowable_strategies, collapse = ", ")
-        ))
+      "Les données ne sont pas échantillonnées car le paramètre",
+      "'resampling_strategy' n'est pas valide. Les paramètres valides sont:",
+      paste(allowable_strategies, collapse = ", ")
+    ))
     task[["train_data"]] <- task[["hist_data"]]
     return(task)
   }
 
-  lgr::lgr$info(paste0("Les donnees historiques sont scindes en ",
-      "echantillons d'entrainement et de test"))
+  lgr::lgr$info(paste0(
+    "Les donnees historiques sont scindes en ",
+    "echantillons d'entrainement et de test"
+  ))
 
   assertthat::assert_that("hist_data" %in% names(task),
-    msg = paste0("Il faut d'abord charger des données à",
-      "échanillonner avec 'load_hist_data()'")
+    msg = paste0(
+      "Il faut d'abord charger des données à",
+      "échanillonner avec 'load_hist_data()'"
+    )
   )
 
   assertthat::assert_that(

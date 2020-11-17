@@ -25,21 +25,19 @@
 #'
 #' @export
 export.sf_task <- function(
-  task,
-  export_type,
-  batch,
-  f_scores = c(F1 = 0.15, F2 = 0.07),
-  known_sirens_full_path = NULL,
-  export_fields = NULL,
-  csv_export_path = NULL,
-  database = task[["database"]],
-  mongodb_uri = task[["mongodb_uri"]],
-  collection_features = task[["collection"]],
-  collection_scores = "Scores",
-  algo_name = "algo",
-  ...
-) {
-
+                           task,
+                           export_type,
+                           batch,
+                           f_scores = c(F1 = 0.15, F2 = 0.07),
+                           known_sirens_full_path = NULL,
+                           export_fields = NULL,
+                           csv_export_path = NULL,
+                           database = task[["database"]],
+                           mongodb_uri = task[["mongodb_uri"]],
+                           collection_features = task[["collection"]],
+                           collection_scores = "Scores",
+                           algo_name = "algo",
+                           ...) {
   requireNamespace("purrr")
   if (is.null(export_fields)) {
     export_fields <- c(
@@ -82,7 +80,7 @@ export.sf_task <- function(
       "exercice_bdf",
       "exercice_diane",
       "delai"
-      )
+    )
   }
 
 
@@ -99,7 +97,7 @@ export.sf_task <- function(
         mongodb_uri = mongodb_uri,
         last_batch = batch,
         known_sirens_full_path = known_sirens_full_path
-        )
+      )
 
     lgr::lgr$info(
       "Data is exported to {paste(export_type, collapse = ' and ')}"
@@ -111,7 +109,7 @@ export.sf_task <- function(
           export_scores_to_csv(
             ...,
             absolute_path = csv_export_path
-            )
+          )
         } else if (x == "mongodb") {
           export_scores_to_mongodb(
             ...,
@@ -119,16 +117,17 @@ export.sf_task <- function(
             database = database,
             collection = collection_scores,
             mongodb_uri = mongodb_uri
-            )
-      }},
+          )
+        }
+      },
       formatted_data = res,
       batch = batch,
       algo = algo_name
-      )
+    )
   }
   lgr::lgr$info("Data exported with success to
     {paste(export_type, collapse = ' and ')}")
-    return(task)
+  return(task)
 }
 
 #' Prepare_for_export
@@ -153,15 +152,13 @@ export.sf_task <- function(
 #'   `export_fields`.
 #' @export
 format_for_export <- function(
-  data_to_export,
-  export_fields,
-  database,
-  collection,
-  mongodb_uri,
-  last_batch,
-  known_sirens_full_path
-  ) {
-
+                              data_to_export,
+                              export_fields,
+                              database,
+                              collection,
+                              mongodb_uri,
+                              last_batch,
+                              known_sirens_full_path) {
   requireNamespace("lgr")
 
   prediction <- data_to_export %>%
@@ -185,16 +182,16 @@ format_for_export <- function(
     dplyr::group_by(siret) %>%
     dplyr::arrange(siret, periode) %>%
     dplyr::mutate(
-      last_score = dplyr::lag(score)#,
+      last_score = dplyr::lag(score) # ,
       # last_periode = dplyr::lag(periode),
       # next_periode = dplyr::lead(periode),
-      ) %>%
+    ) %>%
     dplyr::ungroup() %>%
     # select(-c(last_periode, next_periode)) %>%
     dplyr::mutate(score_diff = score - last_score) %>%
     dplyr::select(-c(last_score))
 
-  if (length(all_periods) >= 2){
+  if (length(all_periods) >= 2) {
     pred_data <- pred_data %>%
       dplyr::filter(periode > min(all_periods), periode <= max(all_periods))
   }
@@ -214,15 +211,15 @@ format_for_export <- function(
     min_effectif = 10,
     fields = export_fields[!export_fields %in% c(
       "connu", "score_diff", "score"
-      )]
-    )
+    )]
+  )
 
   donnees <- pred_data %>%
     mutate(siret = as.character(siret)) %>%
     left_join(donnees %>% mutate(siret = as.character(siret)),
       by =
         c("siret", "periode")
-      ) %>%
+    ) %>%
     dplyr::mutate(CCSF = date_ccsf) %>%
     dplyr::arrange(dplyr::desc(score), siret, dplyr::desc(periode))
 
@@ -244,13 +241,13 @@ format_for_export <- function(
   all_names <- names(donnees)
   lgr::lgr$info("Les variables suivantes sont absentes du dataframe:
     {export_fields[!(export_fields %in% all_names)]}")
-    export_fields <- export_fields[export_fields %in% all_names]
+  export_fields <- export_fields[export_fields %in% all_names]
 
 
-    # if (is.emp)
-    to_export <- donnees %>%
-      dplyr::select(one_of(export_fields))
-    return(to_export)
+  # if (is.emp)
+  to_export <- donnees %>%
+    dplyr::select(one_of(export_fields))
+  return(to_export)
 }
 
 
@@ -285,32 +282,30 @@ format_for_export <- function(
 #'
 #' @export
 export_scores_to_mongodb <- function(
-  formatted_data,
-  algo,
-  batch,
-  f_scores,
-  database,
-  collection,
-  mongodb_uri
-  ) {
-
+                                     formatted_data,
+                                     algo,
+                                     batch,
+                                     f_scores,
+                                     database,
+                                     collection,
+                                     mongodb_uri) {
   exported_columns <- c("siret", "periode", "score", "score_diff")
   assertthat::assert_that(
     all(exported_columns %in% names(formatted_data)),
     msg = paste(
       paste0(exported_columns, collapse = ", "),
       "are compulsary column names to export the scores to mongodb"
-      )
     )
+  )
   assertthat::assert_that(is.character(batch) && length(batch) == 1,
     msg = "Batch shoud be a length 1 character vector"
-    )
+  )
   assertthat::assert_that(is.character(database) && length(database) == 1,
     msg = "Database shoud be a length 1 character vector"
-    )
+  )
   assertthat::assert_that(is.character(collection) && length(collection) == 1,
     msg = "Collection shoud be a length 1 character vector"
-    )
+  )
 
   assertthat::assert_that(length(f_scores) == 2)
   assertthat::assert_that(all(c("F1", "F2") %in% names(f_scores)))
@@ -320,7 +315,7 @@ export_scores_to_mongodb <- function(
     db = database,
     url = mongodb_uri,
     verbose = FALSE
-    )
+  )
 
   data_to_export <- formatted_data %>%
     dplyr::select(dplyr::one_of(exported_columns)) %>%
@@ -328,7 +323,7 @@ export_scores_to_mongodb <- function(
       algo = algo,
       batch = batch,
       timestamp = Sys.time()
-      )
+    )
   data_to_export <- data_to_export %>%
     mutate(alert = alert_levels(score, f_scores["F1"], f_scores["F2"]))
 
@@ -355,16 +350,14 @@ export_scores_to_mongodb <- function(
 #' @return `TRUE`. \cr Exporte un fichier csv, dans le dossier spécifié
 #'   en entrée, nommé automatiquement "aaaa_mm_jj_export_{algo}_{batch}" avec
 #'   éventuellement un suffixe "_vX" pour ne pas écraser de fichier existant.
-export_scores_to_csv  <- function(
-  formatted_data,
-  algo,
-  batch,
-  absolute_path
-  ) {
-
+export_scores_to_csv <- function(
+                                 formatted_data,
+                                 algo,
+                                 batch,
+                                 absolute_path) {
   assertthat::assert_that(is.character(batch) && length(batch) == 1,
     msg = "Batch shoud be a length 1 character vector"
-    )
+  )
 
   data_to_export <- formatted_data
 
@@ -374,7 +367,7 @@ export_scores_to_csv  <- function(
     file_detail = paste("export", algo, batch, sep = "_"),
     file_extension = "csv",
     full_path = TRUE
-    )
+  )
 
   utils::write.table(data_to_export,
     row.names = F,
@@ -383,7 +376,7 @@ export_scores_to_csv  <- function(
     file = full_path,
     quote = T,
     append = F
-    )
+  )
 
   return(TRUE)
 }
@@ -404,10 +397,8 @@ export_scores_to_csv  <- function(
 #' @export
 #'
 mark_known_sirets <- function(
-  df,
-  full_paths
-) {
-
+                              df,
+                              full_paths) {
   sirens <- c()
   for (full_path in full_paths) {
     sirets <- readLines(full_path)
@@ -446,15 +437,13 @@ mark_known_sirets <- function(
 #' @export
 #'
 get_scores <- function(
-  database = "test_signauxfaibles",
-  collection = "Scores",
-  mongodb_uri,
-  method = "last",
-  algo = NULL,
-  batchs = NULL,
-  sirets = NULL
-  ) {
-
+                       database = "test_signauxfaibles",
+                       collection = "Scores",
+                       mongodb_uri,
+                       method = "last",
+                       algo = NULL,
+                       batchs = NULL,
+                       sirets = NULL) {
   assertthat::assert_that(is.character(database) && length(database) == 1,
     msg = "Database name should be a length 1 string"
   )
@@ -491,7 +480,7 @@ get_scores <- function(
     collection = collection,
     url = mongodb_uri
   )
-  col_names <- db$run('{"listCollections":1}')$cursor$firstBatch$name #nolint
+  col_names <- db$run('{"listCollections":1}')$cursor$firstBatch$name # nolint
   assertthat::assert_that(collection %in% col_names,
     msg = "Collection not found"
   )
@@ -502,24 +491,25 @@ get_scores <- function(
     batch_sort <- -1
   }
 
-  if (!is.null(sirets)){
+  if (!is.null(sirets)) {
     siret_match <- paste0(
       '"siret" : {"$in" : [',
-        paste0(paste0('"', sirets, '"'), collapse = ", "),
-        ']}'
+      paste0(paste0('"', sirets, '"'), collapse = ", "),
+      "]}"
     )
   } else {
     siret_match <- NULL
   }
-  if (!is.null(batchs)){
+  if (!is.null(batchs)) {
     batch_match <- paste0(
       '"batch" : {"$in" : [',
-        paste0(paste0('"', batchs, '"'), collapse = ", "),
-        ']}')
+      paste0(paste0('"', batchs, '"'), collapse = ", "),
+      "]}"
+    )
   } else {
-      batch_match <- NULL
+    batch_match <- NULL
   }
-  if (!is.null(algo)){
+  if (!is.null(algo)) {
     algo_match <- paste0('"algo" : "', algo, '"')
   } else {
     algo_match <- NULL
@@ -527,9 +517,8 @@ get_scores <- function(
 
   aggregation <- paste0(
     '[{ "$match" : {',
-    paste(c(siret_match, batch_match, algo_match), collapse = ",")
-      ,
-      '}
+    paste(c(siret_match, batch_match, algo_match), collapse = ","),
+    '}
     }, {
       "$sort" : {
       "siret" : 1.0,
@@ -575,7 +564,7 @@ get_scores <- function(
        }
      }
 ]'
-        )
+  )
 
   query <- db$aggregate(
     aggregation
