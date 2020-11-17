@@ -64,7 +64,7 @@ load_hist_data.sf_task <- function(
   min_effectif = 10L,
   sirets = NULL,
   code_ape = NULL,
-  database_query_fun = query_database,
+  database_query_fun = query_mongodb,
   ...
   ) {
 
@@ -181,7 +181,7 @@ load_new_data.sf_task <- function(
   fields = get_fields(training = FALSE),
   min_effectif = 10L,
   rollback_months = 1L,
-  database_query_fun = database_query_fun,
+  database_query_fun = query_mongodb,
   ...) {
 
   lgr::lgr$info("Loading data from last batch")
@@ -275,7 +275,7 @@ import_data <- function(
   code_ape = NULL,
   subsample = NULL,
   replace_missing = NULL,
-  database_query_fun = query_database
+  database_query_fun = query_mongodb
   ) {
 
   requireNamespace("lgr")
@@ -351,7 +351,7 @@ import_data <- function(
   return(df)
 }
 
-query_database <- function(
+query_mongodb <- function(
   query,
   database,
   collection,
