@@ -74,6 +74,9 @@ get_default_pipeline <- function() {
 #' Applique la pipeline de préparation sur les données d'entraînement ou de
 #' test (que le premier échantillon en cas de validation croisée).
 #'
+#' Cette fonction est uniquement prévue pour l'inspection du bon
+#' fonctionnement de la pipeline de préparation.
+#'
 #' L'objet task doit avoir une propriété "mlr3pipeline" de type
 #' `mlr3pipelines::PipeOp` ou `mlr3pipelines::Graph`
 #'
