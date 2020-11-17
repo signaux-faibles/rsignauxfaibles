@@ -364,10 +364,7 @@ query_mongodb <- function(
   return(df)
 }
 
-replace_missing_data <- function(
-                                 df,
-                                 fields,
-                                 replace_missing) {
+replace_missing_data <- function(df, fields, replace_missing) {
   df <- add_missing_fields(
     df = df,
     fields = fields
