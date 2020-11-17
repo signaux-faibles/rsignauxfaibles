@@ -20,6 +20,9 @@
 #' récupérer des données supplémentaires
 #' @param collection_scores `character()` \cr Collection mongodb stockant les
 #'   scores calculés (utilisée en écriture).
+#' @param algo_name `character(1)` Nom de l'algo qui a tourné pour produire
+#' les scores (permet de stocker en base plusieurs scores sur le même batch
+#' mais avec des modèles différents).
 #' @param ... additional parameters for export functions.
 #' @return `sf_task` \cr L'objet `task` donné en entrée.
 #'
