@@ -3,19 +3,14 @@
 #' Optimise les hyperparamètres du modèle. Nécessite des données
 #' d'entraînement et de validation préparées.
 #'
-#' @param task `[sf_task]` \cr Objet s3 de type sf_task
-#' @param fields `character()` \cr Liste des variables pour l'entraînement. Cf
-#' `[get_fields]` pour les variables par défaut.
-#' @param n_init `integer(1)` \cr Nombre d'évaluations aléatoires initiales.
-#' @param n_iter `integer(1)` \cr Nombre d'itérations (d'évaluations)
-#' d'optimisation.
-#' @param train_pipe `function` \cr Fonction d'entraînement et d'évaluation
-#'   compatible avec l'optimisation avec "mlrMBO" (donc avec des attributs
-#'   spécifiques), notamment comme celles créées avec
-#'   `[smoof::makeSingleObjectiveFunction]`
-#' @param optim_bounds `ParamSet` \cr Objet précisant l'espace exploré par
-#'   l'optimisation, tel que donné par `[ParamHelpers::ParamSet]`. Si NULL,
-#'   alors des limites par défaut sont fixées.
+#' @inheritParams generic_task
+#' @param terminator `bbotk::Terminator` Condition d'arrêt de l'optimisation
+#' des hyperparamètres
+#' @param param_set `paradox::ParamSet` Les paramètres à optimiser
+#' @param tuner `mlr3tuning::Tuner` La méthode d'optimisation des
+#' hyperparamètres
+#' @param measure `mlr3::Measure` La métrique à optimiser
+#'
 #'
 #' @describeIn optimize_hyperparameters
 #'

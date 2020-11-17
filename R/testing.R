@@ -2,9 +2,21 @@
 #'
 #' @param fake_data Data that is stored as "hist_data". If none is provided,
 #'   some data will be automatically set.
-#' @param stage `character(1)` \cr Either "load", "split" or "prepare". The
-#'   output task will be at the end of the specified stage.
+#' @param fake_target `character(1)` name of the column that should be use as
+#' target for the learning.
+#' @param training_fields `character()` name of the feature columns to learn
+#' from
+#' @param stage `character(1)` \cr Either "load", "split", "prepare", "train"
+#' and "evaluate". The output task will be at the end of the specified stage.
+#' @param resampling_strategy `character(1)` Either "holdout" or "cv". The
+#' resampling strategy of the "train" stage.
+#' @param processing_pipeline `mlr3pipelines::PipeOp` A preparation pipeline
+#' used for the "prepare" stage.
+#' @param learner `mlr3::Learner` A learner used at the "train" stage.
+#' @param measures `mlr3::Measure` A list of measures used at the "evaluate"
+#' stage.
 #'
+#' @return An sf_task, at the specified "stage"
 #' @export
 get_test_task <- function(
                           fake_data = NULL,

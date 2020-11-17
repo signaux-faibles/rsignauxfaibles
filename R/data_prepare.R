@@ -41,6 +41,11 @@ prepare.sf_task <- function( # nolint
 }
 
 #' Creates a PipeOp for impact encoding
+#'
+#' @param target_encode_fields `character()` Name of fields to "feature target
+#' encode (fte)" (or "impact encode")
+#'
+#' @return `mlr3pipelines::PipeOp`
 create_fte_pipeline <- function(target_encode_fields) {
   poe <- mlr3pipelines::po("encodeimpact",
     param_vals = list(
@@ -66,6 +71,19 @@ get_default_pipeline <- function() {
 
 #' Apply preparation pipeline and inspect prepared data
 #'
+#' Applique la pipeline de préparation sur les données d'entraînement ou de
+#' test.
+#'
+#' L'objet task doit avoir une propriété "mlr3pipeline" de type
+#' `mlr3pipelines::PipeOp` ou `mlr3pipelines::Graph`
+#'
+#' @inheritParams generic_task
+#' @param train_or_test `"train" or "test"` Faut-il récupérer les données
+#' d'entraînement ou de test ?
+#'
+#' @return `data.frame` données d'entraînement ou de test après la préparation
+#' (l'application de la pipeline mlr3 stockée dans "task"
+#'
 #' @export
 get_prepared_data <- function(task, train_or_test) {
   assertthat::assert_that(train_or_test %in% c("train", "test"))
@@ -79,8 +97,8 @@ get_prepared_data <- function(task, train_or_test) {
   pred <- gpo$predict(task[["mlr3task"]])[[1]]
   if (train_or_test == "test") {
     test_id <- task[["mlr3rsmp"]]$test_set(1)
-    return(pred$data(test_id) %>% as.data.frame())
+    return(as.data.frame(pred$data(test_id)))
   } else {
-    return(pred$data(train_id) %>% as.data.frame())
+    return(as.data.frame(pred$data(train_id)))
   }
 }

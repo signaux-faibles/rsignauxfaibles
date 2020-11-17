@@ -1,23 +1,14 @@
 #' Évaluation du modèle
 #'
-#' Evalue les prédictions d'un ou plusieurs tasks.
-#' Stocke le résultat dans le premier task.
+#' Evalue les prédictions d'un ou plusieurs tasks, et retourne la performance
+#' calculée sur l'échantillon (ou les échantillons dans le cadre de la
+#' validatio croisée) de test.
 #'
 #' @param ... `tasks` \cr Tasks to be evaluated.
-#' @param eval_function `MLsegmentr::eval_function()` \cr Objet s3
-#' d'évaluation.
-#' @param data_name `character(1)` \cr Sur quelles données évaluer ?
-#' @param plot `logical(1)` \cr Faut-il tracer la figure avec la fonction de
-#'   l'`eval_function` (si disponible)
-#' @param prediction_names `character(1)` Name of columns containing
-#'   predictions. Default value should be correct, advanced setting to use
-#'   with care.
-#' @param target_names :: character() \cr Nom de la colonne qui contient
-#'   l'objectif d'apprentissage.
-#' @param segment_names :: character() \cr Nom de la colonne qui permet de
-#'   segmenter l'évaluation.
+#' @param measures `mlr3::Measure` Vecteur de mesures utilisées pour évaluer
+#' la perforlance.
 #' @param should_remove_strong_signals :: `logical(1)`\cr Faut-il retirer des
-#' échantillons de test ou de validation les entrerprises qui présentent des
+#' échantillons de test les entrerprises qui présentent des
 #' signaux forts, c'est-à-dire 3 mois de défaut, ou une procédure collective
 #' en cours ? Nécessite que les données contenues dans
 #' \code{task[["hist_data"]]} possèdent le champs "time_til_outcome".
@@ -29,18 +20,10 @@
 evaluate <- function(
                      ...,
                      measures = get_default_measure(),
-                     data_name = "test_data",
                      should_remove_strong_signals = TRUE) {
   tasks <- list(...)
   purrr::walk(tasks, check_resample_results)
   assertthat::assert_that(length(tasks) >= 1)
-  assertthat::assert_that(
-    length(data_name) == 1,
-    msg = paste0("Evaluation can only be made on a single data type",
-      "(new, test) at once",
-      sep = " "
-    )
-  )
   resample_results <- purrr::map(tasks, "mlr3resample_result")
 
   if (should_remove_strong_signals) {
@@ -50,8 +33,8 @@ evaluate <- function(
     )
     resample_results <- purrr::map(tasks, remove_strong_signals)
   }
-  benchmark <- do.call(c, resample_results) # Automatically converted to
-  # BenchmarkResult
+  benchmark <- do.call(c, resample_results)
+  # Automatically converted to BenchmarkResult
   evaluation <- benchmark$aggregate(measures = measures)
 
   for (i in seq_len(nrow(evaluation))) {
@@ -59,7 +42,10 @@ evaluate <- function(
       7:length(evaluation),
       ~ log_metric(
         tasks[[i]],
-        paste0(names(evaluation)[.], ifelse(should_remove_strong_signals, ".weaksignals", "")),
+        paste0(
+          names(evaluation)[.],
+          ifelse(should_remove_strong_signals, ".weaksignals", "")
+        ),
         evaluation[i][[.]]
       )
     )

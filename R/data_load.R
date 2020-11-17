@@ -230,6 +230,9 @@ load_new_data.sf_task <- function(
 #' @param replace_missing `list()` \cr Liste nommée, dont les noms sont les
 #'   noms de variables et les valeurs sont les valeurs de remplacement des NA.
 #'   Si égal à NULL, alors des remplacements par défauts
+#' @param database_query_fun `function` Une fonction de requête à la base, qui
+#' permet notamment de simuler la requête dans le cadre des tests. Utiliser la
+#' fonction par défaut pour requêter la base mongodb en production.
 #'
 #' @section Remplacement des valeurs manquantes par défaut:
 #' replace_missing <- list(

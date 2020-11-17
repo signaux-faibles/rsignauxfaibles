@@ -69,7 +69,7 @@ replace_hist_data <- function(task, data) {
 
 #' Remplace les données new_data par d'autres données
 #'
-#' @param task `sf_task`
+#' @inheritParams generic_task
 #' @param data `data.frame()` Les données, doivent avoir des colonnes "siret",
 #' "periode" et task[["target"]]
 #'
@@ -89,6 +89,16 @@ replace_new_data <- function(task, data) {
 }
 
 #' Filtre la tâche d'apprentissage aux sirets désirés
+#'
+#' Attention, cette action réinitialise la tâche (échantillonnage,
+#' entraînement).
+#'
+#' @inheritParams generic_task
+#' @param sirets `character()` Sirets à conserver dans la tâche
+#' d'apprentissage.
+#'
+#' @return Une copie de la tâche initiale, réinitialisée, et filtrée sur les
+#' sirets demandés.
 #'
 #' @export
 filter_task <- function(task, sirets) {
