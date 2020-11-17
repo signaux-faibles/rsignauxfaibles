@@ -44,15 +44,15 @@ task <- load_hist_data(
   subsample = sample_size
 )
 
-# On entraîne sur toute la base.
-task <- split_data(task, resampling_strategy = "none") 
+# Si l'on entraîne sur toute la base, pas besoin d'échantillonner
 
 # Utilitaire pour lister les champs
 fields <- get_fields(training = TRUE) 
 
-# Pipeline de préparation des données. task <- prepare(
+# Pipeline de préparation des données. 
+task <- prepare(
   task,
-  training_fields = training_fields
+  training_fields = fields
 )
 
 # Entraînement avec le modèle par défaut (xgboost)
