@@ -17,7 +17,7 @@ import_data(
   code_ape = NULL,
   subsample = NULL,
   replace_missing = NULL,
-  database_query_fun = query_database
+  database_query_fun = query_mongodb
 )
 }
 \arguments{
