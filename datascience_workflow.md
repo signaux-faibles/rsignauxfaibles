@@ -126,6 +126,9 @@ Les git hooks permettent de s'assurer que certains scripts tournent automatiquem
   - `test` et `build` le package R
   - faire tourner et évaluer le modèle (ça peut juste être un rappel si c'est trop lourd)
 
+L'évaluation du modèle peut produire un artefact "model_evaluation.json", 
+versionné dans git avec chaque nouvelle version du modèle. 
+
 
 ## Securité et Configuration :construction_worker:
 
