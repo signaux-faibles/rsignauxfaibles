@@ -15,11 +15,9 @@
 #'
 #' @export
 reset_for_new_run <- function(
-  task,
-  end_run_status = NULL,
-  keep_resampling = TRUE
-) {
-
+                              task,
+                              end_run_status = NULL,
+                              keep_resampling = TRUE) {
   new_task <- sf_task(
     mongodb_uri = task$mongodb_uri,
     database = task$database,
@@ -27,7 +25,7 @@ reset_for_new_run <- function(
     id = task$id,
     target = task$target,
     tracker = reset_tracker(task$tracker, end_run_status)
-    )
+  )
 
   new_task$hist_data <- task$hist_data
   new_task$new_data <- task$new_data
@@ -41,10 +39,10 @@ reset_for_new_run <- function(
 
 reset_tracker <- function(tracker, end_run_status) {
   if (class(tracker) == "mlflow_run") {
-     if (!is.null(end_run_status)) {
-       mlflow::mlflow_end_run(end_run_status)
-     }
-     return(mlflow::mlflow_start_run(experiment_id = tracker$experiment_id))
+    if (!is.null(end_run_status)) {
+      mlflow::mlflow_end_run(end_run_status)
+    }
+    return(mlflow::mlflow_start_run(experiment_id = tracker$experiment_id))
   }
   return(NULL)
 }
@@ -60,13 +58,13 @@ reset_tracker <- function(tracker, end_run_status) {
 #' @return La sf_task d'origine
 #' @export
 replace_hist_data <- function(task, data) {
-   task <- load_hist_data(
-     task,
-     batch = NULL,
+  task <- load_hist_data(
+    task,
+    batch = NULL,
     fields = names(data),
-     database_query_fun = mock_query_database(data)
-   )
-   return(task)
+    database_query_fun = mock_query_database(data)
+  )
+  return(task)
 }
 
 #' Remplace les données new_data par d'autres données

@@ -2,7 +2,7 @@ context("Test that exports and import of scores work as expected")
 
 test_database <- "unittest_signauxfaibles"
 test_collection <- "Scores_for_tests"
-test_mongodb_uri  <-  "mongodb://localhost:27017"
+test_mongodb_uri <- "mongodb://localhost:27017"
 
 
 f_scores <- c(F2 = 0.2, F1 = 0.4)
@@ -100,7 +100,7 @@ test_that("Scores are well exported with export_scores_to_mongodb function", {
         siret = "1", periode = "2019-01-01", score = 0.265508663,
         score_diff = 1, algo = "test_algo", batch = "1901",
         alert = "Alerte seuil F2"
-        ),
+      ),
       class = "data.frame",
       row.names = 1L
     )

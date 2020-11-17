@@ -19,13 +19,12 @@
 #' compatible avec la fonction `[predict.sf_task]`.
 #'
 #' @export
-train.sf_task <- function( #nolint
-  task,
-  seed = 0,
-  learner = get_default_learner(),
-  store_models = FALSE,
-  ...
-  ) {
+train.sf_task <- function( # nolint
+                          task,
+                          seed = 0,
+                          learner = get_default_learner(),
+                          store_models = FALSE,
+                          ...) {
 
   # TODO: Log before training, to fail early if tracker should have been
   # changed
@@ -64,8 +63,8 @@ train.sf_task <- function( #nolint
     names(task[["mlr3graph_learner"]]$param_set$values),
     convert_to_character(task[["mlr3graph_learner"]]$param_set$values),
     ~ log_param(task, .x, .y)
-    )
-  log_param(task, "model_target",  "18 mois, defaut et defaillance")
+  )
+  log_param(task, "model_target", "18 mois, defaut et defaillance")
   return(invisible(task))
 }
 

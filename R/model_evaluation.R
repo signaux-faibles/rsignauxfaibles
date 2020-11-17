@@ -27,12 +27,10 @@
 #' d'évaluation
 #' @export
 evaluate <- function(
-  ...,
-  measures =  get_default_measure(),
-  data_name = "test_data",
-  should_remove_strong_signals = TRUE
-  ) {
-
+                     ...,
+                     measures = get_default_measure(),
+                     data_name = "test_data",
+                     should_remove_strong_signals = TRUE) {
   tasks <- list(...)
   purrr::walk(tasks, check_resample_results)
   assertthat::assert_that(length(tasks) >= 1)
@@ -41,7 +39,7 @@ evaluate <- function(
     msg = paste0("Evaluation can only be made on a single data type",
       "(new, test) at once",
       sep = " "
-      )
+    )
   )
   resample_results <- purrr::map(tasks, "mlr3resample_result")
 
@@ -76,9 +74,7 @@ get_default_measure <- function() {
   return(mlr3::msrs(c("classif.fbeta", "classif.ce")))
 }
 
-remove_strong_signals <- function(
-  task
-  ) {
+remove_strong_signals <- function(task) {
   filtered_resample_results <- task$mlr3resample_result$clone()
   assertthat::assert_that("time_til_outcome" %in% names(task[["hist_data"]]))
   weak_rows <- task[["hist_data"]] %>%
@@ -88,15 +84,13 @@ remove_strong_signals <- function(
 
   filtered_resample_results$data$prediction <- purrr::map(
     filtered_resample_results$data$prediction,
-      ~ list(test = filter_mlr3_prediction(.$test, weak_rows))
-    )
+    ~ list(test = filter_mlr3_prediction(.$test, weak_rows))
+  )
 
- return(filtered_resample_results)
+  return(filtered_resample_results)
 }
 
-check_resample_results <- function(
-  task
-  ) {
+check_resample_results <- function(task) {
   assertthat::assert_that(
     "mlr3resample_result" %in% names(task),
     msg = paste0(
@@ -113,14 +107,14 @@ check_resample_results <- function(
 }
 
 filter_mlr3_prediction <- function(prediction, rows) {
- prediction_dt <- data.table::as.data.table(prediction)
- real_rows <- rows[rows %in% prediction$row_ids]
- filter <- prediction_dt$row_id %in% real_rows
-   prediction_filtered_dt <- prediction_dt[filter, ]
- prediction_filtered <- mlr3::PredictionClassif$new(
-   row_ids = real_rows,
-   truth = prediction_filtered_dt$truth,
-   response = prediction_filtered_dt$response
-   )
- return(prediction_filtered)
+  prediction_dt <- data.table::as.data.table(prediction)
+  real_rows <- rows[rows %in% prediction$row_ids]
+  filter <- prediction_dt$row_id %in% real_rows
+  prediction_filtered_dt <- prediction_dt[filter, ]
+  prediction_filtered <- mlr3::PredictionClassif$new(
+    row_ids = real_rows,
+    truth = prediction_filtered_dt$truth,
+    response = prediction_filtered_dt$response
+  )
+  return(prediction_filtered)
 }

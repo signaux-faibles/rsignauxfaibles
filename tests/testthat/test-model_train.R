@@ -1,11 +1,13 @@
 context("Check model training")
 
-test_train_function  <- function(train_data, outcome, ...) {
-  model  <- function(x) return(x)
+test_train_function <- function(train_data, outcome, ...) {
+  model <- function(x) {
+    return(x)
+  }
   return(model)
 }
 
-parameters  <- list(
+parameters <- list(
   learn_rate = 0.1,
   max_depth = 4,
   ntrees = 60,
@@ -74,13 +76,16 @@ test_that("train.sf_task works with learner as expected", {
   expect_equal(
     trained_task[["mlr3model"]]$model$
       classif.featureless$model$tab,
-    structure(c(`TRUE` = 5L, `FALSE` = 5L), .Dim = 2L, .Dimnames =
-      structure(list(c("TRUE", "FALSE")), .Names = ""), class = "table")
+    structure(c(`TRUE` = 5L, `FALSE` = 5L),
+      .Dim = 2L, .Dimnames =
+        structure(list(c("TRUE", "FALSE")), .Names = ""), class = "table"
+    )
   )
 })
 
 test_that(
-  "Les logs de la fonction 'train_data' fonctionnent correctement", {
+  "Les logs de la fonction 'train_data' fonctionnent correctement",
+  {
     task <- get_test_task(
       processing_pipeline = mlr3pipelines::po(
         "scale",
@@ -102,7 +107,7 @@ test_that(
         "classif.featureless.method",
         "pipeline1"
       ) %in%
-      names(task[["tracker"]])
+        names(task[["tracker"]])
     ))
     expect_equal(
       get("pipeline1", envir = task[["tracker"]]),

@@ -13,14 +13,13 @@
 #'
 #' @export
 explain.sf_task <- function(
-  task,
-  type,
-  aggregation_matrix = NULL,
-  group_name = NULL,
-  data_to_explain = NULL,
-  plot_waterfall = FALSE,
-  ...
-  ) {
+                            task,
+                            type,
+                            aggregation_matrix = NULL,
+                            group_name = NULL,
+                            data_to_explain = NULL,
+                            plot_waterfall = FALSE,
+                            ...) {
   assertthat::assert_that(type %in% c("global", "local"))
   assertthat::assert_that(
     !plot_waterfall || type == "local",
@@ -64,11 +63,10 @@ explain.sf_task <- function(
 #'   `aggregation_matrix` qui sert pour l'agrégation.
 #'
 xgboost_global_explainer <- function(
-  task,
-  aggregation_matrix,
-  group_name,
-  ...
-  ) {
+                                     task,
+                                     aggregation_matrix,
+                                     group_name,
+                                     ...) {
   imp <- xgboost::xgb.importance(task[["features"]], task[["model"]])
   if (!is.null(aggregation_matrix)) {
     imp <- aggregate_importance_frame(imp, aggregation_matrix, group_name)
@@ -83,14 +81,11 @@ xgboost_global_explainer <- function(
 #' @param siret `character()` \cr
 #'   Vecteur de sirets pour lesquels une explication est requise.
 xgboost_local_explainer <- function(
-  task,
-  aggregation_matrix,
-  group_name,
-  data_to_explain
-  ) {
-
+                                    task,
+                                    aggregation_matrix,
+                                    group_name,
+                                    data_to_explain) {
   if (requireNamespace("xgboostExplainer")) {
-
     explainer <- xgboostExplainer::buildExplainer(
       xgb.model = task[["model"]],
       trainingData = xgboost::xgb.DMatrix(task[["prepared_train_data"]]),
@@ -127,10 +122,9 @@ xgboost_local_explainer <- function(
 #'   Table d'importance comme produite en sortie de xgb.importance.
 #' @inheritParams xgboost_global_explainer
 aggregate_importance_frame <- function(
-  frame,
-  aggregation_matrix,
-  group_name
-  ) {
+                                       frame,
+                                       aggregation_matrix,
+                                       group_name) {
   merged <- dplyr::left_join(
     frame,
     aggregation_matrix,
@@ -143,8 +137,8 @@ aggregate_importance_frame <- function(
       c("Gain", "Cover", "Frequency"),
       sum
     )
-    colnames(merged)[1]  <- "Feature"
-    return(merged)
+  colnames(merged)[1] <- "Feature"
+  return(merged)
 }
 
 
@@ -153,17 +147,16 @@ aggregate_importance_frame <- function(
 #'
 #' @inheritParams aggregate_importance_frame
 aggregate_local_explainer <- function(
-  dt_frame,
-  aggregation_matrix,
-  group_name
-  ) {
+                                      dt_frame,
+                                      aggregation_matrix,
+                                      group_name) {
   t_frame <- as.data.frame(t(dt_frame))
   colnames(t_frame) <- paste0("Value", seq_len(nrow(dt_frame)))
   t_frame <- t_frame %>%
     dplyr::mutate(Feature = rownames(t_frame))
 
   # Add intercept
-  aggregation_matrix <- aggregation_matrix  %>%
+  aggregation_matrix <- aggregation_matrix %>%
     dplyr::select(variable, dplyr::one_of(group_name))
   aggregation_matrix <- rbind(
     aggregation_matrix,
@@ -182,19 +175,19 @@ aggregate_local_explainer <- function(
       dplyr::vars(dplyr::starts_with("Value")),
       sum
     )
-    colnames(merged)[1] <- "Feature"
-    intercept_position <- which(merged$Feature == "intercept")
-    new_order <- unique(c(
-        intercept_position,
-        order(abs(merged$Value1))
-        ))
-    merged <- merged[new_order, ]
-    aggregated_frame <- data.table::data.table(t(as.matrix(
-          merged %>% dplyr::select(dplyr::starts_with("Value"))
-          )))
-    names(aggregated_frame) <- merged$Feature
+  colnames(merged)[1] <- "Feature"
+  intercept_position <- which(merged$Feature == "intercept")
+  new_order <- unique(c(
+    intercept_position,
+    order(abs(merged$Value1))
+  ))
+  merged <- merged[new_order, ]
+  aggregated_frame <- data.table::data.table(t(as.matrix(
+    merged %>% dplyr::select(dplyr::starts_with("Value"))
+  )))
+  names(aggregated_frame) <- merged$Feature
 
-    return(aggregated_frame)
+  return(aggregated_frame)
 }
 
 #' Lecture d'un fichier d'agrégation
@@ -234,19 +227,19 @@ plot_waterfall <- function(frame) {
       factor = factor(rownames(.))
     )
 
-  logit <-  function(x) {
-    return(log(x / (1-x)))
+  logit <- function(x) {
+    return(log(x / (1 - x)))
   }
   ybreaks <- logit(c(0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2))
 
   # order ?
   factor_levels <- breakdown_summary$factor[
     order(abs(breakdown_summary$weight), decreasing = TRUE)
-    ]
+  ]
   factor_levels <- unlist(list(
-      factor_levels[factor_levels == "intercept"],
-      factor_levels[factor_levels != "intercept"]
-      ))
+    factor_levels[factor_levels == "intercept"],
+    factor_levels[factor_levels != "intercept"]
+  ))
 
   breakdown_summary$factor <- factor(
     breakdown_summary$factor,
@@ -261,9 +254,10 @@ plot_waterfall <- function(frame) {
       cumulated_proba = 1 / (1 + exp(-cumulated_weight))
     )
 
-    p <- ggplot2::ggplot(
-      breakdown_summary,
-      ggplot2::aes(x = factor, y = cumulated_proba, fill = is_negative)) +
+  p <- ggplot2::ggplot(
+    breakdown_summary,
+    ggplot2::aes(x = factor, y = cumulated_proba, fill = is_negative)
+  ) +
     ggplot2::geom_bar(stat = "identity")
   return(p)
 }
@@ -286,5 +280,3 @@ plot_correlation <- function(task, fields) {
     corrplot::corrplot(cor(data, use = "pairwise"), method = "color", type = "upper")
   }
 }
-
-

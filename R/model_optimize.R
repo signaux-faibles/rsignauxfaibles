@@ -23,14 +23,13 @@
 #' "model_parameters" avec les paramètres optimaux calculées.
 #' @export
 #'
-optimize_hyperparameters.sf_task <- function( #nolint
-  task,
-  terminator = bbotk::trm("evals", n_evals = 10),
-  param_set = get_default_param_set(),
-  tuner = mlr3tuning::tnr("random_search"),
-  measure = get_default_measure()[[1]],
-  ...
-  ) {
+optimize_hyperparameters.sf_task <- function( # nolint
+                                             task,
+                                             terminator = bbotk::trm("evals", n_evals = 10),
+                                             param_set = get_default_param_set(),
+                                             tuner = mlr3tuning::tnr("random_search"),
+                                             measure = get_default_measure()[[1]],
+                                             ...) {
   requireNamespace("paradox")
   requireNamespace("mlr3tuning")
 
@@ -42,7 +41,7 @@ optimize_hyperparameters.sf_task <- function( #nolint
     search_space = param_set,
     terminator = terminator,
     tuner = tuner
-    )
+  )
   task[["mlr3auto_tuner"]] <- at$train(task$mlr3task)
   return(task)
 }
@@ -65,6 +64,6 @@ get_default_param_set <- function() {
       ),
       paradox::ParamDbl$new("classif.xgboost.gamma", lower = 0, upper = 0.03),
       paradox::ParamInt$new("classif.xgboost.max_depth", lower = 3, upper = 10)
-      )
     )
+  )
 }

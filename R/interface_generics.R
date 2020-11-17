@@ -29,13 +29,12 @@ NULL
 #'
 #' @export
 sf_task <- function(
-  mongodb_uri,
-  database = "test_signauxfaibles",
-  collection = "Features",
-  id = "Signaux-faibles",
-  target = "outcome",
-  tracker = NULL
-  ) {
+                    mongodb_uri,
+                    database = "test_signauxfaibles",
+                    collection = "Features",
+                    id = "Signaux-faibles",
+                    target = "outcome",
+                    tracker = NULL) {
   res <- list(
     mongodb_uri = mongodb_uri,
     database = database,

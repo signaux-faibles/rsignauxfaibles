@@ -60,7 +60,7 @@ replace_missing_data_table <- tibble::tribble(
   c(),
   list(a = "a"),
   data.frame(),
-  )
+)
 
 purrr::pwalk(
   .l = replace_missing_data_table,
@@ -70,10 +70,10 @@ purrr::pwalk(
 ## Testing query stages
 
 test_that("build_sort_stage builds a valid sort stage", {
-   expect_equal(
-     jsonlite::toJSON(build_sort_stage(), auto_unbox = TRUE) %>% toString(),
-     '{"$sort":{"value.random_order":-1}}'
-     )
+  expect_equal(
+    jsonlite::toJSON(build_sort_stage(), auto_unbox = TRUE) %>% toString(),
+    '{"$sort":{"value.random_order":-1}}'
+  )
 })
 
 test_that("build_limit_stage builds a valid limit stage", {
@@ -131,7 +131,7 @@ test_that("build_standard_match_stage builds a valid match stage", {
       '{"_id.periode":{"$lt":{"$date":"2021-01-01T00:00:00Z"}}},',
       '{"value.effectif":{"$gte":10}}',
       "]}}"
-      )
+    )
   )
   expect_equal(
     jsonlite::toJSON(
@@ -151,7 +151,7 @@ test_that("build_standard_match_stage builds a valid match stage", {
       '{"_id.periode":{"$lt":{"$date":"2021-01-01T00:00:00Z"}}},',
       '{"value.effectif":{"$gte":1}}',
       "]}}"
-      )
+    )
   )
 })
 
@@ -175,27 +175,29 @@ test_that("build_standard_match_stage builds a valid match stage", {
       '{"_id.periode":{"$lt":{"$date":"2021-01-01T00:00:00Z"}}},',
       '{"value.code_ape":{"$in":["1234B"]}}',
       "]}}"
-      )
+    )
   )
 })
 
 test_that(
-  "assemble_stages_to_query returns a json array of objects, in same order", {
-   expect_equal(
+  "assemble_stages_to_query returns a json array of objects, in same order",
+  {
+    expect_equal(
       assemble_stages_to_query(list(b = 0), list(a = 1)) %>% toString(),
       '[{"b":0},{"a":1}]'
-     )
-})
+    )
+  }
+)
 
 test_that("assemble_stages_to_query ignores NULLs", {
-   expect_equal(
-      assemble_stages_to_query(NULL, list(a = 1)) %>% toString(),
-      '[{"a":1}]'
-     )
-   expect_equal(
-      assemble_stages_to_query(list(b = NULL), list(a = 1)) %>% toString(),
-      '[{"a":1}]'
-     )
+  expect_equal(
+    assemble_stages_to_query(NULL, list(a = 1)) %>% toString(),
+    '[{"a":1}]'
+  )
+  expect_equal(
+    assemble_stages_to_query(list(b = NULL), list(a = 1)) %>% toString(),
+    '[{"a":1}]'
+  )
 })
 
 test_that("build_standard_query builds a valid query", {
@@ -238,12 +240,12 @@ test_that("build_siret_match_stage builds a valid match stage", {
       toString(),
     paste0(
       '{"$match":',
-       '{"_id":{"$in":[',
-       '{"batch":"2001",',
-       '"siret":"01234567891011",',
-       '"periode":{"$date":"2014-01-01T00:00:00Z"}}',
-       "]}}}"
-      )
+      '{"_id":{"$in":[',
+      '{"batch":"2001",',
+      '"siret":"01234567891011",',
+      '"periode":{"$date":"2014-01-01T00:00:00Z"}}',
+      "]}}}"
+    )
   )
   # Several sirets, several periods
   expect_equal(
@@ -259,21 +261,21 @@ test_that("build_siret_match_stage builds a valid match stage", {
       toString(),
     paste0(
       '{"$match":',
-       '{"_id":{"$in":[',
-       '{"batch":"2001",',
-       '"siret":"01234567891011",',
-       '"periode":{"$date":"2014-01-01T00:00:00Z"}},',
-       '{"batch":"2001",',
-       '"siret":"01234567891011",',
-       '"periode":{"$date":"2014-02-01T00:00:00Z"}},',
-       '{"batch":"2001",',
-       '"siret":"11109876543210",',
-       '"periode":{"$date":"2014-01-01T00:00:00Z"}},',
-       '{"batch":"2001",',
-       '"siret":"11109876543210",',
-       '"periode":{"$date":"2014-02-01T00:00:00Z"}}',
-       "]}}}"
-      )
+      '{"_id":{"$in":[',
+      '{"batch":"2001",',
+      '"siret":"01234567891011",',
+      '"periode":{"$date":"2014-01-01T00:00:00Z"}},',
+      '{"batch":"2001",',
+      '"siret":"01234567891011",',
+      '"periode":{"$date":"2014-02-01T00:00:00Z"}},',
+      '{"batch":"2001",',
+      '"siret":"11109876543210",',
+      '"periode":{"$date":"2014-01-01T00:00:00Z"}},',
+      '{"batch":"2001",',
+      '"siret":"11109876543210",',
+      '"periode":{"$date":"2014-02-01T00:00:00Z"}}',
+      "]}}}"
+    )
   )
 })
 
@@ -282,11 +284,13 @@ test_that("build_siret_match_stage builds a valid match stage", {
 #
 
 test_that(
-  "La propriété 'mlr3task' est créée", {
+  "La propriété 'mlr3task' est créée",
+  {
     expect_error(test_task <- get_test_task(stage = "load"), NA)
     expect_true("mlr3task" %in% names(test_task))
     expect_true(inherits(test_task$mlr3task, "TaskClassif"))
-})
+  }
+)
 
 import_test_data <- function(
                              batch,
@@ -317,7 +321,8 @@ import_test_data <- function(
 }
 
 test_that(
-  "une requête vide renvoie un dataframe vide avec une requête standard", {
+  "une requête vide renvoie un dataframe vide avec une requête standard",
+  {
     testthat::skip_on_ci()
     empty_data <- import_test_data(
       "wrong_batch",
@@ -326,68 +331,78 @@ test_that(
       code_ape = NULL
     )
     expect_equal(dim(empty_data), c(0, 2))
-  })
+  }
+)
 
 test_that(
-  "On récupére les éléments de la base avec une requête standard", {
-
-  testthat::skip_on_ci()
-  fields <- c("siret", "periode")
-  test_object <- import_test_data(
-    "test_batch_1",
-    fields = fields,
-    sirets = NULL,
-    code_ape = NULL
-  )
-  expect_equal(names(test_object), fields)
-  expect_equal(as.character(test_object$siret), "01234567891011")
-  expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
-})
-
-test_that(
-  "une requête vide renvoie un dataframe vide avec une requête par siret", {
-  testthat::skip_on_ci()
-  empty_data <- import_test_data(
-    "test_batch_1",
-    fields = c("siret", "periode"),
-    sirets = c("1110987654321"),
-    code_ape = NULL
-  )
-  expect_equal(dim(empty_data), c(0, 2))
-})
+  "On récupére les éléments de la base avec une requête standard",
+  {
+    testthat::skip_on_ci()
+    fields <- c("siret", "periode")
+    test_object <- import_test_data(
+      "test_batch_1",
+      fields = fields,
+      sirets = NULL,
+      code_ape = NULL
+    )
+    expect_equal(names(test_object), fields)
+    expect_equal(as.character(test_object$siret), "01234567891011")
+    expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
+  }
+)
 
 test_that(
-  "On récupére les éléments de la base avec une requête par siret", {
-  testthat::skip_on_ci()
-  fields <- c("siret", "periode")
-  test_object <- import_test_data(
-    "test_batch_1",
-    fields = fields,
-    sirets = c("01234567891011"),
-    code_ape = NULL
-  )
-  expect_equal(names(test_object), fields)
-  expect_equal(as.character(test_object$siret), "01234567891011")
-  expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
-})
+  "une requête vide renvoie un dataframe vide avec une requête par siret",
+  {
+    testthat::skip_on_ci()
+    empty_data <- import_test_data(
+      "test_batch_1",
+      fields = c("siret", "periode"),
+      sirets = c("1110987654321"),
+      code_ape = NULL
+    )
+    expect_equal(dim(empty_data), c(0, 2))
+  }
+)
 
 test_that(
-  "On récupére les éléments de la base avec une requête par code ape", {
-  testthat::skip_on_ci()
-  fields <- c("siret", "periode")
-  test_object <- import_test_data(
-    "test_batch_1",
-    fields = fields,
-    sirets = NULL,
-    code_ape = "1234B"
-  )
-  expect_equal(names(test_object), fields)
-  expect_equal(as.character(test_object$siret), "01234567891011")
-  expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
-})
+  "On récupére les éléments de la base avec une requête par siret",
+  {
+    testthat::skip_on_ci()
+    fields <- c("siret", "periode")
+    test_object <- import_test_data(
+      "test_batch_1",
+      fields = fields,
+      sirets = c("01234567891011"),
+      code_ape = NULL
+    )
+    expect_equal(names(test_object), fields)
+    expect_equal(as.character(test_object$siret), "01234567891011")
+    expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
+  }
+)
 
 test_that(
-  "get_fields has not inadvertedly changed", {
+  "On récupére les éléments de la base avec une requête par code ape",
+  {
+    testthat::skip_on_ci()
+    fields <- c("siret", "periode")
+    test_object <- import_test_data(
+      "test_batch_1",
+      fields = fields,
+      sirets = NULL,
+      code_ape = "1234B"
+    )
+    expect_equal(names(test_object), fields)
+    expect_equal(as.character(test_object$siret), "01234567891011")
+    expect_equal(as.Date(test_object$periode), as.Date("2014-01-01"))
+  }
+)
+
+test_that(
+  "get_fields has not inadvertedly changed",
+  {
     # Mostly for coverage.
     expect_length(get_fields(TRUE), 265)
-  })
+  }
+)
