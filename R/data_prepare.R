@@ -82,7 +82,9 @@ get_default_pipeline <- function() {
 #'
 #' @inheritParams generic_task
 #' @param train_or_test `"train" or "test"` Faut-il récupérer les données
-#' d'entraînement ou de test ?
+#' d'entraînement ou de test ? Ce paramètre n'est pas requis si les données ne
+#' sont pas échantillonnées (alors l'intégralité des données sont utilisées
+#' pour l'entraînement).
 #'
 #' @return `data.frame` données d'entraînement ou de test après la préparation
 #' (l'application de la pipeline mlr3 stockée dans "task"
