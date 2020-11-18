@@ -98,7 +98,13 @@ permet de mesurer la performance et de comparer les modèles, ou encore
 paramètres du modèle. 
 
 ```r
-task<-sf_task(
+library(rsignauxfaibles)
+library(dplyr)
+database <- "<database_name>"
+collection <- "<collection_name>"
+mongodb_uri <- "<mongodb://uri>"
+
+task <- sf_task(
   mongodb_uri,
   database,
   collection
