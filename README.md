@@ -27,6 +27,8 @@ collection <- "<collection_name>"
 mongodb_uri <- "<mongodb://uri>"
 
 # Création d'une tâche d'apprentissage
+# C'est un objet de type "S3", donc une liste dans laquelle sont stockées les 
+# informations de la tâche d'apprentissage
 task <- sf_task(
   mongodb_uri,
   database,
@@ -34,26 +36,36 @@ task <- sf_task(
 )
 
 last_batch <- "2005_2" # Nom du dernier batch importé
-sample_size <- 10000 # Échantillonnage pour l'entraînement de 10.000 couples (siret x période). 
-# (en réalité 800.000 en production)
 
-# Chargement des données historiques
+# Échantillonnage aléatoire pour l'entraînement de 10.000 
+# couples (siret x période).  (en réalité 800.000 en production)
+sample_size <- 10000 
+
+# Chargement des données historiques (par défaut, 2015 et 2016)
 task <- load_hist_data(
   task = task,
   batch = last_batch,
   subsample = sample_size
 )
 
-# Si l'on entraîne sur toute la base, pas besoin d'échantillonner
 
 # Utilitaire pour lister les champs
 fields <- get_fields(training = TRUE) 
 
-# Pipeline de préparation des données. 
+# Si l'on entraîne sur toute la base, pas besoin de créer d'échantillons de 
+# test. Se référé au script de test pour voir comment faire. 
+
+# prepare spécifie une suite d'opérations sur les données, sous la forme d'un
+# `mlr3pipelines::Graph` ou assimilable. 
+# Les opérations ne seront effectuées qu'au moment de l'entraînement.
 task <- prepare(
   task,
   training_fields = fields
 )
+
+# Si l'on veut tout de même consulter l'effet de la préparation sans entraîner 
+# de modèle, on peut utiliser:
+prepared_data <- get_prepared_data(task)
 
 # Entraînement avec le modèle par défaut (xgboost)
 task <- train(task)
@@ -61,8 +73,8 @@ task <- train(task)
 task <- train(task, learner = mlr3::lrn("classif.rpart"))
 
 # Chargement de nouvelles données
-last_period <- as.Date("2020-01-01")  # Dernière période importée task <- 
-load_new_data(
+last_period <- as.Date("2020-01-01")  # Dernière période importée
+task <- load_new_data(
   task = task,
   periods = last_period,
   batch = last_batch
@@ -70,8 +82,9 @@ load_new_data(
 
 # Prédiction sur les nouvelles données
 task <- predict(task, data_names = "new_data")
-# Les prédictions sont au format mlr3 
 
+# Les prédictions sont au format mlr3::Predictions, mais peuvent être 
+# converties 
 require(data.table)
 prediction <- as.data.table(task$prediction_new)
 ```
