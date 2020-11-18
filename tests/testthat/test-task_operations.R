@@ -1,6 +1,6 @@
 context("Test task cloning and filtering")
 
-test_that("reset_for_new_run makes a new task with expected fields", {
+test_that("reset_for_new_run makes a new task with expected properties", {
   task <- get_test_task(stage = "train")
   new_task <- reset_for_new_run(task)
   expect_true(all(
