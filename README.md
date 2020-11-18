@@ -35,7 +35,7 @@ task <- sf_task(
   collection
 )
 
-last_batch <- "2005_2" # Nom du dernier batch importé
+last_batch <- "2009_5" # Nom du dernier batch importé
 
 # Échantillonnage aléatoire pour l'entraînement de 10.000 
 # couples (siret x période).  (en réalité 800.000 en production)
@@ -96,6 +96,57 @@ validation croisée. On peut alors utiliser en plus la fonction `evaluate` qui
 permet de mesurer la performance et de comparer les modèles, ou encore 
 `optimize_hyperparameters` qui permet de faire un grid_search sur les 
 paramètres du modèle. 
+
+```r
+task<-sf_task(
+  mongodb_uri,
+  database,
+  collection
+)
+last_batch <- "2009_5" 
+sample_size <- 10000
+task <- load_hist_data(
+  task = task,
+  batch = last_batch,
+  subsample = sample_size
+)
+
+fields <- get_fields(training = TRUE)
+
+# Les opérations peuvent être enchaînées via l'opérateur pipe
+xgboost_task <- task %>%
+  split_data(resampling_strategy = "cv") %>%
+  prepare(training_fields = fields) %>%
+  train()
+
+# Créons un autre modèle pour comparer.
+# Pour cela, on utilise "reset_for_new_run()", qui ne conserve que l'essentiel
+# afin de ne pas mélanger les résultats de modèles.
+# Les modèles doivent être définis sous la forme de mlr3::Learner.
+learner <- mlr3::lrn("classif.rpart") # Arbre de décisions
+rpart_task <- xgboost_task %>%
+  reset_for_new_run() %>%
+  prepare(training_fields = fields) %>%
+  train(learner = learner)
+
+# On peut alors comparer la performance des modèles
+evaluation <- evaluate(xgboost_task, rpart_task, should_remove_strong_signals =
+FALSE)
+
+# Vous pouvez à tout moment inspecter les objets mlr3 sous-jacents à la tâche
+# d'apprentissage:
+task$mlr3task # mlr3::ClassifTask
+task$mlr3rsmp # mlr3::Resampling: stratégie d'échantillonnage
+task$mlr3pipeline # mlr3pipelines::Graph: Pipeline de préparation
+task$mlr3graphlearner # mlr3pipelines::GraphLearner: Préparation + modèle à entraîner
+task$mlr3resample_result # mlr3::ResampleResult: après entraînement
+
+# Pour faire de l'optimisation d'hyperparamètres, que ce soit de
+# l'entraînement ou de la préparation.
+# Optimise les paramètre du "GraphLearner" stocké dans la tâche.
+# Le modèle résultant se trouve dans task$mlr3auto_tuner
+xgboost_task <- optimize_hyperparameters(xgboost_task, measure = mlr3::msr("classif.ce"))
+```
 
 # Documentation
 
