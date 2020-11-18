@@ -29,9 +29,9 @@ reset_for_new_run <- function(
 
   new_task$hist_data <- task$hist_data
   new_task$new_data <- task$new_data
-  new_task$mlr3task <- task$mlr3task
+  new_task$mlr3task <- task$mlr3task$clone()
   if (keep_resampling) {
-    new_task$mlr3rsmp <- task$mlr3rsmp
+    new_task$mlr3rsmp <- task$mlr3rsmp$clone(deep = TRUE)
   }
 
   return(new_task)
