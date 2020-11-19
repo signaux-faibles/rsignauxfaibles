@@ -6,6 +6,13 @@
 \usage{
 create_fte_pipeline(target_encode_fields)
 }
+\arguments{
+\item{target_encode_fields}{\code{character()} Name of fields to "feature target
+encode (fte)" (or "impact encode")}
+}
+\value{
+\code{mlr3pipelines::PipeOp}
+}
 \description{
 Creates a PipeOp for impact encoding
 }
