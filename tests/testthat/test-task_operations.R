@@ -1,21 +1,21 @@
 context("Test task cloning and filtering")
 
-test_that("reset_for_new_run makes a new task with expected properties", {
+test_that("copy_for_new_run makes a new task with expected properties", {
   task <- get_test_task(stage = "train")
-  new_task <- reset_for_new_run(task)
+  new_task <- copy_for_new_run(task)
   expect_true(all(
     c("mlr3task", "mlr3rsmp", "hist_data", "new_data", "tracker") %in%
       names(new_task)
   ))
   expect_true(!"mlr3resample_result" %in% names(new_task))
 
-  new_task2 <- reset_for_new_run(task, keep_resampling = FALSE)
+  new_task2 <- copy_for_new_run(task, keep_resampling = FALSE)
   expect_true(!"mlr3rsmp" %in% names(new_task2))
 })
 
-test_that("reset_for_new_run clones mlr3 objects", {
+test_that("copy_for_new_run clones mlr3 objects", {
   task <- get_test_task(stage = "train")
-  new_task <- reset_for_new_run(task)
+  new_task <- copy_for_new_run(task)
   new_task$mlr3task$id <- "new_id"
   expect_equal(task$mlr3task$id, "signaux-faibles")
   new_task$mlr3rsmp$param_set$values$ratio <- 0.5
@@ -23,10 +23,10 @@ test_that("reset_for_new_run clones mlr3 objects", {
 })
 
 
-test_that("reset_for_new_run does not make a copy of data", {
+test_that("copy_for_new_run does not make a copy of data", {
   task <- get_test_task(stage = "train")
   task$hist_data <- data.frame(periode = 1, siret = 1:100000, target = c(T, F))
-  new_task <- reset_for_new_run(task)
+  new_task <- copy_for_new_run(task)
   expect_true(pryr::object_size(c(task, new_task)) < 11000000)
 })
 

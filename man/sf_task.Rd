@@ -23,15 +23,12 @@ param exporter. Par défaut, celle stockée dans \code{task}.}
 \item{collection}{\code{character(1)} \cr Nom de la collection vers laquelle
 exporter. Par défaut, celle stockée dans \code{task}.}
 
+\item{id}{\code{character(1)} Permet de donner un nom à la tâche d'apprentissage}
+
 \item{tracker}{\code{mlflow::mlflow_run} \cr
 Un mlflow_run pour tracker les modèles et expériences. Les logs
-utiliseront la propriété \code{tracker$run_id}.}
-
-\item{experiment_name}{\code{character()} \cr
-Quel est l'objet de cette tâche ?}
-
-\item{experiment_description}{\code{character()} \cr
-Descriptions supplémentaires sur l'expérimentation en cours.}
+utiliseront la propriété \code{tracker$run_id}. Peut être laissé à "NULL" et
+mlflow ne sera pas utilisé.}
 }
 \value{
 \verb{[rsignauxfaibles::sf_task]} \cr
