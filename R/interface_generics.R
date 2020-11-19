@@ -16,26 +16,23 @@ NULL
 #'
 #' @inheritParams mongodb_connection
 #' @inheritParams generic_task
-#' @param experiment_name `character()` \cr
-#'   Quel est l'objet de cette tâche ?
-#' @param experiment_description `character()` \cr
-#'   Descriptions supplémentaires sur l'expérimentation en cours.
+#' @param id `character(1)` Permet de donner un nom à la tâche d'apprentissage
 #' @param tracker `mlflow::mlflow_run` \cr
 #'   Un mlflow_run pour tracker les modèles et expériences. Les logs
-#'   utiliseront la propriété `tracker$run_id`.
+#'   utiliseront la propriété `tracker$run_id`. Peut être laissé à "NULL" et
+#'   mlflow ne sera pas utilisé.
 #'
 #' @return `[rsignauxfaibles::sf_task]` \cr
 #'   Un objet sf_task
 #'
 #' @export
 sf_task <- function(
-  mongodb_uri,
-  database = "test_signauxfaibles",
-  collection = "Features",
-  id = "Signaux-faibles",
-  target = "outcome",
-  tracker = NULL
-  ) {
+                    mongodb_uri,
+                    database = "test_signauxfaibles",
+                    collection = "Features",
+                    id = "Signaux-faibles",
+                    target = "outcome",
+                    tracker = NULL) {
   res <- list(
     mongodb_uri = mongodb_uri,
     database = database,

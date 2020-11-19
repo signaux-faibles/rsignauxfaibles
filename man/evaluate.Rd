@@ -7,33 +7,17 @@
 evaluate(
   ...,
   measures = get_default_measure(),
-  data_name = "test_data",
   should_remove_strong_signals = TRUE
 )
 }
 \arguments{
 \item{...}{\code{tasks} \cr Tasks to be evaluated.}
 
-\item{data_name}{\code{character(1)} \cr Sur quelles données évaluer ?}
+\item{measures}{\code{mlr3::Measure} Vecteur de mesures utilisées pour évaluer
+la perforlance.}
 
-\item{eval_function}{\code{MLsegmentr::eval_function()} \cr Objet s3
-d'évaluation.}
-
-\item{plot}{\code{logical(1)} \cr Faut-il tracer la figure avec la fonction de
-l'\code{eval_function} (si disponible)}
-
-\item{prediction_names}{\code{character(1)} Name of columns containing
-predictions. Default value should be correct, advanced setting to use
-with care.}
-
-\item{target_names}{:: character() \cr Nom de la colonne qui contient
-l'objectif d'apprentissage.}
-
-\item{segment_names}{:: character() \cr Nom de la colonne qui permet de
-segmenter l'évaluation.}
-
-\item{remove_strong_signals}{:: \code{logical(1)}\cr Faut-il retirer des
-échantillons de test ou de validation les entrerprises qui présentent des
+\item{should_remove_strong_signals}{:: \code{logical(1)}\cr Faut-il retirer des
+échantillons de test les entrerprises qui présentent des
 signaux forts, c'est-à-dire 3 mois de défaut, ou une procédure collective
 en cours ? Nécessite que les données contenues dans
 \code{task[["hist_data"]]} possèdent le champs "time_til_outcome".}
@@ -44,6 +28,7 @@ remplacé) un champs "model_performance", avec le résultat de la fonction
 d'évaluation
 }
 \description{
-Evalue les prédictions d'un ou plusieurs tasks.
-Stocke le résultat dans le premier task.
+Evalue les prédictions d'un ou plusieurs tasks, et retourne la performance
+calculée sur l'échantillon (ou les échantillons dans le cadre de la
+validatio croisée) de test.
 }

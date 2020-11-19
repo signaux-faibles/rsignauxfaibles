@@ -18,14 +18,12 @@
 #'   "prepared_train_data" correspond aux données de "train_data" préparées).
 #'
 #' @export
-prepare.sf_task <- function( #nolint
-  task,
-  training_fields = get_fields(training = TRUE),
-  outcome_field = NULL,
-  processing_pipeline = get_default_pipeline(),
-  ...
-  ) {
-
+prepare.sf_task <- function( # nolint
+                            task,
+                            training_fields = get_fields(training = TRUE),
+                            outcome_field = NULL,
+                            processing_pipeline = get_default_pipeline(),
+                            ...) {
   task[["training_fields"]] <- training_fields
 
   if (is.null(outcome_field)) {
@@ -43,14 +41,17 @@ prepare.sf_task <- function( #nolint
 }
 
 #' Creates a PipeOp for impact encoding
-create_fte_pipeline <- function(
-   target_encode_fields
-  ) {
+#'
+#' @param target_encode_fields `character()` Name of fields to "feature target
+#' encode (fte)" (or "impact encode")
+#'
+#' @return `mlr3pipelines::PipeOp`
+create_fte_pipeline <- function(target_encode_fields) {
   poe <- mlr3pipelines::po("encodeimpact",
     param_vals = list(
       affect_columns = mlr3pipelines::selector_name(target_encode_fields)
-      )
-   )
+    )
+  )
 }
 
 #' Construct default pipeline
@@ -59,7 +60,7 @@ create_fte_pipeline <- function(
 get_default_pipeline <- function() {
   pipeline <- create_fte_pipeline(
     c("code_ape_niveau2", "code_ape_niveau3")
-    ) %>>%
+  ) %>>%
     mlr3pipelines::po(
       "encode",
       method = "treatment",
@@ -70,11 +71,21 @@ get_default_pipeline <- function() {
 
 #' Apply preparation pipeline and inspect prepared data
 #'
+#' Applique la pipeline de préparation sur les données d'entraînement ou de
+#' test.
+#'
+#' L'objet task doit avoir une propriété "mlr3pipeline" de type
+#' `mlr3pipelines::PipeOp` ou `mlr3pipelines::Graph`
+#'
+#' @inheritParams generic_task
+#' @param train_or_test `"train" or "test"` Faut-il récupérer les données
+#' d'entraînement ou de test ?
+#'
+#' @return `data.frame` données d'entraînement ou de test après la préparation
+#' (l'application de la pipeline mlr3 stockée dans "task"
+#'
 #' @export
-get_prepared_data <- function(
-  task,
-  train_or_test
-  ) {
+get_prepared_data <- function(task, train_or_test) {
   assertthat::assert_that(train_or_test %in% c("train", "test"))
   assertthat::assert_that(
     "mlr3pipeline" %in% names(task),
@@ -86,8 +97,8 @@ get_prepared_data <- function(
   pred <- gpo$predict(task[["mlr3task"]])[[1]]
   if (train_or_test == "test") {
     test_id <- task[["mlr3rsmp"]]$test_set(1)
-    return(pred$data(test_id) %>% as.data.frame())
+    return(as.data.frame(pred$data(test_id)))
   } else {
-    return(pred$data(train_id) %>% as.data.frame())
+    return(as.data.frame(pred$data(train_id)))
   }
 }

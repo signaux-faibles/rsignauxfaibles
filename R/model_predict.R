@@ -14,23 +14,20 @@
 #'   aux données nommées dans `data_names`
 #' @export
 predict.sf_task <- function(
-  object,
-  data_names = c(
-    "new_data",
-    "train_data",
-    "test_data"
-    ),
-  predict_fun = predict_model,
-  ...
-  ) {
-
-  task  <- object
+                            object,
+                            data_names = c(
+                              "new_data",
+                              "train_data",
+                              "test_data"
+                            ),
+                            predict_fun = predict_model,
+                            ...) {
+  task <- object
   assertthat::assert_that(
     all(data_names %in% c("new_data", "train_data", "test_data"))
-    )
+  )
 
   predict_on_given_data <- function(data_name, task) {
-
     prepared_data_name <- paste0("prepared_", data_name)
     if (!prepared_data_name %in% names(task)) {
       lgr::lgr$warn("%s is missing or has not been prepared yet", data_name)
@@ -45,15 +42,17 @@ predict.sf_task <- function(
     )
 
     if (is.data.frame(prediction)) {
-      dup_names <- intersect(names(prediction %>%
+      dup_names <- intersect(
+        names(prediction %>%
           dplyr::select(-siret, -periode)),
-        names(task[[data_name]]))
+        names(task[[data_name]])
+      )
       task[[data_name]] <- task[[data_name]] %>%
         dplyr::select(-one_of(dup_names))
       task[[data_name]] <- task[[data_name]] %>%
         left_join(prediction, by = c("siret", "periode"))
     } else {
-      task[[data_name]][["score"]]  <- prediction
+      task[[data_name]][["score"]] <- prediction
     }
 
     lgr::lgr$info("Prediction successfully done.")
@@ -62,18 +61,12 @@ predict.sf_task <- function(
 
 
   if (any(c("mlr3model", "mlr3resample_result") %in% names(task))) {
-
     if ("test_data" %in% data_names) {
-
       assertthat::assert_that("mlr3resample_result" %in% names(task))
       task[["prediction_test"]] <- task[["mlr3resample_result"]]$prediction()
-
     } else if ("train_data" %in% data_names) {
-
       stop("Currently not supported")
-
     } else if ("new_data" %in% data_names) {
-
       assertthat::assert_that("mlr3model" %in% names(task))
       task[["prediction_new"]] <- task[["mlr3model"]]$predict_newdata(
         task[["new_data"]]
@@ -81,7 +74,7 @@ predict.sf_task <- function(
     }
   } else {
     for (name in data_names) {
-      task  <- predict_on_given_data(name, task)
+      task <- predict_on_given_data(name, task)
     }
   }
   return(task)

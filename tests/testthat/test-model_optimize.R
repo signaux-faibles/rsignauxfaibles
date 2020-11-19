@@ -15,7 +15,7 @@ test_that("optimize_hyperparameters works as expected", {
         paradox::ParamInt$new("classif.rpart.minsplit", lower = 1, upper = 10)
       )
     ),
-  measure = msr("classif.acc")
+    measure = msr("classif.acc")
   )
   expect_true("mlr3auto_tuner" %in% names(task_to_tune))
 })

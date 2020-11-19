@@ -9,10 +9,10 @@ optimize_hyperparameters(task, ...)
 
 \method{optimize_hyperparameters}{sf_task}(
   task,
-  terminator = mlr3tuning::term("evals", n_evals = 10),
+  terminator = bbotk::trm("evals", n_evals = 10),
   param_set = get_default_param_set(),
   tuner = mlr3tuning::tnr("random_search"),
-  measures = get_default_measure(),
+  measure = get_default_measure()[[1]],
   ...
 )
 }
@@ -21,21 +21,15 @@ optimize_hyperparameters(task, ...)
 
 \item{...}{Additional parameters depending on class of task}
 
-\item{fields}{\code{character()} \cr Liste des variables pour l'entraînement. Cf
-\verb{[get_fields]} pour les variables par défaut.}
+\item{terminator}{\code{bbotk::Terminator} Condition d'arrêt de l'optimisation
+des hyperparamètres}
 
-\item{n_init}{\code{integer(1)} \cr Nombre d'évaluations aléatoires initiales.}
+\item{param_set}{\code{paradox::ParamSet} Les paramètres à optimiser}
 
-\item{n_iter}{\code{integer(1)} \cr Nombre d'itérations (d'évaluations) d'optimisation.}
+\item{tuner}{\code{mlr3tuning::Tuner} La méthode d'optimisation des
+hyperparamètres}
 
-\item{train_pipe}{\code{function} \cr Fonction d'entraînement et d'évaluation
-compatible avec l'optimisation avec "mlrMBO" (donc avec des attributs
-spécifiques), notamment comme celles créées avec
-\verb{[smoof::makeSingleObjectiveFunction]}}
-
-\item{optim_bounds}{\code{ParamSet} \cr Objet précisant l'espace exploré par
-l'optimisation, tel que donné par \verb{[ParamHelpers::ParamSet]}. Si NULL,
-alors des limites par défaut sont fixées.}
+\item{measure}{\code{mlr3::Measure} La métrique à optimiser}
 }
 \value{
 La \code{task} donnée en entrée, auquel a été ajouté un champ

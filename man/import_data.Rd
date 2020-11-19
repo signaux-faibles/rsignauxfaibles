@@ -17,7 +17,7 @@ import_data(
   code_ape = NULL,
   subsample = NULL,
   replace_missing = NULL,
-  database_query_fun = query_database
+  database_query_fun = query_mongodb
 )
 }
 \arguments{
@@ -59,6 +59,10 @@ siret x periode) à échantillonner.}
 \item{replace_missing}{\code{list()} \cr Liste nommée, dont les noms sont les
 noms de variables et les valeurs sont les valeurs de remplacement des NA.
 Si égal à NULL, alors des remplacements par défauts}
+
+\item{database_query_fun}{\code{function} Une fonction de requête à la base, qui
+permet notamment de simuler la requête dans le cadre des tests. Utiliser la
+fonction par défaut pour requêter la base mongodb en production.}
 }
 \value{
 \code{data.frame()}
