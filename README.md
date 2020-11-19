@@ -126,12 +126,12 @@ xgboost_task <- task %>%
   train()
 
 # Créons un autre modèle pour comparer.
-# Pour cela, on utilise "reset_for_new_run()", qui ne conserve que l'essentiel
+# Pour cela, on utilise "copy_for_new_run()", qui ne conserve que l'essentiel
 # afin de ne pas mélanger les résultats de modèles.
 # Les modèles doivent être définis sous la forme de mlr3::Learner.
 learner <- mlr3::lrn("classif.rpart") # Arbre de décisions
 rpart_task <- xgboost_task %>%
-  reset_for_new_run() %>%
+  copy_for_new_run() %>%
   prepare(training_fields = fields) %>%
   train(learner = learner)
 
