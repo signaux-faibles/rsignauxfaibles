@@ -6,7 +6,7 @@
 #' - "data_to_explain": `data.frame | data.table`  données à expliquer
 #' @param ... Paramètres additionnels passés à `explanation_method`
 #' @export
-explain.sf_task <- function(explanation_method, ...) {
-
+explain.sf_task <- function(task, explanation_method, ...) {
+   return (explanation_method(
 }
 
