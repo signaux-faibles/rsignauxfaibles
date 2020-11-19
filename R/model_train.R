@@ -23,7 +23,7 @@ train.sf_task <- function( # nolint
                           task,
                           seed = 0,
                           learner = get_default_learner(),
-                          store_models = FALSE,
+                          store_models = TRUE,
                           ...) {
 
   # TODO: Log before training, to fail early if tracker should have been
