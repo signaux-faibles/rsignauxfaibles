@@ -15,6 +15,13 @@ L'installation se fait avec le package `devtools`:
 ```r
 devtools::install_github("signaux-faibles/rsignauxfaibles")
 ```
+Le paramètre additionnel `ref = <nom_de_branche>` permet de consulter au besoin 
+une autre branche que master. Si le package est déjà en mémoire au moment de 
+télécharger la nouvelle version, alors précéder l'installation de:
+```r
+detach("package:rsignauxfaibles", unload = TRUE)
+```
+puis redémarrer R. 
 
 ## Entraîner le modèle et prédire 
 
