@@ -172,5 +172,5 @@ suffixe ".sf_task" au nom de la fonction; par exemple:
 ?predict.sf_task
 ```
 
-Une documentation du modèle est de la procédure d'évaluation est disponible 
+Une documentation du modèle et de la procédure d'évaluation est disponible 
 [ici](https://github.com/signaux-faibles/documentation/blob/master/algorithme-evaluation.md). 
