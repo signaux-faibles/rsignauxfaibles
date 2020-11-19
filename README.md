@@ -53,7 +53,7 @@ task <- load_hist_data(
 fields <- get_fields(training = TRUE) 
 
 # Si l'on entraîne sur toute la base, pas besoin de créer d'échantillons de 
-# test. Se référé au script de test pour voir comment faire. 
+# test. Se référer au script de test pour voir comment faire. 
 
 # prepare spécifie une suite d'opérations sur les données, sous la forme d'un
 # `mlr3pipelines::Graph` ou assimilable. 
