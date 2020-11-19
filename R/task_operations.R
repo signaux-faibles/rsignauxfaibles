@@ -51,7 +51,7 @@ reset_tracker <- function(tracker, end_run_status) {
 #'
 #' Reconstitue la tâche d'apprentissage task$mlr3task en conséquence.
 #'
-#' @param task `sf_task`
+#' @inheritParams generic_task
 #' @param data `data.frame()` Les données, doivent avoir des colonnes "siret",
 #' "periode" et task[["target"]]
 #'

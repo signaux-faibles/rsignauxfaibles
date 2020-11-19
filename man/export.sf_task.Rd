@@ -53,6 +53,10 @@ récupérer des données supplémentaires}
 \item{collection_scores}{\code{character()} \cr Collection mongodb stockant les
 scores calculés (utilisée en écriture).}
 
+\item{algo_name}{\code{character(1)} Nom de l'algo qui a tourné pour produire
+les scores (permet de stocker en base plusieurs scores sur le même batch
+mais avec des modèles différents).}
+
 \item{...}{additional parameters for export functions.}
 }
 \value{

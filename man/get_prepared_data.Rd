@@ -6,6 +6,21 @@
 \usage{
 get_prepared_data(task, train_or_test)
 }
+\arguments{
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
+
+\item{train_or_test}{\verb{"train" or "test"} Faut-il récupérer les données
+d'entraînement ou de test ?}
+}
+\value{
+\code{data.frame} données d'entraînement ou de test après la préparation
+(l'application de la pipeline mlr3 stockée dans "task"
+}
 \description{
-Apply preparation pipeline and inspect prepared data
+Applique la pipeline de préparation sur les données d'entraînement ou de
+test.
+}
+\details{
+L'objet task doit avoir une propriété "mlr3pipeline" de type
+\code{mlr3pipelines::PipeOp} ou \code{mlr3pipelines::Graph}
 }

@@ -6,6 +6,17 @@
 \usage{
 filter_task(task, sirets)
 }
+\arguments{
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
+
+\item{sirets}{\code{character()} Sirets à conserver dans la tâche
+d'apprentissage.}
+}
+\value{
+Une copie de la tâche initiale, réinitialisée, et filtrée sur les
+sirets demandés.
+}
 \description{
-Filtre la tâche d'apprentissage aux sirets désirés
+Attention, cette action réinitialise la tâche (échantillonnage,
+entraînement).
 }
