@@ -109,9 +109,18 @@ get_prepared_data <- function(task, train_or_test) {
       predict_ids <- task[["mlr3rsmp"]]$test_set(1)
     }
   }
+
+  new_data <- task$mlr3task$data(rows = predict_ids)
   gpo <- task[["mlr3pipeline"]]
   gpo$train(task[["mlr3task"]]$clone()$filter(train_ids))
-  pred <- gpo$predict(task[["mlr3task"]])[[1]]
+  new_data_ids <- task$mlr3task$nrow + seq_len(nrow(new_data))
 
-  return(as.data.frame(pred$data(predict_ids)))
+  new_data_task <- task[["mlr3task"]]$
+    clone()$
+    rbind(new_data)$
+    filter(new_data_ids)
+  pred <- gpo$predict(new_data_task)[[1]]
+  pred <- as.data.frame(pred$data())
+
+  return(pred)
 }
