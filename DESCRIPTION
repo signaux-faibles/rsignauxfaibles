@@ -37,7 +37,7 @@ Suggests:
     smoof,
     rpart,
     testthat (>= 2.1.0)
-Remotes: signaux-faibles/mlr3extralearners#1
+Remotes: signaux-faibles/mlr3extralearners#2
 RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/signaux-faibles/rsignauxfaibles
