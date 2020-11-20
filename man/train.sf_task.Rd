@@ -9,7 +9,6 @@
   seed = 0,
   learner = get_default_learner(),
   store_models = TRUE,
-  keep_intermediate_results = TRUE,
   ...
 )
 }
@@ -27,9 +26,6 @@ spécifiés dans le modèle).}
 Faut-il sauvegardé tous les modèles entraînés pour référence ultérieure ?}
 
 \item{...}{Not used}
-
-\item{keep_results}{\code{logical(1)} \cr
-Faut-il conserver les états intermédiaires (données préparées)}
 }
 \value{
 \verb{[sf_task]} \cr L'objet \code{task} donné en entré, auquel a été ajouté
