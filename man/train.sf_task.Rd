@@ -8,7 +8,7 @@
   task,
   seed = 0,
   learner = get_default_learner(),
-  store_models = FALSE,
+  store_models = TRUE,
   ...
 )
 }
