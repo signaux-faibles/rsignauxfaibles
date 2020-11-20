@@ -16,6 +16,7 @@ Imports:
     lubridate,
     mlr3,
     mlr3learners,
+    mlr3extralearners,
     mlr3measures,
     mlr3pipelines,
     mongolite,
