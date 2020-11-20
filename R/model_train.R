@@ -106,7 +106,7 @@ get_xgboost_learner <- function() {
 get_gam_learner <- function() {
   require(mlr3extralearners)
   # installed with
-  # install_github("JazzyPierrot/mlr3extralearners", ref = "feat/gam_learner")
+  # install_github("signaux-faibles/mlr3extralearners")
   learner <- mlr3::lrn("classif.gam")
   return(learner)
 }
