@@ -33,6 +33,8 @@ prepare.sf_task <- function( # nolint
     task[["mlr3task"]]$col_roles$target <- outcome_field
   }
 
+  processing_pipeline <- mlr3pipelines::as_graph(processing_pipeline)
+  processing_pipeline$keep_results <- TRUE
   task[["mlr3pipeline"]] <- processing_pipeline
 
   task[["mlr3task"]]$col_roles$feature <- training_fields
@@ -108,7 +110,7 @@ get_prepared_data <- function(task, train_or_test) {
       predict_ids <- task[["mlr3rsmp"]]$test_set(1)
     }
   }
-  gpo <- mlr3pipelines::as_graph(task[["mlr3pipeline"]])
+  gpo <- task[["mlr3pipeline"]]
   gpo$train(task[["mlr3task"]]$clone()$filter(train_ids))
   pred <- gpo$predict(task[["mlr3task"]])[[1]]
 
