@@ -196,3 +196,12 @@ test_that("preparing twice with different training fields takes effect", {
   )
   check_names(c("outcome", "feature", "ab", "cd"))
 })
+
+test_that("get_prepared_data works with and without resampling", {
+  prep_task <- get_test_task(stage = "prepare")
+  # Remove resampling plan
+  expect_equal(dim(get_prepared_data(prep_task, train_or_test = "train")), c(7, 2))
+  expect_equal(dim(get_prepared_data(prep_task, train_or_test = "test")), c(3, 2))
+  prep_task[["mlr3rsmp"]] <- NULL
+  expect_equal(dim(get_prepared_data(prep_task)), c(10, 2))
+})
