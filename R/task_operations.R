@@ -14,7 +14,7 @@
 #' tâche mère ?
 #'
 #' @export
-reset_for_new_run <- function(
+copy_for_new_run <- function(
                               task,
                               end_run_status = NULL,
                               keep_resampling = TRUE) {
@@ -29,9 +29,9 @@ reset_for_new_run <- function(
 
   new_task$hist_data <- task$hist_data
   new_task$new_data <- task$new_data
-  new_task$mlr3task <- task$mlr3task
+  new_task$mlr3task <- task$mlr3task$clone()
   if (keep_resampling) {
-    new_task$mlr3rsmp <- task$mlr3rsmp
+    new_task$mlr3rsmp <- task$mlr3rsmp$clone(deep = TRUE)
   }
 
   return(new_task)
@@ -112,6 +112,6 @@ filter_task <- function(task, sirets) {
 
   # Filter hist_data
   task[["mlr3task"]]$filter(ids)
-  reset_task <- reset_for_new_run(task, keep_resampling = FALSE)
+  reset_task <- copy_for_new_run(task, keep_resampling = FALSE)
   return(reset_task)
 }

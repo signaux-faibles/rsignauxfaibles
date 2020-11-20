@@ -37,7 +37,7 @@ get_default_explanation_method <- function(task, data_to_explain) {
 #'
 #' @examples
 explain_gam <- function(task, data_to_explain) {
-  prepared_data <- task$mlr3pipeline$predict(data_to_explain)
+  prepared_data <- get_prepared_data(task, data_to_explain)
   if ("mlr3resample_result" %in% names(task)) {
     gam_model <- get_gam_from_task(task)
     explanation <- predict(gam_model, prepared_data, type = "terms")
