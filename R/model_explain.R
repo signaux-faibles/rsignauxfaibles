@@ -57,6 +57,6 @@ explain_gam <- function(task, data_to_explain) {
 #' @return `mgcv::gam` gam model
 get_gam_from_task <- function(task) {
   graphlearner <- task$mlr3resample_result$learners[[1]]
-  gam_model <- graphlearner$model$classif.gam
+  gam_model <- graphlearner$model$classif.gam$model
   return(gam_model)
 }
