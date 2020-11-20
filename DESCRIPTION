@@ -39,8 +39,7 @@ Suggests:
     testthat (>= 2.1.0),
     xgboostExplainer
 Remotes:
-    AppliedDataSciencePartners/xgboostExplainer,
-    mlr-org/mlr3pipelines,
+    signaux-faibles/mlr3extralearners
 RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/signaux-faibles/rsignauxfaibles
