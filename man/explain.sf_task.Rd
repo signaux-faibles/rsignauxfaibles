@@ -4,14 +4,19 @@
 \alias{explain.sf_task}
 \title{Local explanation of a single prediction}
 \usage{
-\method{explain}{sf_task}(task, explanation_method, ...)
+\method{explain}{sf_task}(
+  task,
+  data_to_explain,
+  explanation_method = get_default_explanation_method(),
+  ...
+)
 }
 \arguments{
 \item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{explanation_method}{\code{function} Fonction qui prend en paramètre:
 \itemize{
-\item "model": \code{any} le modèle
+\item "task": \code{sf_task} la tâche d'apprentissage
 \item "data_to_explain": \code{data.frame | data.table}  données à expliquer
 }}
 
