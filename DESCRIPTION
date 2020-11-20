@@ -36,8 +36,7 @@ Suggests:
     pryr,
     smoof,
     rpart,
-    testthat (>= 2.1.0),
-    xgboostExplainer
+    testthat (>= 2.1.0)
 Remotes:
     signaux-faibles/mlr3extralearners
 RoxygenNote: 7.1.1
