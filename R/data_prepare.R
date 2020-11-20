@@ -9,8 +9,6 @@
 #'   Champ de la variable à prédire.
 #' @param training_fields `character()` \cr
 #'   Les champs qui doivent être conservées pour l'entraînement.
-#' @param keep_results `logical(1)` \cr
-#'   Faut-il conserver les états intermédiaires (données préparées)
 #' @param ... Unused.
 #'
 #' @return `[sf_task]` \cr
@@ -25,7 +23,6 @@ prepare.sf_task <- function( # nolint
                             training_fields = get_fields(training = TRUE),
                             outcome_field = NULL,
                             processing_pipeline = get_default_pipeline(),
-                            keep_results = TRUE,
                             ...) {
   task[["training_fields"]] <- training_fields
 
@@ -37,7 +34,6 @@ prepare.sf_task <- function( # nolint
   }
 
   processing_pipeline <- mlr3pipelines::as_graph(processing_pipeline)
-  processing_pipeline$keep_results <- keep_results
   task[["mlr3pipeline"]] <- processing_pipeline
 
   task[["mlr3task"]]$col_roles$feature <- training_fields

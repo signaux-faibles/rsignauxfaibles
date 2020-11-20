@@ -12,6 +12,8 @@
 #'   spécifiés dans le modèle).
 #' @param store_models `logical(1)` \cr
 #'   Faut-il sauvegardé tous les modèles entraînés pour référence ultérieure ?
+#' @param keep_results `logical(1)` \cr
+#'   Faut-il conserver les états intermédiaires (données préparées)
 #'
 #' @return `[sf_task]` \cr L'objet `task` donné en entré, auquel a été ajouté
 #' (ou écrasé) le champs "mlr3resample_result" si les données ont été
@@ -23,20 +25,22 @@ train.sf_task <- function( # nolint
                           task,
                           seed = 0,
                           learner = get_default_learner(),
-                          store_models = FALSE,
+                          store_models = TRUE,
+                          keep_intermediate_results = TRUE,
                           ...) {
 
   # TODO: Log before training, to fail early if tracker should have been
   # changed
 
-  require(mlr3learners)
-
+  requireNamespace("mlr3learners")
+  requireNamespace("mlr3pipelines")
 
   lgr::lgr$info("Model is being trained.")
+  full_pipeline <- task[["mlr3pipeline"]] %>>% learner
+  full_pipeline$keep_results <- keep_intermediate_results
 
-  graph_learner <- mlr3pipelines::GraphLearner$new(
-    task[["mlr3pipeline"]] %>>% learner
-  )
+
+  graph_learner <- mlr3pipelines::GraphLearner$new(full_pipeline)
   graph_learner$predict_type <- "prob"
   graph_learner$predict_sets <- c("test", "train")
   task[["mlr3graph_learner"]] <- graph_learner

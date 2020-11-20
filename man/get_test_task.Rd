@@ -19,8 +19,28 @@ get_test_task(
 \item{fake_data}{Data that is stored as "hist_data". If none is provided,
 some data will be automatically set.}
 
-\item{stage}{\code{character(1)} \cr Either "load", "split" or "prepare". The
-output task will be at the end of the specified stage.}
+\item{fake_target}{\code{character(1)} name of the column that should be use as
+target for the learning.}
+
+\item{training_fields}{\code{character()} name of the feature columns to learn
+from}
+
+\item{stage}{\code{character(1)} \cr Either "load", "split", "prepare", "train"
+and "evaluate". The output task will be at the end of the specified stage.}
+
+\item{resampling_strategy}{\code{character(1)} Either "holdout" or "cv". The
+resampling strategy of the "train" stage.}
+
+\item{processing_pipeline}{\code{mlr3pipelines::PipeOp} A preparation pipeline
+used for the "prepare" stage.}
+
+\item{learner}{\code{mlr3::Learner} A learner used at the "train" stage.}
+
+\item{measures}{\code{mlr3::Measure} A list of measures used at the "evaluate"
+stage.}
+}
+\value{
+An sf_task, at the specified "stage"
 }
 \description{
 Get a fake task
