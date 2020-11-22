@@ -36,6 +36,7 @@ Suggests:
     pryr,
     smoof,
     rpart,
+    rwebstat,
     testthat (>= 2.1.0),
     xgboostExplainer
 Remotes:
