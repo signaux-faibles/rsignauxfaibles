@@ -16,5 +16,5 @@ Via l'api webstat.
 \details{
 La variable webstat_client_ID est indispensable pour s'identifier auprès de
 l'api webstat pour faire fonctionner w_series_list. Cf la documentation
-officielle ou la page gollum "Accès extérieurs depuis labtenant dans R".
+officielle ou la page gollum "Ressources externes depuis labtenant dans R".
 }
