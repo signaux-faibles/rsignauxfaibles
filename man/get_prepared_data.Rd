@@ -10,7 +10,9 @@ get_prepared_data(task, train_or_test)
 \item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{train_or_test}{\verb{"train" or "test"} Faut-il récupérer les données
-d'entraînement ou de test ?}
+d'entraînement ou de test ? Ce paramètre n'est pas requis si les données ne
+sont pas échantillonnées (alors l'intégralité des données sont utilisées
+pour l'entraînement).}
 }
 \value{
 \code{data.frame} données d'entraînement ou de test après la préparation
@@ -18,9 +20,12 @@ d'entraînement ou de test ?}
 }
 \description{
 Applique la pipeline de préparation sur les données d'entraînement ou de
-test.
+test (que le premier échantillon en cas de validation croisée).
 }
 \details{
+Cette fonction est uniquement prévue pour l'inspection du bon
+fonctionnement de la pipeline de préparation.
+
 L'objet task doit avoir une propriété "mlr3pipeline" de type
 \code{mlr3pipelines::PipeOp} ou \code{mlr3pipelines::Graph}
 }

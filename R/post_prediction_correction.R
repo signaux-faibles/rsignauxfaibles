@@ -9,7 +9,7 @@
 #' @return `data.frame` Quelques séries de données de conjoncture de la Banque
 #' de France, depuis le premier janvier 2014.
 #' @export
-get_conj_data <- function() {
+fetch_conj_data <- function() {
   assertthat::assert_that(exists("webstat_client_ID"),
     msg = paste("L'accès à l'API webstat demande une identification.\n",
       "Veuillez vous référer à la page gollum",
