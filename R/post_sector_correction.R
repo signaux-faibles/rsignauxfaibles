@@ -1,5 +1,15 @@
-compute_sectorial_correction <- function(
-                                         conjuncture_predictions = get_conjuncture_predictions()) {
+#' Calcule la correction sectorielle liée à la crisé
+#'
+#' La correction est dans l'espace des log-vraisemblance (donc après avoir
+#' appliqué un logit aux prédictions en probabilité).
+#'
+#' @param conjuncture_predictions `data.frame()` Predictions sectorielles, par
+#' plages temporelles, calculés à partir des enquêtes de conjoncture. Format de retour de la
+#' fonction `get_conjuncture_predictions`.
+#'
+#' @return `data.frame` avec colonnes "secteur" et "correction_sector"
+#' @export
+compute_sectorial_correction <- function(conjuncture_predictions = get_conjuncture_predictions()) {
   conjuncture_predictions <- conjuncture_predictions %>%
     select(prediction, n_month_period, secteur) %>%
     mutate(prediction = gtools::logit(prediction))
@@ -24,9 +34,9 @@ compute_sectorial_correction <- function(
       names_prefix = "last_observed_pred_",
       values_from = mean_prediction
     ) %>%
-    mutate(correction_prediction = last_observed_pred_TRUE - last_observed_pred_FALSE) %>%
-    mutate(correction_prediction = ifelse(is.na(correction_prediction), 0, correction_prediction)) %>%
-    select(secteur, correction_prediction)
+    mutate(correction_sector = last_observed_pred_TRUE - last_observed_pred_FALSE) %>%
+    mutate(correction_sector = ifelse(is.na(correction_sector), 0, correction_sector)) %>%
+    select(secteur, correction_sector)
 
   return(correction)
 }

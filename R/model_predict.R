@@ -80,6 +80,32 @@ predict.sf_task <- function(
   return(task)
 }
 
+apply_corrections(task, correction_debt, correction_sector) {
+  df_join <- task$new_data %>%
+    select(siret, code_ape)
+
+  ape_to_secteur <- get_ape_to_secteur()
+  df_join <- df_join %>%
+    left_join(ape_to_secteur, by = "code_ape")
+
+  df_corrections <- df_join %>%
+    left_join(correction_debt, by = "siret") %>%
+    left_join(correction_sector, by = "secteur") %>%
+    select(correction_debt, correction_sector)
+
+  prediction_log_likelihood <- task$prediction_new %>%
+    as.data.table() %>%
+    gtools::logit()
+
+  new_prediction_log_likelihood <- prediction_log_likelihood +
+    df_corrections$correction_debt +
+    df_corrections$correction_sector
+
+  new_prediction <- mlr3::Prediction$new(gtools::inv.logit(new_prediction_log_likelihood))
+  task$prediction_corrected_new <- new_prediction
+  return(task)
+}
+
 #' Prédiction du model
 #'
 #' Produit une prédiction du modèle sur de nouvelles données. Renvoie le

@@ -1,4 +1,7 @@
-#' Correction pour les entreprises endettées
+#' Calcule une correction pour les entreprises endettées
+#'
+#' La correction est dans l'espace des log-vraisemblance (donc après avoir
+#' appliqué un logit aux prédictions en probabilité).
 #'
 #' @inheritParams generic_task
 #'
