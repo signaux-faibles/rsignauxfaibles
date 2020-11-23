@@ -42,7 +42,7 @@ get_conjuncture_predictions <- function(
                                         task,
                                         df_conj = fetch_conj_data(),
                                         df_agg_failure = fetch_aggregated_sectors(task)) {
-  assertthat(all(c("CCTSM000", "TUTSM000", "PRTEM100") %in% df_conj))
+  assertthat::assert_that(all(c("CCTSM000", "TUTSM000", "PRTEM100") %in% df_conj))
   nb_months <- 3
 
   conj_centered <- df_conj %>%
