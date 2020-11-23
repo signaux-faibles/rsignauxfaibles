@@ -32,16 +32,107 @@ compute_sectorial_correction <- function(
   return(correction)
 }
 
-#' Title
+#' Train and predict a model on conjuncture data
 #'
-#' @param param
+#' @param df_conj données de conjoncture
+#' @param df_agg_failure données d'agrégation sectorielle.
 #'
 #' @return `data.frame` with columns: prediction (in [0, 1], n_month_period,
 #'   secteur)
-#' @export
-get_conjuncture_predictions <- function() {
+get_conjuncture_predictions <- function(
+  task,
+  df_conj = fetch_conj_data(),
+  df_agg_failure = fetch_aggregated_sectors(task)
+  ) {
 
+  assertthat(all(c("CCTSM000", "TUTSM000", "PRTEM100") %in% df_conj))
+  nb_months <- 3
 
+  conj_centered <- df_conj %>%
+    mutate(
+      n_month_period = lubridate::floor_date(
+        as.Date(periode),
+        paste0(nb_months, "m")
+      )
+      ) %>%
+  group_by(n_month_period, secteur) %>%
+  summarize(
+    CCTSM000 = mean(CCTSM000), # Carnet de commande
+    TUTSM000 = mean(TUTSM000), # Taux utilisation capacité production
+    PRTEM100 = mean(PRTEM100), # Evolution de la production
+    .groups = "drop"
+    ) %>%
+  tidyr::pivot_longer(
+    c(CCTSM000, TUTSM000, PRTEM100),
+    names_to = "indicateur",
+    values_to = "valeur"
+    ) %>%
+  group_by(secteur, indicateur) %>%
+  mutate(
+    valeur = valeur - mean(valeur, na.rm = T)
+    ) %>%
+  ungroup()
+
+  seq_date <- seq.Date(
+    as.Date("2014-01-01"),
+    as.Date("2018-04-01"),
+    by = paste0(nb_months, " month")
+  )
+  assertthat::assert_that(all(seq_date %in% conj_centered$n_month_period))
+
+  conj_centered_scaled <- conj_centered %>%
+    group_by(indicateur) %>%
+    mutate(
+      valeur = valeur / sd(valeur[n_month_period %in% seq_date])
+      ) %>%
+    ungroup() %>%
+    group_by(indicateur, secteur) %>%
+    mutate(
+      valeur_lag1 = lag(valeur),
+      valeur_lag2 = lag(valeur, 2)
+      ) %>%
+    tidyr::pivot_wider(names_from = "indicateur", values_from = c("valeur", "valeur_lag1", "valeur_lag2"))
+
+  df <- df_agg_failure %>%
+    aggregate_by_secteur() %>%
+    aggregate_by_n_months(nb_months) %>%
+    adjust_seasonnality(nb_months)
+
+  df <- df %>%
+    left_join(conj_centered_scaled, by = c("n_month_period", "secteur")) %>%
+    filter(!is.na(secteur)) %>%
+    mutate(
+      count = as.integer(count),
+      count_new_outcome = as.integer(count_new_outcome)
+    )
+    priors <- c(
+      brms::set_prior("student_t(10, 0, 1)", class = "b", ub = 0)
+    )
+    latent_model <- brms::brm(
+      count_new_outcome | trials(count) ~ (1 | secteur) +
+        valeur_lag1_CCTSM000 +
+        valeur_lag1_TUTSM000,
+      data = df,
+      family = "binomial",
+      prior = priors
+    )
+
+    # Prediction
+    counts <- df %>%
+      group_by(secteur) %>%
+      summarize(count = as.integer(last(count))) %>%
+      select(secteur, count)
+    conj <- conj_centered_scaled %>%
+      left_join(counts, by = "secteur")
+    prediction <- predict(model, conj)
+    multiplicative_fact <- 18 / nb_months
+    res <- dplyr::bind_cols(conj, as.data.frame(prediction)) %>%
+      mutate(
+        prediction = multiplicative_fact * Estimate / count,
+        Q2.5  = multiplicative_fact * Q2.5 / count,
+        Q97.5 = multiplicative_fact * Q97.5 / count
+      )
+    return(res)
 }
 
 
@@ -72,11 +163,11 @@ get_conjuncture_predictions <- function() {
 #' le nombre de défaillances/défauts à 1 mois, "secteur", "code_naf"
 #'
 #' @export
-requete_secteurs_agreges <- function(
+fetch_aggregated_sectors <- function(
   task,
   ape_to_naf = get_ape_to_naf(),
   ape_to_secteur = get_ape_to_secteur()
-) {
+  ) {
   require(mongolite)
   collection <- "secteurs"
   dbconnection <- mongolite::mongo(
@@ -166,7 +257,7 @@ fetch_conj_data <- function() {
     msg = paste("L'accès à l'API webstat demande une identification.\n",
       "Veuillez vous référer à la page gollum",
       '"Ressources externes depuis labtenant dans R"')
-    )
+  )
   require(rwebstat)
   require(dplyr)
   series <- rwebstat::w_series_list("CONJ", language = "fr")
@@ -187,36 +278,36 @@ fetch_conj_data <- function() {
       question = ENQCNJ_QUESTION,
       frequence = FREQ,
       redressement = ADJUSTMENT
-    ) %>%
-    filter(
-      frequence == "M", # Frequence mensuelle
-      redressement == "S" # Redressement de la saisonnalité
-    ) %>%
-    filter(question %in% questions_to_keep)
-
-    data_conj_original <- rwebstat::w_data(
-      dataset_name = "CONJ",
-      series_name = string_denominator(series$SeriesKey),
-      language = "fr"
-    )
-    data_conj <- data_conj_original %>%
-      select(periode = "date", all_of(series$SeriesKey)) %>%
-      filter(periode >= "2014-01-01")
-
-    # Transformation en format
-    # periodes X secteur X (une colonne par question)
-    data_conj <- data_conj %>%
-      tidyr::pivot_longer(
-        cols = -periode,
-        names_to = "serie_name",
-        values_to = "serie_value"
-        ) %>%
-    mutate(
-      secteur = stringr::str_sub(serie_name, 17, 21),
-      question = stringr::str_sub(serie_name, 23, 30)
       ) %>%
-    select(-serie_name) %>%
-    tidyr::pivot_wider(names_from = question, values_from = serie_value)
+  filter(
+    frequence == "M", # Frequence mensuelle
+    redressement == "S" # Redressement de la saisonnalité
+    ) %>%
+  filter(question %in% questions_to_keep)
+
+data_conj_original <- rwebstat::w_data(
+  dataset_name = "CONJ",
+  series_name = string_denominator(series$SeriesKey),
+  language = "fr"
+)
+data_conj <- data_conj_original %>%
+  select(periode = "date", all_of(series$SeriesKey)) %>%
+  filter(periode >= "2014-01-01")
+
+# Transformation en format
+# periodes X secteur X (une colonne par question)
+data_conj <- data_conj %>%
+  tidyr::pivot_longer(
+    cols = -periode,
+    names_to = "serie_name",
+    values_to = "serie_value"
+    ) %>%
+mutate(
+  secteur = stringr::str_sub(serie_name, 17, 21),
+  question = stringr::str_sub(serie_name, 23, 30)
+  ) %>%
+select(-serie_name) %>%
+tidyr::pivot_wider(names_from = question, values_from = serie_value)
   return(data_conj)
 }
 
@@ -269,7 +360,7 @@ aggregate_by_secteur <- function(df) {
       nom_secteur = first(nom_secteur),
       .groups = "drop"
     )
-  return(secteurs_agreges)
+    return(secteurs_agreges)
 }
 
 #' Agrège les donnée de défaillances par plages de plusieurs mois
@@ -286,20 +377,20 @@ aggregate_by_n_months <- function(df, n_month = 3) {
 
   df <- df %>%
     mutate(n_month_period = lubridate::floor_date(
-      periode,
-      paste0(n_month, "m")
-    )) %>%
-    add_missing_first_month()
+        periode,
+        paste0(n_month, "m")
+        )) %>%
+  add_missing_first_month()
 
-  aggregated_df <- df %>%
-    group_by(secteur, n_month_period) %>%
-    summarise(
-      count = mean(count),
-      count_new_outcome = sum(count_new_outcome),
-      prop_new_outcome = count_new_outcome / count,
-      nom_secteur = first(nom_secteur),
-      .groups = "drop"
-    )
+aggregated_df <- df %>%
+  group_by(secteur, n_month_period) %>%
+  summarise(
+    count = mean(count),
+    count_new_outcome = sum(count_new_outcome),
+    prop_new_outcome = count_new_outcome / count,
+    nom_secteur = first(nom_secteur),
+    .groups = "drop"
+  )
 
   return(aggregated_df)
 }
@@ -320,10 +411,10 @@ add_missing_first_month <- function(df) {
         n_month_period == "2015-01-01" ~ purrr::map(
           data,
           add_missing_first_month_aux
-        ),
+          ),
         TRUE ~ data
       )
-    ) %>%
+      ) %>%
     tidyr::unnest("data")
   return(df)
 }
@@ -358,10 +449,10 @@ add_missing_first_month_aux <- function(data_secteur_n_months) {
       count = mean(data_secteur_n_months$count),
       count_new_outcome = mean(data_secteur_n_months$count_new_outcome),
       prop_new_outcome = count_new_outcome / count
-    ) %>%
-    arrange(periode)
+      ) %>%
+  arrange(periode)
 
-  return(data_secteur_n_months)
+return(data_secteur_n_months)
 }
 
 #' Correction de la saisonnalité pour le secteur 000C1
