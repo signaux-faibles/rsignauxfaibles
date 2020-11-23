@@ -16,6 +16,7 @@ Imports:
     lubridate,
     mlr3,
     mlr3learners,
+    mlr3extralearners,
     mlr3measures,
     mlr3pipelines,
     mongolite,
@@ -36,11 +37,8 @@ Suggests:
     pryr,
     smoof,
     rpart,
-    testthat (>= 2.1.0),
-    xgboostExplainer
-Remotes:
-    AppliedDataSciencePartners/xgboostExplainer,
-    mlr-org/mlr3pipelines,
+    testthat (>= 2.1.0)
+Remotes: signaux-faibles/mlr3extralearners#2
 RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/signaux-faibles/rsignauxfaibles

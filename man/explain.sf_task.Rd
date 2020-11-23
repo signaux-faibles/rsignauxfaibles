@@ -2,36 +2,28 @@
 % Please edit documentation in R/model_explain.R
 \name{explain.sf_task}
 \alias{explain.sf_task}
-\title{Explains a single prediction}
+\title{Local explanation of a single prediction}
 \usage{
 \method{explain}{sf_task}(
   task,
-  type,
-  aggregation_matrix = NULL,
-  group_name = NULL,
-  data_to_explain = NULL,
-  plot_waterfall = FALSE,
+  data_to_explain,
+  explanation_method = get_default_explanation_method(),
   ...
 )
 }
 \arguments{
 \item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
-\item{type}{\code{character()} \cr Ou bien "global", "local".}
+\item{data_to_explain}{\code{data.frame}}
 
-\item{aggregation_matrix}{\code{data.frame()} \cr  Une matrice d'agrégation. Si
-égal à NULL, alors les résultats ne sont pas agrégés. Utiliser \code{read_aggregation_matrix()} pour lire la
-table de corrsepondance.}
+\item{explanation_method}{\code{function} Fonction qui prend en paramètre:
+\itemize{
+\item "task": \code{sf_task} la tâche d'apprentissage
+\item "data_to_explain": \code{data.frame | data.table}  données à expliquer
+}}
 
-\item{group_name}{\code{character(1)} \cr Le nom de la colonne à utiliser dans
-le data.frame \code{aggregation_matrix}. Obligatoire si aggregation_matrix est
-différent de NULL.}
-
-\item{data_to_explain}{\code{data.frame()} \cr Si type = "local" uniquement, les
-données (lignes de "hist_data" ou "new_data") à expliquer.}
-
-\item{...}{Not used}
+\item{...}{Paramètres additionnels passés à \code{explanation_method}}
 }
 \description{
-Explains a single prediction
+Local explanation of a single prediction
 }

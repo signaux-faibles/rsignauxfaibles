@@ -82,6 +82,14 @@ convert_to_character <- function(x) {
 #'
 #' @export
 get_default_learner <- function() {
+  return(get_gam_learner())
+}
+
+
+#' Get a xgboost learner
+#'
+#' @return `mlr3::Learner`
+get_xgboost_learner <- function() {
   require(mlr3learners)
   learner <- mlr3::lrn("classif.xgboost")
   learner$predict_type <- "prob"
@@ -89,5 +97,16 @@ get_default_learner <- function() {
   learner$param_set$values$min_child_weight <- 20
   learner$param_set$values$ntreelimit <- 240
   learner$param_set$values$eta <- 0.01
+  return(learner)
+}
+
+#' Get a generalized additive model learner
+#'
+#' @return `mlr3::Learner`
+get_gam_learner <- function() {
+  require(mlr3extralearners)
+  # installed with
+  # install_github("signaux-faibles/mlr3extralearners", ref = "feat/gam_learner")
+  learner <- mlr3extralearners::LearnerClassifGam$new()
   return(learner)
 }

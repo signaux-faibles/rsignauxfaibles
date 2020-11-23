@@ -127,3 +127,23 @@ test_that(
     )
   }
 )
+
+test_that("gam gives the same result applied directly or within mlr3", {
+  requireNamespace("data.table")
+  task <- mlr3::tsk("pima")
+  learner <- get_gam_learner()
+  learner$train(task)
+  prediction_mlr3 <- data.table::as.data.table(learner$predict(task))$prob.neg
+
+  requireNamespace("mgcv")
+  pima_data <- as.data.frame(task$data())
+  model <- mgcv::gam(
+    diabetes ~ s(age) + s(glucose) + s(insulin) + s(mass) +
+      s(pedigree) + s(pregnant) + s(pressure) + s(triceps),
+    family = binomial(link = "logit"),
+    data = pima_data
+    )
+  # Prédiction de "neg", car c'est le deuxième niveau du facteur
+  prediction_gam <- as.double(predict(model, pima_data, type = "response"))
+  expect_equal(prediction_mlr3, prediction_gam)
+})
