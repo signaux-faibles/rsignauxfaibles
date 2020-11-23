@@ -281,7 +281,7 @@ aggregate_by_secteur <- function(df) {
 #' @return `data.frame` Données agrégées, "count" est moyenné,
 #' "count_new_outcome" est sommé, "prop_new_outcome" est recalculé.
 #' @export
-aggregate_by_n_months <- function(df, n_month = 6) {
+aggregate_by_n_months <- function(df, n_month = 3) {
   assertthat::assert_that(n_month %in% c(1, 2, 3, 6))
 
   df <- df %>%
@@ -348,6 +348,10 @@ add_missing_first_month <- function(df) {
 #'
 add_missing_first_month_aux <- function(data_secteur_n_months) {
   require(dplyr)
+  assertthat::assert_that(
+    !as.Date("2015-01-01") %in% data_secteur_n_months$periode,
+    msg = "Tentative d'imputer une donnée existante en 2015-01-01"
+  )
   data_secteur_n_months <- data_secteur_n_months %>%
     dplyr::add_row(
       periode = as.Date("2015-01-01"),
