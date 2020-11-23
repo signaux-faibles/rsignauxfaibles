@@ -48,9 +48,16 @@ test_that("'processing_pipeline' is correctly applied", {
     processing_pipeline = fake_pipe
   )
   test_mean_sd <- function(mean_or_sd, expected, test_or_train) {
+    if (test_or_train == "train") {
+      ids <- prep_task$mlr3rsmp$train_set(1)
+    } else {
+      ids <- prep_task$mlr3rsmp$test_set(1)
+    }
+
+    data <- prep_task$mlr3task$data(ids)
     expect_equal(
       mean_or_sd(
-        get_prepared_data(prep_task, test_or_train)$feature
+        get_prepared_data(prep_task, data)$feature
       ),
       expected,
       tolerance = 10e-3
@@ -167,8 +174,10 @@ test_that("fte state works as expected", {
   testthat::skip_on_ci()
   prep_task <- create_fte_test_task(create_fte_pipeline(c("ab", "cd")))
 
+  ids <- prep_task$mlr3rsmp$test_set(1)
+
   expect_known_hash(
-    get_prepared_data(prep_task, "test"),
+    get_prepared_data(prep_task, prep_task$mlr3task$data(ids)),
     "40734c2555"
   )
 })
@@ -176,9 +185,11 @@ test_that("fte state works as expected", {
 test_that("preparing twice with different training fields takes effect", {
   prep_task <- create_fte_test_task(mlr3pipelines::PipeOpNOP$new())
 
+  ids <- prep_task$mlr3rsmp$test_set(1)
+
   check_names <- function(names) {
     expect_setequal(
-      names(get_prepared_data(prep_task, "test")),
+      names(get_prepared_data(prep_task, prep_task$mlr3task$data(ids))),
       names
     )
   }
@@ -195,4 +206,17 @@ test_that("preparing twice with different training fields takes effect", {
     training_fields = c("feature", "ab", "cd")
   )
   check_names(c("outcome", "feature", "ab", "cd"))
+})
+
+test_that("get_prepared_data works with and without resampling", {
+  prep_task <- get_test_task(stage = "prepare")
+  # Remove resampling plan
+  train_ids <- prep_task$mlr3rsmp$train_set(1)
+  train_data <- prep_task$mlr3task$data(train_ids)
+  test_ids <- prep_task$mlr3rsmp$test_set(1)
+  test_data <- prep_task$mlr3task$data(test_ids)
+  expect_equal(dim(get_prepared_data(prep_task, train_data)), c(7, 2))
+  expect_equal(dim(get_prepared_data(prep_task, test_data)), c(3, 2))
+  prep_task[["mlr3rsmp"]] <- NULL
+  expect_equal(dim(get_prepared_data(prep_task, prep_task$mlr3task$data())), c(10, 2))
 })

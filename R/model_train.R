@@ -29,14 +29,14 @@ train.sf_task <- function( # nolint
   # TODO: Log before training, to fail early if tracker should have been
   # changed
 
-  require(mlr3learners)
-
+  requireNamespace("mlr3learners")
+  requireNamespace("mlr3pipelines")
 
   lgr::lgr$info("Model is being trained.")
+  full_pipeline <- task[["mlr3pipeline"]] %>>% learner
 
-  graph_learner <- mlr3pipelines::GraphLearner$new(
-    task[["mlr3pipeline"]] %>>% learner
-  )
+
+  graph_learner <- mlr3pipelines::GraphLearner$new(full_pipeline)
   graph_learner$predict_type <- "prob"
   graph_learner$predict_sets <- c("test", "train")
   task[["mlr3graph_learner"]] <- graph_learner

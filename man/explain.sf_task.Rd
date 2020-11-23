@@ -14,6 +14,8 @@
 \arguments{
 \item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
+\item{data_to_explain}{\code{data.frame}}
+
 \item{explanation_method}{\code{function} Fonction qui prend en paramètre:
 \itemize{
 \item "task": \code{sf_task} la tâche d'apprentissage
