@@ -1,3 +1,51 @@
+compute_sectorial_correction <- function(
+  conjuncture_predictions = get_conjuncture_predictions()
+) {
+  conjuncture_predictions <- conjuncture_predictions %>%
+    select(prediction, n_month_period, secteur) %>%
+    mutate(prediction = gtools::logit(prediction))
+
+  # How much did the crisis affect the predictions ?
+  # Computes the average difference between before mid-2018 and last
+  # observation.
+  correction <- conjuncture_predictions %>%
+    filter(
+      n_month_period <= as.Date("2018-06-01") |
+      n_month_period == last(n_month_period)
+    ) %>%
+    mutate(last_observation = (n_month_period == last(n_month_period))) %>%
+    group_by(secteur, last_observation) %>%
+    summarize(mean_prediction = mean(prediction, na.rm = TRUE)) %>%
+    tidyr::pivot_wider(
+      # One row for each "secteur"
+      # New columns:
+      # last_observation_TRUE: last observed prediction
+      # last_observation_FALSE: average observed prediction before mid-2018
+      names_from = last_observation,
+      names_prefix = "last_observed_pred_",
+      values_from = mean_prediction
+    ) %>%
+    mutate(correction_prediction = last_observed_pred_TRUE - last_observed_pred_FALSE) %>%
+    mutate(correction_prediction = ifelse(is.na(correction_prediction), 0, correction_prediction)) %>%
+    select(secteur, correction_prediction)
+
+  return(correction)
+}
+
+#' Title
+#'
+#' @param param
+#'
+#' @return `data.frame` with columns: prediction (in [0, 1], n_month_period,
+#'   secteur)
+#' @export
+get_conjuncture_predictions <- function() {
+
+
+}
+
+
+
 #' Requete la base de données pour récupérer les secteurs agrégés
 #'
 #' La collection "secteurs" contient des informations agrégés par code_ape et
@@ -72,8 +120,6 @@ requete_secteurs_agreges <- function(
 #'
 #' @return `data.frame` table de correspondance avec les colonnes "code_ape", "secteur",
 #' "nom_secteur".
-#'
-#' @export
 get_ape_to_secteur <- function(path = file.path("raw_data", "RWEBSTATS_table_passage.xlsx"), sheet = 6) {
   require(readxl)
   require(stringr)
