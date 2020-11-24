@@ -90,7 +90,7 @@ get_conjuncture_predictions <- function(
   conj_centered_scaled <- conj_centered %>%
     group_by(indicateur) %>%
     mutate(
-      valeur = valeur / sd(valeur[n_month_period %in% seq_date])
+      valeur = valeur / sd(valeur[n_month_period %in% seq_date], na.rm = TRUE)
     ) %>%
     ungroup() %>%
     group_by(indicateur, secteur) %>%
@@ -115,7 +115,7 @@ get_conjuncture_predictions <- function(
   priors <- c(
     brms::set_prior("student_t(10, 0, 1)", class = "b", ub = 0)
   )
-  latent_model <- brms::brm(
+  model <- brms::brm(
     count_new_outcome | trials(count) ~ (1 | secteur) +
       valeur_lag1_CCTSM000 +
       valeur_lag1_TUTSM000,
