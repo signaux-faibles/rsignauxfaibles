@@ -61,7 +61,11 @@ predict.sf_task <- function(
 #' la prédicition corrigé (tout ça dans l'espace des log-vraisemblance) et la
 #' correction corrigée dans l'espace des probabilités
 #' @export
-apply_corrections <- function(task, correction_debt, correction_sector) {
+apply_corrections <- function(
+  task,
+  correction_debt = compute_debt_correction(task),
+  correction_sector = compute_sectorial_correction()
+) {
   df_join <- task$new_data %>%
     select(siret, code_ape)
 
