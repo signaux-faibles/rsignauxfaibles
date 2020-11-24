@@ -127,7 +127,7 @@ task <- load_hist_data(
 fields <- get_fields(training = TRUE)
 
 # Les opérations peuvent être enchaînées via l'opérateur pipe
-xgboost_task <- task %>%
+gam_task <- task %>%
   split_data(resampling_strategy = "cv") %>%
   prepare(training_fields = fields) %>%
   train()
@@ -137,13 +137,13 @@ xgboost_task <- task %>%
 # afin de ne pas mélanger les résultats de modèles.
 # Les modèles doivent être définis sous la forme de mlr3::Learner.
 learner <- mlr3::lrn("classif.rpart") # Arbre de décisions
-rpart_task <- xgboost_task %>%
+rpart_task <- gam_task %>%
   copy_for_new_run() %>%
   prepare(training_fields = fields) %>%
   train(learner = learner)
 
 # On peut alors comparer la performance des modèles
-evaluation <- evaluate(xgboost_task, rpart_task, should_remove_strong_signals =
+evaluation <- evaluate(gam_task, rpart_task, should_remove_strong_signals =
 FALSE)
 
 # Vous pouvez à tout moment inspecter les objets mlr3 sous-jacents à la tâche
@@ -158,7 +158,7 @@ task$mlr3resample_result # mlr3::ResampleResult: après entraînement
 # l'entraînement ou de la préparation.
 # Optimise les paramètre du "GraphLearner" stocké dans la tâche.
 # Le modèle résultant se trouve dans task$mlr3auto_tuner
-xgboost_task <- optimize_hyperparameters(xgboost_task, measure = mlr3::msr("classif.ce"))
+gam_task <- optimize_hyperparameters(gam_task, measure = mlr3::msr("classif.ce"))
 ```
 
 # Documentation
