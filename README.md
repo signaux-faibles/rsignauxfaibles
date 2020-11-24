@@ -72,7 +72,7 @@ task <- prepare(
 
 # Si l'on veut tout de même consulter l'effet de la préparation sans entraîner 
 # de modèle, on peut utiliser:
-prepared_data <- get_prepared_data(task)
+prepared_data <- get_prepared_data(task, data = task$mlr3task$data())
 
 # Entraînement avec le modèle par défaut (xgboost)
 task <- train(task)

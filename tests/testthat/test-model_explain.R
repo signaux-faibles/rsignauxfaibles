@@ -1,54 +1,14 @@
-# context("Test explain function")
-#
-# test_task <- get_test_task_2()
-#
-# test_task <- train(test_task)
-# test_task <- predict(test_task, data_names = "test_data")
-#
-# test_aggregation_matrix <- data.frame(
-#   variable = c(
-#     "effectif",
-#     "excedent_brut_d_exploitation",
-#     "taux_marge",
-#     "montant_part_patronale"
-#   ),
-#    group = c("effectif", "financier", "financier", "urssaf"),
-#    stringsAsFactors = FALSE
-#    )
-#
-# test_that("model_explain works as expected", {
-#   without_aggregation <- explain(test_task, type = "global")
-#
-#   with_aggregation <- explain(
-#     test_task,
-#     type = "global",
-#     aggregation_matrix = test_aggregation_matrix,
-#     group_name = "group"
-#   )
-# })
-#
-# test_that("xgboost_explainer works as expected", {
-#   without_aggregation <- explain(
-#     test_task,
-#     type = "local",
-#     data_to_explain = test_task[["test_data"]]
-#     )
-#
-#   with_aggregation <- explain(
-#     test_task,
-#     type = "local",
-#     aggregation_matrix = test_aggregation_matrix,
-#     group_name = "group",
-#     data_to_explain = test_task[["test_data"]]
-#     )
-# })
-#
-# test_that("plot_waterfall works as expected", {
-#   without_aggregation <- explain(
-#     test_task,
-#     type = "local",
-#     data_to_explain = test_task[["test_data"]]
-#     )
-#   plot_waterfall(without_aggregation[7,])
-#
-# })
+context("Test explain function")
+
+test_that("explain_gam works on a gam trained on splitted data", {
+  requireNamespace("mlr3extralearners")
+  test_task <- get_test_task(stage = "train", learner = mlr3::lrn("classif.gam"))
+  data_to_explain <- head(data.table::as.data.table(test_task$mlr3task$data()))
+  explanation <- explain_gam(test_task, data_to_explain)
+  expect_equal(explanation, structure(
+    c(-4.68669029419069, -0.781115049031782, -7.22531420354398, -2.63626329048226, -6.63947791677015, -5.27252658096453),
+    .Dim = c(6L, 1L),
+    .Dimnames = list(c("1", "2", "3", "4", "5", "6"), "feature"),
+    constant = c(`(Intercept)` = 4.58820931948092)
+  ))
+})

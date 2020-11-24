@@ -10,7 +10,7 @@ replace_hist_data(task, data)
 replace_new_data(task, data)
 }
 \arguments{
-\item{task}{\code{sf_task}}
+\item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
 \item{data}{\code{data.frame()} Les données, doivent avoir des colonnes "siret",
 "periode" et task[\link{"target"}]}

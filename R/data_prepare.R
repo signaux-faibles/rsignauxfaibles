@@ -33,6 +33,7 @@ prepare.sf_task <- function( # nolint
     task[["mlr3task"]]$col_roles$target <- outcome_field
   }
 
+  processing_pipeline <- mlr3pipelines::as_graph(processing_pipeline)
   task[["mlr3pipeline"]] <- processing_pipeline
 
   task[["mlr3task"]]$col_roles$feature <- training_fields
@@ -81,36 +82,32 @@ get_default_pipeline <- function() {
 #' `mlr3pipelines::PipeOp` ou `mlr3pipelines::Graph`
 #'
 #' @inheritParams generic_task
-#' @param train_or_test `"train" or "test"` Faut-il récupérer les données
-#' d'entraînement ou de test ? Ce paramètre n'est pas requis si les données ne
-#' sont pas échantillonnées (alors l'intégralité des données sont utilisées
-#' pour l'entraînement).
+#' @param data `data.frame` données à préparer
 #'
-#' @return `data.frame` données d'entraînement ou de test après la préparation
-#' (l'application de la pipeline mlr3 stockée dans "task"
+#' @return `data.frame` données passées en entrée après la préparation
 #'
 #' @export
-get_prepared_data <- function(task, train_or_test) {
-  assertthat::assert_that(!"mlr3rsmp" %in% names(task) ||
-    train_or_test %in% c("train", "test"))
+get_prepared_data <- function(task, data) {
   assertthat::assert_that(
     "mlr3pipeline" %in% names(task),
     msg = "A pipeline is needed to get prepared data (property: mlr3pipeline)"
   )
   if (!"mlr3rsmp" %in% names(task)) {
     train_ids <- task[["mlr3task"]]$row_ids
-    predict_ids <- train_ids
   } else {
     train_ids <- task[["mlr3rsmp"]]$train_set(1)
-    if (train_or_test == "train") {
-      predict_ids <- train_ids
-    } else {
-      predict_ids <- task[["mlr3rsmp"]]$test_set(1)
-    }
   }
-  gpo <- mlr3pipelines::as_graph(task[["mlr3pipeline"]])
-  gpo$train(task[["mlr3task"]]$clone()$filter(train_ids))
-  pred <- gpo$predict(task[["mlr3task"]])[[1]]
 
-  return(as.data.frame(pred$data(predict_ids)))
+  gpo <- task[["mlr3pipeline"]]
+  gpo$train(task[["mlr3task"]]$clone()$filter(train_ids))
+  data_ids <- task$mlr3task$nrow + seq_len(nrow(data))
+
+  new_data_task <- task[["mlr3task"]]$
+    clone()$
+    rbind(data)$
+    filter(data_ids)
+  pred <- gpo$predict(new_data_task)[[1]]
+  pred <- as.data.frame(pred$data())
+
+  return(pred)
 }

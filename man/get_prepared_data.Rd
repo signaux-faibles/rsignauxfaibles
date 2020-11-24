@@ -4,19 +4,15 @@
 \alias{get_prepared_data}
 \title{Apply preparation pipeline and inspect prepared data}
 \usage{
-get_prepared_data(task, train_or_test)
+get_prepared_data(task, data)
 }
 \arguments{
 \item{task}{\verb{[sf_task]} \cr Objet s3 de type sf_task}
 
-\item{train_or_test}{\verb{"train" or "test"} Faut-il récupérer les données
-d'entraînement ou de test ? Ce paramètre n'est pas requis si les données ne
-sont pas échantillonnées (alors l'intégralité des données sont utilisées
-pour l'entraînement).}
+\item{data}{\code{data.frame} données à préparer}
 }
 \value{
-\code{data.frame} données d'entraînement ou de test après la préparation
-(l'application de la pipeline mlr3 stockée dans "task"
+\code{data.frame} données passées en entrée après la préparation
 }
 \description{
 Applique la pipeline de préparation sur les données d'entraînement ou de

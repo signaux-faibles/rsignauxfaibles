@@ -23,20 +23,20 @@ train.sf_task <- function( # nolint
                           task,
                           seed = 0,
                           learner = get_default_learner(),
-                          store_models = FALSE,
+                          store_models = TRUE,
                           ...) {
 
   # TODO: Log before training, to fail early if tracker should have been
   # changed
 
-  require(mlr3learners)
-
+  requireNamespace("mlr3learners")
+  requireNamespace("mlr3pipelines")
 
   lgr::lgr$info("Model is being trained.")
+  full_pipeline <- task[["mlr3pipeline"]] %>>% learner
 
-  graph_learner <- mlr3pipelines::GraphLearner$new(
-    task[["mlr3pipeline"]] %>>% learner
-  )
+
+  graph_learner <- mlr3pipelines::GraphLearner$new(full_pipeline)
   graph_learner$predict_type <- "prob"
   graph_learner$predict_sets <- c("test", "train")
   task[["mlr3graph_learner"]] <- graph_learner
@@ -82,6 +82,14 @@ convert_to_character <- function(x) {
 #'
 #' @export
 get_default_learner <- function() {
+  return(get_gam_learner())
+}
+
+
+#' Get a xgboost learner
+#'
+#' @return `mlr3::Learner`
+get_xgboost_learner <- function() {
   require(mlr3learners)
   learner <- mlr3::lrn("classif.xgboost")
   learner$predict_type <- "prob"
@@ -89,5 +97,16 @@ get_default_learner <- function() {
   learner$param_set$values$min_child_weight <- 20
   learner$param_set$values$ntreelimit <- 240
   learner$param_set$values$eta <- 0.01
+  return(learner)
+}
+
+#' Get a generalized additive model learner
+#'
+#' @return `mlr3::Learner`
+get_gam_learner <- function() {
+  require(mlr3extralearners)
+  # installed with
+  # install_github("signaux-faibles/mlr3extralearners", ref = "feat/gam_learner")
+  learner <- mlr3extralearners::LearnerClassifGam$new()
   return(learner)
 }
