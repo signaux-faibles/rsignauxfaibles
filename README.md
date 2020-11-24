@@ -87,6 +87,9 @@ task <- load_new_data(
   batch = last_batch
   )
 
+# Ou pour court-circuiter cette longue étape:
+task[["new_data"]] <- task[["hist_data"]]
+
 # Prédiction sur les nouvelles données
 task <- predict(task, data_names = "new_data")
 
@@ -94,6 +97,14 @@ task <- predict(task, data_names = "new_data")
 # converties 
 require(data.table)
 prediction <- as.data.table(task$prediction_new)
+# On applique les corrections liées à la crise:                                                                           
+# Nécessite un identifiant webstat.
+webstat_client_ID <- <identifiant_webstat>
+task <- apply_corrections(
+  task,
+  correction_debt = compute_debt_correction(task),
+  correction_sector = compute_sectorial_correction()
+)
 ```
 
 # Évaluer et comparer les modèles
