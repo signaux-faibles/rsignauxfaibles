@@ -91,7 +91,8 @@ apply_corrections <- function(
   task$full_prediction <- data.frame(
     prediction = prediction_log_likelihood,
     correction_debt = df_corrections$correction_debt,
-    correction_sector = df_corrections$correction_sector,
+    correction_sector = df_corrections$correction_sector) %>%
+  mutate(
     corrected_prediction = prediction + correction_debt + corrected_sector,
     corrected_prediction_prob = gtools::inv.logit(corrected_prediction)
     )
