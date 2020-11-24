@@ -4,52 +4,11 @@
 \alias{get_fields}
 \title{Get a list of field names}
 \usage{
-get_fields(
-  training,
-  siren = 2,
-  urssaf = 2,
-  delai = 2,
-  effectif = 2,
-  diane = 2,
-  bdf = 2,
-  apart = 2,
-  procol = 2,
-  interim = 0,
-  info = 0
-)
+get_fields(training)
 }
 \arguments{
 \item{training}{\code{logical()} \cr Si \code{TRUE}, uniquement des champs utilisés
 pour l'entraînement sont retournés.}
-
-\item{siren}{\code{0 | 1 | 2} \cr Niveau de
-détail des données Sirene. cf Détails.}
-
-\item{urssaf}{\code{0 | 1 | 2} \cr Niveau de détail des données urssaf. cf
-Détails.}
-
-\item{delai}{\code{0 | 1 | 2} \cr Niveau de détail des données delai. cf
-Détails.}
-
-\item{effectif}{\code{0 | 1 | 2} \cr Niveau de détail des données effectif. cf
-Détails.}
-
-\item{diane}{\code{0 | 1 | 2} \cr Niveau de détail des données diane. cf
-Détails.}
-
-\item{bdf}{\code{0 | 1 | 2} \cr Niveau de détail des données bdf. cf Détails.}
-
-\item{apart}{\code{0 | 1 | 2} \cr Niveau de détail des données apart. cf
-Détails.}
-
-\item{procol}{\code{0 | 1 | 2} \cr Niveau de détail des données procol. cf
-Détails.}
-
-\item{interim}{\code{0 | 1 | 2} \cr Niveau de détail des données interim. cf
-Détails.}
-
-\item{info}{\code{0 | 1 | 2}\cr Année des
-exercices Diane & Bdf}
 }
 \value{
 \code{character()} \cr Vecteur de noms de variables
@@ -61,9 +20,3 @@ list. Put training = TRUE to get only fields used for training. Put an
 input to 0 to remove the related fields, to 1 to keep basic fields, and to
 2 to include all fields.
 }
-\section{Details}{
- Chaque type de données a 3 niveaux. Le niveau 0
-correspond à aucune données. Le niveau 1 aux données élémentaires, et le
-niveau 2 toutes les données retravaillées.
-}
-

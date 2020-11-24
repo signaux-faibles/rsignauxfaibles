@@ -734,60 +734,40 @@ build_sector_match_stage <- function(
 #'
 #' @param training `logical()` \cr Si `TRUE`, uniquement des champs utilisés
 #' pour l'entraînement sont retournés.
-#' @param siren `0 | 1 | 2` \cr Niveau de
-#' détail des données Sirene. cf Détails.
-#' @param urssaf `0 | 1 | 2` \cr Niveau de détail des données urssaf. cf
-#' Détails.
-#' @param delai `0 | 1 | 2` \cr Niveau de détail des données delai. cf
-#' Détails.
-#' @param effectif `0 | 1 | 2` \cr Niveau de détail des données effectif. cf
-#' Détails.
-#' @param diane `0 | 1 | 2` \cr Niveau de détail des données diane. cf
-#' Détails.
-#' @param bdf `0 | 1 | 2` \cr Niveau de détail des données bdf. cf Détails.
-#' @param apart `0 | 1 | 2` \cr Niveau de détail des données apart. cf
-#' Détails.
-#' @param procol `0 | 1 | 2` \cr Niveau de détail des données procol. cf
-#' Détails.
-#'
-#' @param interim `0 | 1 | 2` \cr Niveau de détail des données interim. cf
-#' Détails.
-#' @param info `0 | 1 | 2`\cr Année des
-#' exercices Diane & Bdf
-#'
-#' @section Details: Chaque type de données a 3 niveaux. Le niveau 0
-#' correspond à aucune données. Le niveau 1 aux données élémentaires, et le
-#' niveau 2 toutes les données retravaillées.
 #'
 #' @return `character()` \cr Vecteur de noms de variables
 #' @export
-get_fields <- function(
-                       training,
-                       siren = 2,
-                       urssaf = 2,
-                       delai = 2,
-                       effectif = 2,
-                       diane = 2,
-                       bdf = 2,
-                       apart = 2,
-                       procol = 2,
-                       interim = 0,
-                       info = 0) {
-  fields <- c()
-  if (siren >= 1 && !training) {
+get_fields <- function(training) {
+  if (training) {
     fields <- c(
-      fields, "siret",
-      "siren", "periode", "code_ape", "code_ape_niveau2", "code_ape_niveau3",
-      "code_naf", "libelle_naf", "libelle_ape5", "departement"
+      "endettement",
+      "equilibre_financier",
+      "productivite_capital_investi",
+      "degre_immo_corporelle",
+      "interets",
+      "financier_court_terme",
+      "liquidite_reduite",
+      "rentabilite_nette",
+      "rentabilite_economique",
+      "ca",
+      "effectif_ent",
+      "effectif",
+      "nombre_etab_secondaire"
     )
-  }
-  if (siren >= 1) {
-    fields <- c(fields, "age_entreprise", "region")
-  }
-
-  if (urssaf >= 1) {
+  } else {
     fields <- c(
-      fields,
+      "siret",
+      "siren",
+      "periode",
+      "code_ape",
+      "code_ape_niveau2",
+      "code_ape_niveau3",
+      "code_naf",
+      "libelle_naf",
+      "libelle_ape5",
+      "departement",
+      "age_entreprise",
+      "region",
       "montant_part_patronale",
       "montant_part_ouvriere",
       "montant_echeancier",
@@ -795,12 +775,7 @@ get_fields <- function(
       "duree_delai",
       "ratio_dette",
       "ratio_dette_moy12m",
-      "cotisation_moy12m"
-    )
-  }
-  if (urssaf >= 2) {
-    fields <- c(
-      fields,
+      "cotisation_moy12m",
       "montant_part_patronale_past_1",
       "montant_part_ouvriere_past_1",
       "montant_part_patronale_past_2",
@@ -812,44 +787,16 @@ get_fields <- function(
       "montant_part_patronale_past_12",
       "montant_part_ouvriere_past_12",
       "ratio_dette_delai",
-      "debit_entreprise"
-    )
-  }
-
-  if (apart >= 1) {
-    fields <- c(
-      fields,
+      "debit_entreprise",
       "apart_heures_consommees",
-      "apart_heures_autorisees"
-    )
-  }
-
-  if (apart >= 2) {
-    fields <- c(
-      fields,
-      "apart_entreprise"
-    )
-  }
-  if (effectif >= 1) {
-    fields <- c(
-      fields,
+      "apart_heures_autorisees",
+      "apart_entreprise",
       "effectif",
-      "effectif_ent"
-    )
-  }
-  if (effectif >= 2) {
-    fields <- c(
-      fields,
+      "effectif_ent",
       "effectif_past_6",
       "effectif_past_12",
       "effectif_past_18",
-      "effectif_past_24"
-    )
-  }
-
-  if (diane >= 1) {
-    fields <- c(
-      fields,
+      "effectif_past_24",
       "dette_fiscale_et_sociale",
       "effectif_consolide",
       "frais_de_RetD",
@@ -921,13 +868,7 @@ get_fields <- function(
       "charge_exceptionnelle",
       "participation_salaries",
       "impot_benefice",
-      "benefice_ou_perte"
-    )
-  }
-
-  if (diane >= 2) {
-    fields <- c(
-      fields,
+      "benefice_ou_perte",
       # DIANE PAST 1
       "effectif_consolide_past_1",
       "dette_fiscale_et_sociale_past_1",
@@ -1073,24 +1014,13 @@ get_fields <- function(
       "charge_exceptionnelle_past_2",
       "participation_salaries_past_2",
       "impot_benefice_past_2",
-      "benefice_ou_perte_past_2"
-    )
-  }
-  if (bdf >= 1) {
-    fields <- c(
-      fields,
+      "benefice_ou_perte_past_2",
       "taux_marge",
       "delai_fournisseur",
       "poids_frng",
       "financier_court_terme",
       "frais_financier",
-      "dette_fiscale"
-    )
-  }
-
-  if (bdf >= 2) {
-    fields <- c(
-      fields,
+      "dette_fiscale",
       # BDF PAST 1
       "taux_marge_past_1",
       "delai_fournisseur_past_1",
@@ -1104,46 +1034,20 @@ get_fields <- function(
       "poids_frng_past_2",
       "financier_court_terme_past_2",
       "frais_financier_past_2",
-      "dette_fiscale_past_2"
-    )
-  }
-
-  if (procol >= 1 && !training) {
-    fields <- c(
-      fields,
-      # ALTARES
+      "dette_fiscale_past_2",
       "outcome",
       "time_til_outcome",
-      "etat_proc_collective"
-    )
-  }
-  if (procol >= 2 && !training) {
-    fields <- c(
-      fields,
+      "etat_proc_collective",
       "tag_failure",
       "tag_default",
       "tag_debit",
       "time_til_failure",
-      "time_til_default"
-    )
-  }
-
-  if (interim >= 1) {
-    fields <- c(
-      fields,
+      "time_til_default",
       "interim_proportion",
       "interim_ratio_past_6",
       "interim_ratio_past_12",
       "interim_ratio_past_18",
-      "interim_ratio_past_24"
-    )
-  }
-
-  if (info >= 1 && !training) {
-    fields <- c(
-      fields,
-      "region",
-      "departement",
+      "interim_ratio_past_24",
       "arrete_bilan_diane",
       "exercice_bdf",
       "exercice_diane"
@@ -1152,65 +1056,3 @@ get_fields <- function(
   return(fields)
 }
 
-#' Obtenir une liste allégée de champs à exporter
-#'
-#' TODO temporaire, retravailler get_fields.
-#' task e58fb5d5-4bc1-410b-8287-c78e4fd442d0
-#'
-#' @export
-get_fields_training_light <- function() {
-  return(
-    c(
-      "apart_heures_consommees",
-      "effectif_past_24",
-      "montant_part_ouvriere_past_12",
-      "montant_part_ouvriere_past_3",
-      "montant_part_ouvriere_past_2",
-      "montant_part_patronale_past_2",
-      "montant_part_ouvriere_past_1",
-      "montant_part_patronale_past_1",
-      "montant_part_patronale",
-      "ratio_dette",
-      "ratio_dette_moy12m",
-      "dette_fiscale_et_sociale_past_2",
-      "frais_de_RetD_past_2",
-      "independance_financiere_past_2",
-      "endettement_past_2",
-      "credit_client_past_2",
-      "capacite_autofinancement_past_2",
-      "exportation_past_2",
-      "productivite_capital_investi_past_2",
-      "rendement_capitaux_propres_past_2",
-      "rendement_ressources_durables_past_2",
-      "part_autofinancement_past_2",
-      "charge_personnel_past_2",
-      "frais_de_RetD_past_1",
-      "endettement_past_1",
-      "credit_client_past_1",
-      "capacite_autofinancement_past_1",
-      "exportation_past_1",
-      "rentabilite_economique_past_1",
-      "part_autofinancement_past_1",
-      "valeur_ajoutee_past_1",
-      "charge_personnel_past_1",
-      "effectif_consolide",
-      "frais_de_RetD",
-      "concours_bancaire_courant",
-      "endettement",
-      "autonomie_financiere",
-      "degre_immo_corporelle",
-      "rotation_stocks",
-      "credit_fournisseur",
-      "productivite_capital_investi",
-      "performance",
-      "benefice_ou_perte",
-      "taux_marge_past_2",
-      "concours_bancaire_courant_past_2",
-      "taux_marge_commerciale_past_2",
-      "taux_marge_commerciale_past_1",
-      "taux_marge_commerciale",
-      "TargetEncode_code_ape_niveau2",
-      "TargetEncode_code_ape_niveau3"
-    )
-  )
-}

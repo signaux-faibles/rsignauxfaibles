@@ -12,15 +12,14 @@ des débits sur les cotisations sociales. Colonnes "siret" et "correction_debt".
 
 \item{correction_sector}{\code{data.frame} Corrections liées aux secteurs
 d'activité selon qu'ils soient plus ou moins touchés par la crise.
-Colonnes "secteur" et "correction_sector".
-
-@return \code{sf_task} avec nouveau champ "full prediction", un data frame avec
+Colonnes "secteur" et "correction_sector".}
+}
+\value{
+\code{sf_task} avec nouveau champ "full_prediction", un data frame avec
 les colonnes: "siret", "periode", la décomposition en variables latentes,
 la prédiction de l'apprentissage automatique, les corrections apportées,
 la prédicition corrigé (tout ça dans l'espace des log-vraisemblance) et la
 correction corrigée dans l'espace des probabilités
-
-@examples}
 }
 \description{
 Après avoir prédit sur de nouvelles données, certaines corrections a
