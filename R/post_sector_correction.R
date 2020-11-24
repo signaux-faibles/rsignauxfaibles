@@ -9,7 +9,7 @@
 #'
 #' @return `data.frame` avec colonnes "secteur" et "correction_sector"
 #' @export
-compute_sectorial_correction <- function(conjuncture_predictions = get_conjuncture_predictions()) {
+compute_sectorial_correction <- function(task, conjuncture_predictions = get_conjuncture_predictions(task)) {
   conjuncture_predictions <- conjuncture_predictions %>%
     select(prediction, n_month_period, secteur) %>%
     mutate(prediction = gtools::logit(prediction))
