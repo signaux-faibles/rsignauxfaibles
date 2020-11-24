@@ -37,7 +37,7 @@ testthat::test_that("add_missing_first_month ajoute bien la ligne comme attendue
 
 testthat::test_that("compute_sectorial_correction works as expected", {
   actual <- compute_sectorial_correction(generate_failure_data())
-  expect_true("correction_prediction" %in% names(actual))
+  expect_true("correction_sector" %in% names(actual))
   expected <- c(1.7559, 0.7533)
-  expect_equal(actual$correction_prediction, expected, tolerance = 1e-3)
+  expect_equal(actual$correction_sector, expected, tolerance = 1e-3)
 })
