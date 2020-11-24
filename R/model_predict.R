@@ -92,14 +92,11 @@ predict.sf_task <- function(
 #' d'activité selon qu'ils soient plus ou moins touchés par la crise.
 #' Colonnes "secteur" et "correction_sector".
 #'
-#'  @return `sf_task` avec nouveau champ "full prediction", un data frame avec
-#'  les colonnes: "siret", "periode", la décomposition en variables latentes,
-#'  la prédiction de l'apprentissage automatique, les corrections apportées,
-#'  la prédicition corrigé (tout ça dans l'espace des log-vraisemblance) et la
-#'  correction corrigée dans l'espace des probabilités
-#'
-#'
-#'  @examples
+#' @return `sf_task` avec nouveau champ "full_prediction", un data frame avec
+#' les colonnes: "siret", "periode", la décomposition en variables latentes,
+#' la prédiction de l'apprentissage automatique, les corrections apportées,
+#' la prédicition corrigé (tout ça dans l'espace des log-vraisemblance) et la
+#' correction corrigée dans l'espace des probabilités
 apply_corrections <- function(task, correction_debt, correction_sector) {
   df_join <- task$new_data %>%
     select(siret, code_ape)
@@ -114,15 +111,18 @@ apply_corrections <- function(task, correction_debt, correction_sector) {
     select(correction_debt, correction_sector)
 
   prediction_log_likelihood <- task$prediction_new %>%
-    as.data.table() %>%
+    data.table::as.data.table() %>%
     gtools::logit()
 
-  new_prediction_log_likelihood <- prediction_log_likelihood +
-    df_corrections$correction_debt +
-    df_corrections$correction_sector
+  # TODO: add latent variables here
+  task$full_prediction <- data.frame(
+    prediction = prediction_log_likelihood,
+    correction_debt = df_corrections$correction_debt,
+    correction_sector = df_corrections$correction_sector,
+    corrected_prediction = prediction + correction_debt + corrected_sector,
+    corrected_prediction_prob = gtools::inv.logit(corrected_prediction)
+    )
 
-  new_prediction <- mlr3::Prediction$new(gtools::inv.logit(new_prediction_log_likelihood))
-  task$prediction_corrected_new <- new_prediction
   return(task)
 }
 
