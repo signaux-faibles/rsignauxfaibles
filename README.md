@@ -103,7 +103,7 @@ webstat_client_ID <- <identifiant_webstat>
 task <- apply_corrections(
   task,
   correction_debt = compute_debt_correction(task),
-  correction_sector = compute_sectorial_correction()
+  correction_sector = compute_sectorial_correction(task)
 )
 ```
 
