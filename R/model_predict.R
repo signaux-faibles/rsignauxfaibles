@@ -69,6 +69,7 @@ apply_corrections <- function(
   correction_debt = compute_debt_correction(task),
   correction_sector = compute_sectorial_correction(task)
 ) {
+  assertthat::assert_that("prediction_new" %in% names(task))
   df_join <- task$new_data %>%
     select(siret, code_ape)
 
