@@ -23,7 +23,8 @@ NULL
 #'
 #' @param batch `character(1)` \cr Batch auquel doit être importées les
 #'   données. Les modifications opérées par les batchs ultérieurs sont
-#'   ignorées.
+#'   ignorées. Par défaut, le dernier présent dans la collection Admin
+#'   de MongoDB.
 #' @inheritParams mongodb_connection
 #' @param subsample `integer(1)` \cr Nombre d'objets (c'est-à-dire de couples
 #'   siret x periode) à échantillonner.
@@ -53,7 +54,7 @@ NULL
 #' @export
 load_hist_data.sf_task <- function(
                                    task,
-                                   batch,
+                                   batch = NULL,
                                    database = task[["database"]],
                                    collection = task[["collection"]],
                                    mongodb_uri = task[["mongodb_uri"]],
@@ -73,6 +74,10 @@ load_hist_data.sf_task <- function(
     task[["target"]] %in% fields,
     msg = "Target field is absent of loaded data: careful"
   )
+
+  if (is.null(batch)) {
+    batch <- get_last_batch(database = database, mongodb_uri = mongodb_uri)
+  }
 
   hist_data <- import_data(
     database,
@@ -172,7 +177,7 @@ load_hist_data.sf_task <- function(
 load_new_data.sf_task <- function(
                                   task,
                                   periods,
-                                  batch,
+                                  batch = NULL,
                                   database = task[["database"]],
                                   collection = task[["collection"]],
                                   mongodb_uri = task[["mongodb_uri"]],
@@ -181,7 +186,10 @@ load_new_data.sf_task <- function(
                                   rollback_months = 1L,
                                   database_query_fun = query_mongodb,
                                   ...) {
-  lgr::lgr$info("Loading data from last batch")
+  if (is.null(batch)) {
+    lgr::lgr$info("Loading data from last batch")
+    batch <- get_last_batch(database = database, mongodb_uri = mongodb_uri)
+    }
   task[["new_data"]] <- import_data(
     database = database,
     collection = collection,
@@ -1056,3 +1064,80 @@ get_fields <- function(training) {
   return(fields)
 }
 
+#' Obtenir une liste allégée de champs à exporter
+#'
+#' TODO temporaire, retravailler get_fields.
+#' task e58fb5d5-4bc1-410b-8287-c78e4fd442d0
+#'
+#' @export
+get_fields_training_light <- function() {
+  return(
+    c(
+      "apart_heures_consommees",
+      "effectif_past_24",
+      "montant_part_ouvriere_past_12",
+      "montant_part_ouvriere_past_3",
+      "montant_part_ouvriere_past_2",
+      "montant_part_patronale_past_2",
+      "montant_part_ouvriere_past_1",
+      "montant_part_patronale_past_1",
+      "montant_part_patronale",
+      "ratio_dette",
+      "ratio_dette_moy12m",
+      "dette_fiscale_et_sociale_past_2",
+      "frais_de_RetD_past_2",
+      "independance_financiere_past_2",
+      "endettement_past_2",
+      "credit_client_past_2",
+      "capacite_autofinancement_past_2",
+      "exportation_past_2",
+      "productivite_capital_investi_past_2",
+      "rendement_capitaux_propres_past_2",
+      "rendement_ressources_durables_past_2",
+      "part_autofinancement_past_2",
+      "charge_personnel_past_2",
+      "frais_de_RetD_past_1",
+      "endettement_past_1",
+      "credit_client_past_1",
+      "capacite_autofinancement_past_1",
+      "exportation_past_1",
+      "rentabilite_economique_past_1",
+      "part_autofinancement_past_1",
+      "valeur_ajoutee_past_1",
+      "charge_personnel_past_1",
+      "effectif_consolide",
+      "frais_de_RetD",
+      "concours_bancaire_courant",
+      "endettement",
+      "autonomie_financiere",
+      "degre_immo_corporelle",
+      "rotation_stocks",
+      "credit_fournisseur",
+      "productivite_capital_investi",
+      "performance",
+      "benefice_ou_perte",
+      "taux_marge_past_2",
+      "concours_bancaire_courant_past_2",
+      "taux_marge_commerciale_past_2",
+      "taux_marge_commerciale_past_1",
+      "taux_marge_commerciale",
+      "TargetEncode_code_ape_niveau2",
+      "TargetEncode_code_ape_niveau3"
+    )
+  )
+}
+
+
+
+get_last_batch <- function(
+                  database = "test",
+                  mongodb_uri) {
+  dbconnection <- mongolite::mongo(
+    collection = "Admin",
+    db = database,
+    url = mongodb_uri
+  )
+  last_batch = dbconnection$find(query = '{"_id.type": "batch"}', sort = '{"_id.key": -1}', limit = 1, fields = '{"_id": true}')$`_id`$key
+  lgr::lgr$info(paste0("Last batch is : ", last_batch))
+  return(last_batch)
+}
