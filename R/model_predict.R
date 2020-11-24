@@ -39,7 +39,10 @@ predict.sf_task <- function(
         task[["new_data"]]
       )
     }
+  } else {
+    stop('model should have created "mlr3resample_result" or "mlr3model" property in task during training')
   }
+
   return(task)
 }
 
