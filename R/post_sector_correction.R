@@ -112,6 +112,8 @@ get_conjuncture_predictions <- function(
       count = as.integer(count),
       count_new_outcome = as.integer(count_new_outcome)
     )
+  # entraînements en parallèle si possible
+  options(mc.cores = parallel::detectCores())
   priors <- c(
     brms::set_prior("student_t(10, 0, 1)", class = "b", ub = 0)
   )
