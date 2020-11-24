@@ -74,7 +74,7 @@ task <- prepare(
 # de modèle, on peut utiliser:
 prepared_data <- get_prepared_data(task, data = task$mlr3task$data())
 
-# Entraînement avec le modèle par défaut (xgboost)
+# Entraînement avec le modèle par défaut (gam)
 task <- train(task)
 # Ou alors avec un autre modèle (issu de mlr3 ou mlr3learners)
 task <- train(task, learner = mlr3::lrn("classif.rpart"))
