@@ -64,7 +64,7 @@ predict.sf_task <- function(
 apply_corrections <- function(
   task,
   correction_debt = compute_debt_correction(task),
-  correction_sector = compute_sectorial_correction()
+  correction_sector = compute_sectorial_correction(task)
 ) {
   df_join <- task$new_data %>%
     select(siret, code_ape)

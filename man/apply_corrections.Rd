@@ -4,7 +4,11 @@
 \alias{apply_corrections}
 \title{Applique des corrections à la prédiction de l'apprentissage automatique}
 \usage{
-apply_corrections(task, correction_debt, correction_sector)
+apply_corrections(
+  task,
+  correction_debt = compute_debt_correction(task),
+  correction_sector = compute_sectorial_correction(task)
+)
 }
 \arguments{
 \item{correction_debt}{\code{data.frame} Corrections liées aux entreprises ayant

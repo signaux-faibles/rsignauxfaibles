@@ -5,7 +5,8 @@
 \title{Calcule la correction sectorielle liée à la crisé}
 \usage{
 compute_sectorial_correction(
-  conjuncture_predictions = get_conjuncture_predictions()
+  task,
+  conjuncture_predictions = get_conjuncture_predictions(task)
 )
 }
 \arguments{
