@@ -77,8 +77,8 @@ apply_corrections <- function(
   df_join <- df_join %>%
     left_join(ape_to_secteur, by = "code_ape")
 
-  df_corrections <- df_join %>%
-    left_join(correction_debt, by = "siret") %>%
+  df_corrections <- correction_debt %>%
+    left_join(unique(df_join), by = "siret") %>%
     left_join(correction_sector, by = "secteur") %>%
     select(correction_debt, correction_sector)
 
