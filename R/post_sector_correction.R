@@ -131,7 +131,7 @@ get_conjuncture_predictions <- function(
     select(secteur, count)
   conj <- conj_centered_scaled %>%
     left_join(counts, by = "secteur")
-  prediction <- predict(model, conj)
+  prediction <- predict(model, conj, allow_new_levels = TRUE)
   multiplicative_fact <- 18 / nb_months
   res <- dplyr::bind_cols(conj, as.data.frame(prediction)) %>%
     mutate(
