@@ -80,6 +80,26 @@ predict.sf_task <- function(
   return(task)
 }
 
+#' Applique des corrections à la prédiction de l'apprentissage automatique
+#'
+#' Après avoir prédit sur de nouvelles données, certaines corrections a
+#' posteriori sont appliquées à la prédiction. Les corrections se présentent
+#' comme des termes supplémentaires dans l'espace des log-vraisemblances.
+#'
+#' @param correction_debt `data.frame` Corrections liées aux entreprises ayant
+#' des débits sur les cotisations sociales. Colonnes "siret" et "correction_debt".
+#' @param correction_sector `data.frame` Corrections liées aux secteurs
+#' d'activité selon qu'ils soient plus ou moins touchés par la crise.
+#' Colonnes "secteur" et "correction_sector".
+#'
+#'  @return `sf_task` avec nouveau champ "full prediction", un data frame avec
+#'  les colonnes: "siret", "periode", la décomposition en variables latentes,
+#'  la prédiction de l'apprentissage automatique, les corrections apportées,
+#'  la prédicition corrigé (tout ça dans l'espace des log-vraisemblance) et la
+#'  correction corrigée dans l'espace des probabilités
+#'
+#'
+#'  @examples
 apply_corrections <- function(task, correction_debt, correction_sector) {
   df_join <- task$new_data %>%
     select(siret, code_ape)
