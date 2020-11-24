@@ -84,6 +84,7 @@ apply_corrections <- function(
 
   prediction_log_likelihood <- task$prediction_new %>%
     data.table::as.data.table() %>%
+    .$prob.TRUE %>%
     gtools::logit()
 
   # TODO: add latent variables here
