@@ -11,6 +11,7 @@ LazyData: true
 Imports:
     assertthat,
     dplyr,
+    gtools,
     jsonlite,
     lgr,
     lubridate,
@@ -37,6 +38,7 @@ Suggests:
     pryr,
     smoof,
     rpart,
+    rwebstat,
     testthat (>= 2.1.0)
 Remotes: signaux-faibles/mlr3extralearners#2
 RoxygenNote: 7.1.1

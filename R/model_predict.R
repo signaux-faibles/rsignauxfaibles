@@ -27,39 +27,6 @@ predict.sf_task <- function(
     all(data_names %in% c("new_data", "train_data", "test_data"))
   )
 
-  predict_on_given_data <- function(data_name, task) {
-    prepared_data_name <- paste0("prepared_", data_name)
-    if (!prepared_data_name %in% names(task)) {
-      lgr::lgr$warn("%s is missing or has not been prepared yet", data_name)
-      return(task)
-    }
-
-    lgr::lgr$info("Model is being applied on %s", prepared_data_name)
-
-    prediction <- predict_fun(
-      model = task[["model"]],
-      new_data = task[[prepared_data_name]]
-    )
-
-    if (is.data.frame(prediction)) {
-      dup_names <- intersect(
-        names(prediction %>%
-          dplyr::select(-siret, -periode)),
-        names(task[[data_name]])
-      )
-      task[[data_name]] <- task[[data_name]] %>%
-        dplyr::select(-one_of(dup_names))
-      task[[data_name]] <- task[[data_name]] %>%
-        left_join(prediction, by = c("siret", "periode"))
-    } else {
-      task[[data_name]][["score"]] <- prediction
-    }
-
-    lgr::lgr$info("Prediction successfully done.")
-    return(task)
-  }
-
-
   if (any(c("mlr3model", "mlr3resample_result") %in% names(task))) {
     if ("test_data" %in% data_names) {
       assertthat::assert_that("mlr3resample_result" %in% names(task))
@@ -73,10 +40,63 @@ predict.sf_task <- function(
       )
     }
   } else {
-    for (name in data_names) {
-      task <- predict_on_given_data(name, task)
-    }
+    stop('model should have created "mlr3resample_result" or "mlr3model" property in task during training')
   }
+
+  return(task)
+}
+
+#' Applique des corrections à la prédiction de l'apprentissage automatique
+#'
+#' Après avoir prédit sur de nouvelles données, certaines corrections a
+#' posteriori sont appliquées à la prédiction. Les corrections se présentent
+#' comme des termes supplémentaires dans l'espace des log-vraisemblances.
+#'
+#' @param correction_debt `data.frame` Corrections liées aux entreprises ayant
+#' des débits sur les cotisations sociales. Colonnes "siret" et "correction_debt".
+#' @param correction_sector `data.frame` Corrections liées aux secteurs
+#' d'activité selon qu'ils soient plus ou moins touchés par la crise.
+#' Colonnes "secteur" et "correction_sector".
+#'
+#' @return `sf_task` avec nouveau champ "full_prediction", un data frame avec
+#' les colonnes: "siret", "periode", la décomposition en variables latentes,
+#' la prédiction de l'apprentissage automatique, les corrections apportées,
+#' la prédicition corrigé (tout ça dans l'espace des log-vraisemblance) et la
+#' correction corrigée dans l'espace des probabilités
+#' @export
+apply_corrections <- function(
+  task,
+  correction_debt = compute_debt_correction(task),
+  correction_sector = compute_sectorial_correction(task)
+) {
+  assertthat::assert_that("prediction_new" %in% names(task))
+  df_join <- task$new_data %>%
+    select(siret, code_ape)
+
+  ape_to_secteur <- get_ape_to_secteur()
+  df_join <- df_join %>%
+    left_join(ape_to_secteur, by = "code_ape")
+
+  df_corrections <- correction_debt %>%
+    left_join(unique(df_join), by = "siret") %>%
+    left_join(correction_sector, by = "secteur") %>%
+    select(correction_debt, correction_sector)
+
+  prediction_log_likelihood <- task$prediction_new %>%
+    data.table::as.data.table() %>%
+    .$prob.TRUE %>%
+    gtools::logit()
+
+  # TODO: add latent variables here
+  task$full_prediction <- data.frame(
+    prediction = prediction_log_likelihood,
+    correction_debt = df_corrections$correction_debt,
+    correction_sector = df_corrections$correction_sector) %>%
+  mutate(
+    corrected_prediction = prediction + correction_debt + correction_sector,
+    corrected_prediction_prob = gtools::inv.logit(corrected_prediction)
+    )
+
   return(task)
 }
 

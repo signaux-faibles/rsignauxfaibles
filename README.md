@@ -74,7 +74,7 @@ task <- prepare(
 # de modèle, on peut utiliser:
 prepared_data <- get_prepared_data(task, data = task$mlr3task$data())
 
-# Entraînement avec le modèle par défaut (xgboost)
+# Entraînement avec le modèle par défaut (gam)
 task <- train(task)
 # Ou alors avec un autre modèle (issu de mlr3 ou mlr3learners)
 task <- train(task, learner = mlr3::lrn("classif.rpart"))
@@ -87,6 +87,9 @@ task <- load_new_data(
   batch = last_batch
   )
 
+# Ou pour court-circuiter cette longue étape:
+task[["new_data"]] <- task[["hist_data"]]
+
 # Prédiction sur les nouvelles données
 task <- predict(task, data_names = "new_data")
 
@@ -94,6 +97,14 @@ task <- predict(task, data_names = "new_data")
 # converties 
 require(data.table)
 prediction <- as.data.table(task$prediction_new)
+# On applique les corrections liées à la crise:                                                                           
+# Nécessite un identifiant webstat.
+webstat_client_ID <- <identifiant_webstat>
+task <- apply_corrections(
+  task,
+  correction_debt = compute_debt_correction(task),
+  correction_sector = compute_sectorial_correction(task)
+)
 ```
 
 # Évaluer et comparer les modèles
@@ -127,7 +138,7 @@ task <- load_hist_data(
 fields <- get_fields(training = TRUE)
 
 # Les opérations peuvent être enchaînées via l'opérateur pipe
-xgboost_task <- task %>%
+gam_task <- task %>%
   split_data(resampling_strategy = "cv") %>%
   prepare(training_fields = fields) %>%
   train()
@@ -137,13 +148,13 @@ xgboost_task <- task %>%
 # afin de ne pas mélanger les résultats de modèles.
 # Les modèles doivent être définis sous la forme de mlr3::Learner.
 learner <- mlr3::lrn("classif.rpart") # Arbre de décisions
-rpart_task <- xgboost_task %>%
+rpart_task <- gam_task %>%
   copy_for_new_run() %>%
   prepare(training_fields = fields) %>%
   train(learner = learner)
 
 # On peut alors comparer la performance des modèles
-evaluation <- evaluate(xgboost_task, rpart_task, should_remove_strong_signals =
+evaluation <- evaluate(gam_task, rpart_task, should_remove_strong_signals =
 FALSE)
 
 # Vous pouvez à tout moment inspecter les objets mlr3 sous-jacents à la tâche
@@ -158,7 +169,7 @@ task$mlr3resample_result # mlr3::ResampleResult: après entraînement
 # l'entraînement ou de la préparation.
 # Optimise les paramètre du "GraphLearner" stocké dans la tâche.
 # Le modèle résultant se trouve dans task$mlr3auto_tuner
-xgboost_task <- optimize_hyperparameters(xgboost_task, measure = mlr3::msr("classif.ce"))
+gam_task <- optimize_hyperparameters(gam_task, measure = mlr3::msr("classif.ce"))
 ```
 
 # Documentation

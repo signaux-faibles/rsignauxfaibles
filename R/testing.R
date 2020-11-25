@@ -119,6 +119,50 @@ get_test_task <- function(
   lgr::lgr$set_threshold(previous_threshold)
 }
 
+#' Génère des données de défaillance factices
+#'
+#' @param aggregate_by_n_months `logical(1)` Faut-il des données agrégées par plages de
+#' plusieurs mois ?
+#' @param n_months Si`aggregate_by_n_months`, combien de mois dure la phase
+#' d'agrégation (6 = semestre, 3 = trimestre, etc.)
+#' @param add_random_predictions `logical(1)` Adds random predictions in a
+#' "prediction" column
+#' @param from `Date` Début de la période d'observation
+#' @param to `Date` fin de la période d'observation
+#'
+#' @return `data.frame` avec deux secteurs A et B dans la colonne secteur, une
+#' colonne "periode", des colonnes "count", "count_new_outcome" et
+#' "prop_new_outcome", qui simulent respectivement: le nombre d'entreprises
+#' dans le secteur, les nouvelles défaillances dans la plage temporelle, et la
+#' proportion que cela représente.
+#' @export
+generate_failure_data <- function(
+  aggregate_by_n_months = TRUE,
+  n_months = 3,
+  add_random_predictions = TRUE,
+  from = as.Date("2015-02-01"),
+  to = as.Date("2015-12-01")
+) {
+  seq_periods <- seq.Date(from = from, to = to, by = "months")
+  fake_data <- data.frame(
+      secteur = factor(c("A", "B")),
+      nom_secteur = factor(c("Marchandises A", "Industrie B")),
+      periode = rep(seq_periods, each = 2),
+      count = c(100, 150),
+      count_new_outcome = c(10, 30),
+      prop_new_outcome = c(0.1, 0.2)
+    )
+  if (aggregate_by_n_months) {
+    fake_data <- aggregate_by_n_months(fake_data, n_month = n_months)
+  }
+  if (add_random_predictions) {
+    set.seed(234)
+    n <- nrow(fake_data)
+    fake_data["prediction"] <- runif(n)
+  }
+  return(fake_data)
+}
+
 # Pass an environment to client and it will assign new variables in it.
 mock_log_param <- function(task, key, value, ...) {
   assertthat::assert_that(inherits(task[["tracker"]], "environment"))
@@ -126,3 +170,5 @@ mock_log_param <- function(task, key, value, ...) {
 }
 
 mock_log_metric <- mock_log_param
+
+

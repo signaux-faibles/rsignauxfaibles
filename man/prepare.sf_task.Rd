@@ -28,10 +28,9 @@ Pipeline de préparation des données}
 }
 \value{
 \verb{[sf_task]} \cr
-L'objet \code{task} donné en entrée auquel les champs de données
-préparées ont été ajoutées, avec une convention de nommage d'apposition
-du préfixe "prepared_" aux noms des données préparées (par exemple:
-"prepared_train_data" correspond aux données de "train_data" préparées).
+L'objet \code{task} donné en entrée auquel le champ "mlr3pipeline" a été
+ajouté. Cette pipeline ne sera appliquée qu'au moment de l'entraînement,
+ou de l'utilisation de \code{get_prepared_data()}.
 }
 \description{
 Prépare les données pour l'entraînement ou la prédiction de l'algorithme.

@@ -403,6 +403,6 @@ test_that(
   "get_fields has not inadvertedly changed",
   {
     # Mostly for coverage.
-    expect_length(get_fields(TRUE), 265)
+    expect_length(get_fields(FALSE), 291)
   }
 )

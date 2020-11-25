@@ -31,21 +31,14 @@ get_default_explanation_method <- function(task, data_to_explain) {
 #' Get explanations for a gam model
 #'
 #' @inheritParams explain.sf_task
+#' @param data_to_explain `data.frame`
 #'
 #' @return
 #' @export
-#'
-#' @examples
 explain_gam <- function(task, data_to_explain) {
   prepared_data <- get_prepared_data(task, data_to_explain)
-  if ("mlr3resample_result" %in% names(task)) {
-    gam_model <- get_gam_from_task(task)
-    explanation <- predict(gam_model, prepared_data, type = "terms")
-  } else if ("mlr3model" %in% names(task)) {
-    # TODO:
-  } else {
-    stop('model should have created "mlr3resample_result" or "mlr3model" property in task during training')
-  }
+  gam_model <- get_gam_from_task(task)
+  explanation <- predict(gam_model, prepared_data, type = "terms")
   return(explanation)
 }
 
@@ -56,7 +49,13 @@ explain_gam <- function(task, data_to_explain) {
 #'
 #' @return `mgcv::gam` gam model
 get_gam_from_task <- function(task) {
-  graphlearner <- task$mlr3resample_result$learners[[1]]
-  gam_model <- graphlearner$model$classif.gam$model
+  if ("mlr3resample_result" %in% names(task)) {
+    graphlearner <- task$mlr3resample_result$learners[[1]]
+    gam_model <- graphlearner$model$classif.gam$model
+  } else if ("mlr3model" %in% names(task)) {
+    gam_model <- task$mlr3model$model$classig.gam$model
+  } else {
+    stop('model should have created "mlr3resample_result" or "mlr3model" property in task during training')
+  }
   return(gam_model)
 }
