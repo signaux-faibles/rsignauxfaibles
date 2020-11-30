@@ -7,7 +7,7 @@
 \usage{
 \method{load_hist_data}{sf_task}(
   task,
-  batch = NULL,
+  batch = "latest",
   database = task[["database"]],
   collection = task[["collection"]],
   mongodb_uri = task[["mongodb_uri"]],

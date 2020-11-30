@@ -60,7 +60,7 @@ reset_tracker <- function(tracker, end_run_status) {
 replace_hist_data <- function(task, data) {
   task <- load_hist_data(
     task,
-    batch = NULL,
+    batch = "whatever",
     fields = names(data),
     database_query_fun = mock_query_database(data)
   )
@@ -81,7 +81,7 @@ replace_new_data <- function(task, data) {
   task <- load_new_data(
     task,
     periods = as.Date("2020-01-01"),
-    batch = NULL,
+    batch = "whatever",
     fields = names(data),
     database_query_fun = mock_query_database(data)
   )

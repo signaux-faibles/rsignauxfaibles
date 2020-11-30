@@ -54,7 +54,7 @@ NULL
 #' @export
 load_hist_data.sf_task <- function(
                                    task,
-                                   batch = NULL,
+                                   batch = "latest",
                                    database = task[["database"]],
                                    collection = task[["collection"]],
                                    mongodb_uri = task[["mongodb_uri"]],
@@ -75,7 +75,7 @@ load_hist_data.sf_task <- function(
     msg = "Target field is absent of loaded data: careful"
   )
 
-  if (is.null(batch)) {
+  if (batch == "latest") {
     batch <- get_last_batch(database = database, mongodb_uri = mongodb_uri)
   }
 
@@ -177,7 +177,7 @@ load_hist_data.sf_task <- function(
 load_new_data.sf_task <- function(
                                   task,
                                   periods,
-                                  batch = NULL,
+                                  batch = "latest",
                                   database = task[["database"]],
                                   collection = task[["collection"]],
                                   mongodb_uri = task[["mongodb_uri"]],
@@ -186,7 +186,7 @@ load_new_data.sf_task <- function(
                                   rollback_months = 1L,
                                   database_query_fun = query_mongodb,
                                   ...) {
-  if (is.null(batch)) {
+  if (batch == "latest") {
     lgr::lgr$info("Loading data from last batch")
     batch <- get_last_batch(database = database, mongodb_uri = mongodb_uri)
     }

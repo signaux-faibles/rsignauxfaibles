@@ -8,7 +8,7 @@
 \method{load_new_data}{sf_task}(
   task,
   periods,
-  batch = NULL,
+  batch = "latest",
   database = task[["database"]],
   collection = task[["collection"]],
   mongodb_uri = task[["mongodb_uri"]],
