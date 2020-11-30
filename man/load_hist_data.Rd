@@ -7,7 +7,7 @@
 \usage{
 \method{load_hist_data}{sf_task}(
   task,
-  batch,
+  batch = "latest",
   database = task[["database"]],
   collection = task[["collection"]],
   mongodb_uri = task[["mongodb_uri"]],
@@ -29,7 +29,8 @@ load_hist_data(task, ...)
 
 \item{batch}{\code{character(1)} \cr Batch auquel doit être importées les
 données. Les modifications opérées par les batchs ultérieurs sont
-ignorées.}
+ignorées. Par défaut, le dernier présent dans la collection Admin
+de MongoDB.}
 
 \item{database}{\code{character(1)} \cr Nom de la base de données vers laquelle
 param exporter. Par défaut, celle stockée dans \code{task}.}
